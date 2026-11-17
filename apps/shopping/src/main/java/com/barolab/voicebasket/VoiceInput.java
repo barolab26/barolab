@@ -21,6 +21,7 @@ final class VoiceInput {
     private int generation;
     private boolean active;
     VoiceInput(Context context,Listener listener) {this.context=context;this.listener=listener;}
+    static boolean canStart(boolean active,boolean permissionPending,boolean stopped){return !active&&!permissionPending&&!stopped;}
     boolean onDeviceAvailable() {return Build.VERSION.SDK_INT>=31&&SpeechRecognizer.isOnDeviceRecognitionAvailable(context);}
     boolean available() {return onDeviceAvailable()||SpeechRecognizer.isRecognitionAvailable(context);}
     void start(boolean networkAllowed) {

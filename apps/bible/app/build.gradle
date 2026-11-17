@@ -14,13 +14,14 @@ if (signingFile.exists()) signingFile.withInputStream { signing.load(it) }
 
 android {
     namespace 'com.barolab.harubible'
+    androidResources { noCompress += "ogg" }
     compileSdk 36
     defaultConfig {
         applicationId 'com.barolab.harubible'
         minSdk 26
         targetSdk 36
-        versionCode 5
-        versionName '0.5.0'
+        versionCode 6
+        versionName '0.6.0'
         manifestPlaceholders = [admobAppId: 'UNCONFIGURED']
         buildConfigField 'String', 'BANNER_AD_UNIT_ID', '"UNCONFIGURED"'
         buildConfigField 'boolean', 'IS_PREVIEW', 'false'

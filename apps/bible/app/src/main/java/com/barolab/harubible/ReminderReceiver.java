@@ -31,7 +31,7 @@ public final class ReminderReceiver extends BroadcastReceiver {
         if (ACTION.equals(intent.getAction()) && prefs(c).getBoolean("reminder_enabled", false) && canNotify(c)) {
             NotificationManager manager = c.getSystemService(NotificationManager.class);
             manager.createNotificationChannel(new NotificationChannel(CHANNEL, "하루 말씀 알림", NotificationManager.IMPORTANCE_DEFAULT));
-            PendingIntent open = PendingIntent.getActivity(c, 411, new Intent(c, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent open = PendingIntent.getActivity(c, 411, new Intent(c, MainActivity.class).setAction(DailyReading.OPEN_TODAY).putExtra("reminder_request",System.currentTimeMillis()).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             Notification notification = new Notification.Builder(c, CHANNEL).setSmallIcon(com.barolab.harubible.R.drawable.ic_bible)
                     .setContentTitle("오늘의 성경말씀").setContentText("오늘 말씀을 읽을 시간이에요.")
                     .setContentIntent(open).setAutoCancel(true).setVisibility(Notification.VISIBILITY_PRIVATE).build();

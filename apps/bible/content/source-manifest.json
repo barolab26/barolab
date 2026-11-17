@@ -10,7 +10,7 @@
   "sourceArchiveSha256": "b04cd6d7d6683f4a590330076e30a67c679454b1782ed8c37bfac75a2ab51b42",
   "sourceTextFile": "kor_vpl.txt",
   "sourceTextSha256": "8937d907650df5319bb9fae40b8caa502ed3291db45550b20b047f3699790d0a",
-  "selectionCount": 30,
+  "selectionCount": 60,
   "textTreatment": "Exact VPL strings, no modernization, ellipsis or AI reconstruction. HTML match normalizes whitespace only for verification.",
   "editionWarning": "Do not relabel this source as KRV1961 or NKRV1998.",
   "knownSourceLimit": "VPL archive omits1Peter5:7 and jumps from1Peter4:14 to2Peter1:1; excluded requested missing verse. No complete-Bible claim.",
@@ -253,6 +253,246 @@
       "textSha256": "a0c4d125f7501dc55fd511ef585309adfd29a6d01a3b86db480ef8caaaf57ea4",
       "sourceUrl": "https://ebible.org/kor/PSA023.htm#V4",
       "chapterHtmlSha256": "1ebdbf6b42ca3f25750e476ebadcd3e57e47f4fa9251215e2359908ad21b9eb7",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "gen-1-1",
+      "vplReference": "GEN 1:1",
+      "textSha256": "d80eb2daccbe92a2375c91a3bdd866400cf1d01fc7fa374fbdb83666bbd69444",
+      "sourceUrl": "https://ebible.org/kor/GEN01.htm#V1",
+      "chapterHtmlSha256": "22f77e1bceb7e8383db8686eddb5b00b7b5c7680ece2a1162b65c3629e19beac",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "jos-1-9",
+      "vplReference": "JOS 1:9",
+      "textSha256": "19652feb889c04d2b49a8607ca7e4809d0fb047270e343580407f44c68722ed3",
+      "sourceUrl": "https://ebible.org/kor/JOS01.htm#V9",
+      "chapterHtmlSha256": "7ec124b0d68516a9cfc3c8b9cfdecd4f6de9084bb90e8f6fa385cab39203877b",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-27-1",
+      "vplReference": "PSA 27:1",
+      "textSha256": "acf7a28ac59df315e2a7fe812406bf6ec2b785c8e5d509e00ad064ef13b0cd50",
+      "sourceUrl": "https://ebible.org/kor/PSA027.htm#V1",
+      "chapterHtmlSha256": "70b08116f3ecbcd3790a3d5ab3a92cf11876e2a4be815d090bf3673e65ac8c4c",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-28-7",
+      "vplReference": "PSA 28:7",
+      "textSha256": "4f2f1c9d4b681b89f3782288618b9e2d93f8a1e9df047b5c1b92a1dbb5ff31df",
+      "sourceUrl": "https://ebible.org/kor/PSA028.htm#V7",
+      "chapterHtmlSha256": "0c1d2234f3764e1813d3ab217337517014a9dbddb1eecf0143c4531e66e980fa",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-30-5",
+      "vplReference": "PSA 30:5",
+      "textSha256": "a69239ec0dcb3dae9e125502ef3523824362cb9ab7e7f3be53d5891847f8928e",
+      "sourceUrl": "https://ebible.org/kor/PSA030.htm#V5",
+      "chapterHtmlSha256": "2be1c62ae1b471efa60a3f8a4289ebbc9192d367e08fcf636a3abc96147f1c6f",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-37-4",
+      "vplReference": "PSA 37:4",
+      "textSha256": "475b580fbb6fa609b183fbb5074b80e522a65f5e37434de37d468a5921f0bd17",
+      "sourceUrl": "https://ebible.org/kor/PSA037.htm#V4",
+      "chapterHtmlSha256": "a5a52fa5932732d0c0973c917107200416ee50898c0ee8ba2122b5034522c822",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-55-22",
+      "vplReference": "PSA 55:22",
+      "textSha256": "336c5d91ef90a348fee73b1b37a2e4844250919444b6d7a96114cbe7d6a5c930",
+      "sourceUrl": "https://ebible.org/kor/PSA055.htm#V22",
+      "chapterHtmlSha256": "ebb87588634f2772c749a813bd5c6a27d6ee6fe21d335a8086d7876ba048eeba",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-103-2",
+      "vplReference": "PSA 103:2",
+      "textSha256": "b630c405e429cad6b8e031e7b3c9833f3dbef70e49731e2f59dc8dd9305d7832",
+      "sourceUrl": "https://ebible.org/kor/PSA103.htm#V2",
+      "chapterHtmlSha256": "762cee1451d6b9e728b270f827278db177e770d36a9e757416ebc0e83f2ac546",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-145-18",
+      "vplReference": "PSA 145:18",
+      "textSha256": "afcba40f5d6ad30ae57d5cd8ce51519b661446f2d631694dba0fcba828a1e622",
+      "sourceUrl": "https://ebible.org/kor/PSA145.htm#V18",
+      "chapterHtmlSha256": "718168b5881fe552673ca3d5ee8d2f9a1614aaa29f94f1dc3bfedeafdcc29b06",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "pro-4-23",
+      "vplReference": "PRO 4:23",
+      "textSha256": "1590907c2b6cbc3f8ecd1dd66ddfb1564b0ab850bcede60c07d374481640a783",
+      "sourceUrl": "https://ebible.org/kor/PRO04.htm#V23",
+      "chapterHtmlSha256": "925706483f00877e0a67c48e7dafaa91f76528f1cfb38fe7ff4497183843d3f0",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "pro-17-22",
+      "vplReference": "PRO 17:22",
+      "textSha256": "e071caa807561dfe972f104d128b14975e1046818fa7dd397881267032b94b02",
+      "sourceUrl": "https://ebible.org/kor/PRO17.htm#V22",
+      "chapterHtmlSha256": "a9b04e21d8a4dad08e10f4aa9b8f6246fc57ce00feaa416be5071d9bcb22b13b",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "isa-26-3",
+      "vplReference": "ISA 26:3",
+      "textSha256": "35269b8f8cf0d2d7940ffe6f08b3bf6a7c734c12f183e34c6999bd9824856fff",
+      "sourceUrl": "https://ebible.org/kor/ISA26.htm#V3",
+      "chapterHtmlSha256": "3c27a39232ef68a2ef0bbf85f6e1e72b3e6eafb5ec17f846ad484cc25b6401ee",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "isa-40-8",
+      "vplReference": "ISA 40:8",
+      "textSha256": "fc98e99b2754c521f86fd49751fce6a2397a5825b6812fff24aebcfceb434e9e",
+      "sourceUrl": "https://ebible.org/kor/ISA40.htm#V8",
+      "chapterHtmlSha256": "85dfe3d31cd9d4e085b6c3875d7a648ed05ba6eae4cbd9efc1528ca8835146ca",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "jer-29-11",
+      "vplReference": "JER 29:11",
+      "textSha256": "3c075b868a4bfd9c943ad80df31c91ae7435796355be56c401411b7c37a27ad4",
+      "sourceUrl": "https://ebible.org/kor/JER29.htm#V11",
+      "chapterHtmlSha256": "ff8f2c8f259044d94c59991ffcfd2a791d5bf05bd2d9b112cbd8cfb410f5e4ad",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "jer-33-3",
+      "vplReference": "JER 33:3",
+      "textSha256": "b53f7352d350847cd1870a57d973ed010e6530c254a91f5d6ca62074173a9584",
+      "sourceUrl": "https://ebible.org/kor/JER33.htm#V3",
+      "chapterHtmlSha256": "b96dc2bd0af4eb78748956d755b7350b4ad9acea7a04de1506eed8f8149d795b",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "mat-28-20",
+      "vplReference": "MAT 28:20",
+      "textSha256": "8cb46d1c5434c4b8acc35b6640436113f4429fc8b5712da6e63486b57e794cf9",
+      "sourceUrl": "https://ebible.org/kor/MAT28.htm#V20",
+      "chapterHtmlSha256": "a668fa564b5850a0c425f0a3e5a43c300349fb38cc02b9731156fa3a3be2202a",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "joh-3-16",
+      "vplReference": "JOH 3:16",
+      "textSha256": "f171a68f79e967d55d421a7ad781181c0fe1c922b18f28a55769ffa57394d467",
+      "sourceUrl": "https://ebible.org/kor/JHN03.htm#V16",
+      "chapterHtmlSha256": "551e554e5933b4f6f0bdb79ba6539119d7db10eca1dd7fa63836546446d0bf87",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "1co-16-14",
+      "vplReference": "1CO 16:14",
+      "textSha256": "ce8bc937c439c4435f97f74264e6a7b22c86dd19c0b89ccbb24aff9d4cdb3395",
+      "sourceUrl": "https://ebible.org/kor/1CO16.htm#V14",
+      "chapterHtmlSha256": "58bd08fa74de8b13f617dfc361cf3074f858748f356fbaac726db55528302028",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "1jo-4-19",
+      "vplReference": "1JO 4:19",
+      "textSha256": "08266582ab7e55d9eefa4973101a9a6bab2c660ff2cb77ae758e8a884e727433",
+      "sourceUrl": "https://ebible.org/kor/1JN04.htm#V19",
+      "chapterHtmlSha256": "ece46ab1e38f513b0d94303c6469ce29e3b41da2ca953b992f46904503af9316",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "phi-1-6",
+      "vplReference": "PHI 1:6",
+      "textSha256": "6037d32b0e51f0ce894bfaee14a7a766bc97aa968b35b47a56b52969ac055877",
+      "sourceUrl": "https://ebible.org/kor/PHP01.htm#V6",
+      "chapterHtmlSha256": "58015f94e81c1267f2cf6dd741fc589c2e17afcc326d49cdc469844235363032",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "2ti-1-7",
+      "vplReference": "2TI 1:7",
+      "textSha256": "bfe8cfed634e183caafdd75423ab0db6a8e258015c3cc70098ebabfee66cd719",
+      "sourceUrl": "https://ebible.org/kor/2TI01.htm#V7",
+      "chapterHtmlSha256": "20ddc94dceca54ec26fe52ed35e6dc1836d60688d3c82ece74b3150241a6b82c",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "jam-1-5",
+      "vplReference": "JAM 1:5",
+      "textSha256": "2a3e23f4f30c0aa7216d273e06f3eee40ae99089f6c8cc2afc3233bafa464118",
+      "sourceUrl": "https://ebible.org/kor/JAS01.htm#V5",
+      "chapterHtmlSha256": "56fd9b2b46fc70f0919136dc55251e736cb4e42a9d47d2a72e2ad9a1483fd7c4",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-16-8",
+      "vplReference": "PSA 16:8",
+      "textSha256": "e5345b14756472e869d01ec44b5ce6f7b630dec3ad931eb87d866ee6dcd7cfd6",
+      "sourceUrl": "https://ebible.org/kor/PSA016.htm#V8",
+      "chapterHtmlSha256": "21a7f38b19e9de83039e39f403f7f01bae5c6cde78a89706f156a1b26d92ea2e",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-34-18",
+      "vplReference": "PSA 34:18",
+      "textSha256": "39369f0ba135e12cda40d2d2378b62069f5af593d96dd3e96d00a196cb741db5",
+      "sourceUrl": "https://ebible.org/kor/PSA034.htm#V18",
+      "chapterHtmlSha256": "93df09db70ab2a392aebe21e0829239c5fc076d8e349bdda636aefe0337d16e0",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-121-1",
+      "vplReference": "PSA 121:1",
+      "textSha256": "7570135e6076d46b7cf800714d1b9bfca70561f28e082ed73c2236a60af40b9d",
+      "sourceUrl": "https://ebible.org/kor/PSA121.htm#V1",
+      "chapterHtmlSha256": "07d9b7e35d6dda807e42eef5e64eb8dbdb5940a3658774b57b916bf8ed407abc",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "pro-3-6",
+      "vplReference": "PRO 3:6",
+      "textSha256": "2c449177fa336719cbef414bfdeb82572239c9203395652327dbe7a458686c91",
+      "sourceUrl": "https://ebible.org/kor/PRO03.htm#V6",
+      "chapterHtmlSha256": "aa4f5ee03fb16d0f20dc64aef690dfce17377c97ae61ad7cb469619ee8e4757c",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-119-11",
+      "vplReference": "PSA 119:11",
+      "textSha256": "6e8f95455e791665b20323527e27c68531a7f53d696038a9231351cf75a82a6d",
+      "sourceUrl": "https://ebible.org/kor/PSA119.htm#V11",
+      "chapterHtmlSha256": "f881fc5ce158f8e34f704ad0469c6a4da2494f397dd3f91940122377259db014",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "psa-100-5",
+      "vplReference": "PSA 100:5",
+      "textSha256": "da51e79adcceaddaba3c51df09fcd87d76e166ca000b3ae678caafff0fa96dd1",
+      "sourceUrl": "https://ebible.org/kor/PSA100.htm#V5",
+      "chapterHtmlSha256": "c2d20e79388121f6562d2c730a700b70f02dfb49cb67d3f9db6550232900507b",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "mat-5-16",
+      "vplReference": "MAT 5:16",
+      "textSha256": "2e2aa848cf2fef4239af27e4a4721ddc4f4ad635b0ebcfbf016245b14a69c94c",
+      "sourceUrl": "https://ebible.org/kor/MAT05.htm#V16",
+      "chapterHtmlSha256": "aa7cf8042c3be07175e51c4fb9f6f02f335ad0f61193395f48aba442e286f176",
+      "vplMatchesChapterHtml": true
+    },
+    {
+      "id": "1jo-4-8",
+      "vplReference": "1JO 4:8",
+      "textSha256": "3ffba8b0475cdf0b94abd1f5ac1316a0635fefb16bcf49429687fb60a02d3c21",
+      "sourceUrl": "https://ebible.org/kor/1JN04.htm#V8",
+      "chapterHtmlSha256": "ece46ab1e38f513b0d94303c6469ce29e3b41da2ca953b992f46904503af9316",
       "vplMatchesChapterHtml": true
     }
   ],

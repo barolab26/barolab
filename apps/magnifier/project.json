@@ -4,7 +4,7 @@
   "packageName": "com.barolab.biglens",
   "description": "작은 글씨를 확대하고 화면 정지·고대비·선택 저장을 돕는 생활 앱. 개발 중이며 기기별 카메라 검증과 배포를 준비합니다.",
   "status": "preview",
-  "stage": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)",
+  "stage": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요)",
   "deploymentPending": false,
   "platforms": [
     "Android"
@@ -28,7 +28,7 @@
     "primaryCfDomain": "https://healthcox.com",
     "secondaryCfDomain": "https://must-good.com"
   },
-  "updatedAt": "2026-11-05T05:27:10+09:00",
+  "updatedAt": "2026-11-10T04:07:11+09:00",
   "measurement": {
     "admob": {
       "status": "collected",
@@ -157,9 +157,9 @@
     "playEvidence": "apps/qa/2026-10-19-play-console-status.json",
     "closedTrackAttached": true
   },
-  "progressPct": 65,
+  "progressPct": 73,
   "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-  "blocker": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족) | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
+  "blocker": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요) | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
   "nextAction": "Alpha 실참여 12명 이상을 14일 연속 유지하고 Play Console의 요건 충족 상태를 확인하세요.",
   "testSchedule": {
     "internalTrack": "internal",
@@ -175,14 +175,14 @@
     "requiredClosedTesters": 12,
     "countdownStarted": true,
     "closedTestStartedAt": "2026-11-03T12:18:00+09:00",
-    "elapsedDays": 2,
-    "remainingDays": 12,
+    "elapsedDays": 6,
+    "remainingDays": 8,
     "requiredDays": 14,
     "targetProductionDate": "2026-11-17",
-    "dayProgressPct": 14,
+    "dayProgressPct": 43,
     "currentTrackLabel": "비공개 테스트 가동 중 (테스터 12/12명)",
-    "closedTrackStatusLabel": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)",
-    "dDayBadge": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)",
+    "closedTrackStatusLabel": "비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요)",
+    "dDayBadge": "비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요)",
     "testerGroupEmail": "barolab-testers@googlegroups.com",
     "testerLandingUrl": "https://barolab-daily-apps.pages.dev/testers/",
     "readyForProductionTrack": false
@@ -206,20 +206,20 @@
       "publisherMatched": true,
       "verified": true,
       "line": "google.com, pub-7642010403138987, DIRECT, f08c47fec0942fa0",
-      "checkedAt": "2026-11-05T05:27:10+09:00"
+      "checkedAt": "2026-11-10T04:07:11+09:00"
     },
     "todayRevenueUsd": 0.0,
     "monthRevenueUsd": 0.0,
     "impressionsToday": 0,
     "currentTrackLabel": "비공개 테스트 가동 중 (테스터 12/12명)",
-    "closedTrackStatusLabel": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)",
+    "closedTrackStatusLabel": "비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요)",
     "deviceVerified": true,
     "deviceVerifiedVersionCode": 2,
     "latestBuildVersionCode": 3,
     "latestBuildPhysicalDeviceVerified": false,
     "deviceVerificationLabel": "삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
     "owner": "@patch (빌드·배포) · @trace (SJ AdMob·스토어 추적)",
-    "blocker": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족) | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
+    "blocker": "현재 트랙: 비공개 테스트 가동 중 (테스터 12/12명) | 비공개 테스트 현황: 비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요) | 실기기 확인: 삼성 실기기 v2 검증 완료 · 신규 v3 실기기 미검증",
     "nextAction": "Alpha 실참여 12명 이상을 14일 연속 유지하고 Play Console의 요건 충족 상태를 확인하세요.",
     "ceoActionRequired": true,
     "productionChecklist": [
@@ -228,7 +228,7 @@
         "label": "1단계: 테스터 명단 확인 · Alpha 실참여 12명 이상",
         "owner": "대표님 (QR 4터치 설치) · @patch (반자동 스크립트)",
         "status": "verified",
-        "detail": "비공개 테스트 D+2일째 · 14일 요건 D-12일 (2026-11-17 충족)"
+        "detail": "비공개 테스트 6일 경과 · 14일 요건까지 8일 (2026-11-17 예상 · 연속 참여 유지 필요)"
       },
       {
         "step": 2,

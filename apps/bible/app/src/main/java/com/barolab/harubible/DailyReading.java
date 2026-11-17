@@ -5,6 +5,9 @@ import java.time.ZonedDateTime;
 
 /** Local calendar rules: no tracking identifier and no network dependency. */
 public final class DailyReading {
+    static final String OPEN_TODAY="com.barolab.harubible.OPEN_TODAY";
+    static boolean opensToday(String action){return OPEN_TODAY.equals(action);}
+    static boolean opensToday(String action,long requestId,long handledId){return opensToday(action)&&requestId!=handledId;}
     private DailyReading() { }
     public static int index(LocalDate date, int size) {
         if (size <= 0) throw new IllegalArgumentException("Empty verse collection");

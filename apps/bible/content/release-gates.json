@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-14T05:53:52.511088+00:00",
+  "checkedAt": "2026-11-17T04:42:43.673Z",
   "contentReady": true,
   "gates": {
     "textRights": {
       "status": "provider_evidence_confirmed",
       "translationId": "ebible-kor1910",
-      "scope": "30 selected source-matched provider-declared Public Domain text verses; commercial app inclusion and sharing",
+      "scope": "60 selected source-matched provider-declared Public Domain text verses; commercial app inclusion and sharing",
       "rightsConfirmedMeaning": "text source reuse evidence only; not blanket legal or app-store approval"
     },
     "sourceIntegrity": {
       "status": "passed",
-      "selectedVerseCount": 30,
-      "sourceHtmlMatches": 30,
+      "selectedVerseCount": 60,
+      "sourceHtmlMatches": 60,
       "wholeBibleCompleteness": "not_claimed"
     },
     "editionNaming": {

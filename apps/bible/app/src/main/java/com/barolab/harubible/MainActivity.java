@@ -30,6 +30,10 @@ public final class MainActivity extends Activity {
     private VerseRepository.Verse selected;
     private android.content.SharedPreferences preferences;
     private OfflineTtsController speech;
+    private android.media.MediaPlayer recording;
+    private final Handler audioHandler=new Handler(Looper.getMainLooper());
+    private boolean recordingStarted;
+    private long handledReminder=-1;
     private boolean pendingReminderPermission, todaySelected, disposed, savedOnly;
     private String currentPage = "today", searchQuery = "", verseOrigin = "favorites";
     private LocalDate shownDate;
@@ -39,6 +43,7 @@ public final class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         preferences = ReminderReceiver.prefs(this);
+        if(state!=null)handledReminder=state.getLong("handledReminder",-1);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().setNavigationBarColor(Color.rgb(249, 247, 240));
         if (Build.VERSION.SDK_INT >= 30) getWindow().setDecorFitsSystemWindows(false);
@@ -53,7 +58,7 @@ public final class MainActivity extends Activity {
         });
         LinearLayout brand = new LinearLayout(this);brand.setOrientation(largeSystemText()?LinearLayout.VERTICAL:LinearLayout.HORIZONTAL); brand.setGravity(largeSystemText()?Gravity.START:Gravity.CENTER_VERTICAL); brand.setPadding(dp(22), dp(10), dp(22), dp(2));
         TextView name = text(largeSystemText()?"오늘의 말씀":"오늘의 성경말씀", 21, GREEN);name.setContentDescription("오늘의 성경말씀"); name.setTypeface(Typeface.DEFAULT, Typeface.BOLD); brand.addView(name, largeSystemText()?new LinearLayout.LayoutParams(-1,-2):new LinearLayout.LayoutParams(0, -2, 1));
-        TextView edition = text("선정 말씀 30개", 12, MUTED); brand.addView(edition); if (!compactHeight()) root.addView(brand);
+        TextView edition = text("하루 한 구절", 12, MUTED); brand.addView(edition); if (!compactHeight()) root.addView(brand);
         nav = new LinearLayout(this); nav.setPadding(dp(18), dp(2), dp(18), dp(8));
         addTab("오늘", v -> showToday()); addTab(largeSystemText()?"모음":"말씀 모음", v -> { savedOnly = false; showSearch(); }); addTab("설정", v -> showSettings()); root.addView(nav);
         readingTools = new LinearLayout(this); readingTools.setOrientation(LinearLayout.VERTICAL); readingTools.setPadding(dp(20), 0, dp(20), dp(4)); readingTools.setVisibility(View.GONE); root.addView(readingTools);
@@ -67,7 +72,8 @@ public final class MainActivity extends Activity {
         try {
             repository = new VerseRepository(this);
             String page = state == null ? (preferences.contains("reading_verse_id")?"savedVerse":"today") : state.getString("page", "today");
-            if ("favorites".equals(page)) showFavorites();
+            if (opensReminder()) { handledReminder=getIntent().getLongExtra("reminder_request",0); showToday(); getIntent().setAction(null); }
+            else if ("favorites".equals(page)) showFavorites();
             else if ("settings".equals(page)) showSettings();
             else if ("search".equals(page)) showSearch();
             else if ("savedVerse".equals(page)) {
@@ -83,8 +89,8 @@ public final class MainActivity extends Activity {
         ReminderReceiver.schedule(this);
     }
 
-    private void clear() { rememberReading(); readingBody=null;voiceDiagnostics=null; listenButton = null; voiceStatus = null; if (speech != null) speech.stop(); content.removeAllViews(); readingTools.removeAllViews(); readingTools.setVisibility(View.GONE); scroll.post(() -> scroll.scrollTo(0, 0)); }
-    private void addTab(String label, View.OnClickListener action) { Button tab = button(label, action);if(label.equals("모음"))tab.setContentDescription("말씀 모음, 전체 30개와 저장한 말씀"); tab.setTextSize(14); tab.setMinHeight(dp(48)); tabs.add(tab); nav.addView(tab, weighted()); }
+    private void clear() { rememberReading(); readingBody=null;voiceDiagnostics=null; listenButton = null; voiceStatus = null; stopReading(); content.removeAllViews(); readingTools.removeAllViews(); readingTools.setVisibility(View.GONE); scroll.post(() -> scroll.scrollTo(0, 0)); }
+    private void addTab(String label, View.OnClickListener action) { Button tab = button(label, action);if(label.equals("모음"))tab.setContentDescription("말씀 모음과 저장한 말씀"); tab.setTextSize(18); tab.setMinHeight(dp(56)); tabs.add(tab); nav.addView(tab, weighted()); }
     private void selectTab(int index) {
         for (int i = 0; i < tabs.size(); i++) { Button tab = tabs.get(i); boolean active = i == index; tab.setSelected(active); tab.setTextColor(active ? Color.WHITE : GREEN); tab.setTypeface(Typeface.DEFAULT, active ? Typeface.BOLD : Typeface.NORMAL); tab.setBackground(surface(active ? GREEN : Color.TRANSPARENT, active ? GREEN : Color.rgb(222, 226, 219), 13)); }
     }
@@ -99,7 +105,7 @@ public final class MainActivity extends Activity {
         TextView view = new TextView(this); view.setText(value); view.setTextSize(size); view.setTextColor(color); view.setLineSpacing(dp(4), 1.16f); if (Build.VERSION.SDK_INT >= 29) { view.setBreakStrategy(android.graphics.text.LineBreaker.BREAK_STRATEGY_HIGH_QUALITY); view.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE); } view.setPadding(0, dp(4), 0, dp(12)); return view;
     }
     private Button button(String label, View.OnClickListener action) {
-        Button button = new Button(this); button.setText(label); button.setAllCaps(false); button.setTextSize(16); button.setTextColor(GREEN); button.setMinHeight(dp(56)); button.setMinimumWidth(0);
+        Button button = new Button(this); button.setText(label); button.setAllCaps(false); button.setTextSize(18); button.setTextColor(GREEN); button.setMinHeight(dp(56)); button.setMinimumWidth(0);
         GradientDrawable shape = new GradientDrawable(); shape.setColor(Color.WHITE); shape.setCornerRadius(dp(14)); shape.setStroke(dp(1), Color.rgb(215, 224, 216)); button.setBackground(shape);
         button.setStateListAnimator(null); button.setPadding(dp(10), dp(10), dp(10), dp(10)); button.setOnClickListener(action); return button;
     }
@@ -116,7 +122,7 @@ public final class MainActivity extends Activity {
     }
     private void showVerse(VerseRepository.Verse verse, boolean today) {
         clear(); selected = verse; todaySelected = today; currentPage = today ? "today" : "savedVerse"; selectTab(today ? 0 : 1);
-        readingTools.setVisibility(View.VISIBLE); LinearLayout metadata = compactHeight() ? content : readingTools; metadata.addView(text((today ? LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일 EEEE", Locale.KOREAN)) : "읽던 말씀")+(compactHeight()?" · 선정 말씀 30개":""), 13, MUTED));
+        readingTools.setVisibility(View.VISIBLE); LinearLayout metadata = compactHeight() ? content : readingTools; metadata.addView(text((today ? LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일 EEEE", Locale.KOREAN)) : "읽던 말씀")+(compactHeight()?" · 선정 말씀 "+repository.verses.size()+"개":""), 13, MUTED));
         LinearLayout referenceRow=new LinearLayout(this);referenceRow.setGravity(Gravity.CENTER_VERTICAL);TextView reference = text(verse.reference, 24, GREEN); reference.setTypeface(Typeface.DEFAULT, Typeface.BOLD);reference.setPadding(0,0,dp(8),0); referenceRow.addView(reference,new LinearLayout.LayoutParams(0,-2,1));metadata.addView(referenceRow);
         LinearLayout actions = new LinearLayout(this);
         listenButton = button("말씀 듣기", v -> speak()); fillButton(listenButton); actions.addView(listenButton, weighted());
@@ -126,7 +132,7 @@ public final class MainActivity extends Activity {
         Button share = button(largeSystemText()?"공유":"카드 공유", v -> { }); share.setContentDescription("말씀 카드 이미지 공유");share.setOnClickListener(v -> shareCard(share, verse)); actions.addView(share, weighted()); readingTools.addView(actions);
         voiceStatus = text("듣기를 준비하고 있어요", 12, MUTED); voiceStatus.setMaxLines(compactHeight()?4:2); (compactHeight() ? content : readingTools).addView(voiceStatus); if (speech != null) updateVoiceStatus(speech.getState(), "");
         LinearLayout card = panel();
-        TextView body = text(verse.text, preferences.getInt("font_size", 30), INK); readingBody=body;body.setTypeface(Typeface.create("serif", Typeface.NORMAL)); body.setTextIsSelectable(true); body.setTextLocale(Locale.KOREAN); if (Build.VERSION.SDK_INT >= 33) body.setLineBreakWordStyle(android.graphics.text.LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE); body.setPadding(0, dp(7), 0, dp(16)); Button sizeControl = button("글씨 " + preferences.getInt("font_size", 30)+" ▾", v -> { }); sizeControl.setTextSize(14);sizeControl.setMinHeight(dp(48));sizeControl.setPadding(dp(10),dp(6),dp(10),dp(6));sizeControl.setContentDescription("말씀 글씨 크기 바꾸기, 현재 "+preferences.getInt("font_size",30));referenceRow.addView(sizeControl,new LinearLayout.LayoutParams(-2,-2));
+        TextView body = text(verse.text, preferences.getInt("font_size", 30), INK); readingBody=body;body.setTypeface(Typeface.create("serif", Typeface.NORMAL)); body.setTextIsSelectable(true); body.setTextLocale(Locale.KOREAN); if (Build.VERSION.SDK_INT >= 33) body.setLineBreakWordStyle(android.graphics.text.LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE); body.setPadding(0, dp(7), 0, dp(16)); Button sizeControl = button("글씨 " + preferences.getInt("font_size", 30)+" ▾", v -> { }); sizeControl.setTextSize(18);sizeControl.setMinHeight(dp(56));sizeControl.setPadding(dp(10),dp(6),dp(10),dp(6));sizeControl.setContentDescription("말씀 글씨 크기 바꾸기, 현재 "+preferences.getInt("font_size",30));referenceRow.addView(sizeControl,new LinearLayout.LayoutParams(-2,-2));
         sizeControl.setOnClickListener(v -> chooseReadingSize(body, sizeControl)); card.addView(body);
         TextView source = text(repository.translationName, 12, MUTED); source.setPadding(0, dp(12), 0, 0); card.addView(source);
         gap(12);
@@ -141,7 +147,8 @@ public final class MainActivity extends Activity {
     private void shareCard(Button share, VerseRepository.Verse verse) {
         share.setEnabled(false); sharing.execute(() -> {
             try {
-                Intent intent = VerseCard.share(this, verse, repository.translationName + " · " + repository.copyrightNotice);
+                int background=VerseCard.backgroundIndex(preferences.getInt("card_background",0));
+                Intent intent = VerseCard.share(this, verse, repository.translationName + " · " + repository.copyrightNotice,background);
                 runOnUiThread(() -> { if (!disposed && !isFinishing() && !isDestroyed()) { share.setEnabled(true); try { startActivity(Intent.createChooser(intent, "말씀 카드 공유")); } catch (ActivityNotFoundException e) { toast("이미지를 공유할 앱이 설치되어 있지 않아요."); } } });
             } catch (Exception e) { runOnUiThread(() -> { if (!disposed) { share.setEnabled(true); toast("카드를 만들지 못했어요. 다시 시도해 주세요."); } }); }
         });
@@ -201,6 +208,7 @@ public final class MainActivity extends Activity {
     private void showFavorites() { savedOnly = true; showSearch(); }
     private void updateVoiceStatus(OfflineTtsController.State state, String detail) {
         if (disposed) return;
+        if(recording!=null){if(listenButton!=null){listenButton.setEnabled(true);listenButton.setText(recordingStarted?"듣기 멈춤":"준비 취소");listenButton.setContentDescription(recordingStarted?"녹음 말씀 듣기 멈춤":"녹음 말씀 준비 취소");}if(voiceStatus!=null){voiceStatus.setVisibility(View.VISIBLE);voiceStatus.setText(recordingStarted?VoiceChoice.LABELS[VoiceChoice.index(voiceChoice())]+"로 읽고 있어요.":"녹음 말씀을 준비하고 있어요.");}return;}
         String label, description;
         switch (state) {
             case INITIALIZING: label = "음성 준비 중"; description = "기기의 한국어 음성을 확인하고 있어요."; break;
@@ -215,11 +223,35 @@ public final class MainActivity extends Activity {
             if(largeSystemText()&&!currentPage.equals("settings")){
                 switch(state){case READY:label="듣기";break;case SPEAKING:label="멈춤";break;case STARTING:label="취소";break;case INITIALIZING:label="준비";break;case ENGINE_ERROR:label="다시";break;default:label="설정";}
             }
-            if(currentPage.equals("settings") && state==OfflineTtsController.State.READY)label="짧은 소리 확인";listenButton.setText(label); listenButton.setEnabled(state != OfflineTtsController.State.INITIALIZING); }
+            if(currentPage.equals("settings") && state==OfflineTtsController.State.READY)label="선택한 목소리 듣기";listenButton.setText(label); listenButton.setEnabled(state != OfflineTtsController.State.INITIALIZING); }
         if (voiceStatus != null) {voiceStatus.setText(detail == null || detail.isEmpty() ? description : detail);voiceStatus.setVisibility(!currentPage.equals("settings")&&state==OfflineTtsController.State.READY?View.GONE:View.VISIBLE);}
+        if(selected!=null&&VoiceChoice.index(voiceChoice())<2&&state!=OfflineTtsController.State.SPEAKING&&state!=OfflineTtsController.State.STARTING){if(listenButton!=null){listenButton.setText("말씀 듣기");listenButton.setEnabled(true);listenButton.setContentDescription("선택한 목소리로 말씀 듣기");}if(voiceStatus!=null){voiceStatus.setVisibility(View.VISIBLE);voiceStatus.setText(VoiceChoice.LABELS[VoiceChoice.index(voiceChoice())]+" · 녹음이 없으면 기기 음성으로 읽어요.");}}
         if(voiceDiagnostics!=null&&speech!=null)voiceDiagnostics.setText("기본 엔진: "+(speech.engineLabel().isEmpty()?"확인 중":speech.engineLabel())+"\n"+speech.voiceDescription()+"\n소리가 들리지 않으면 휴대폰의 미디어 음량을 확인해 주세요.");
     }
-    private void speak() {
+    private boolean opensReminder(){return getIntent()!=null&&DailyReading.opensToday(getIntent().getAction(),getIntent().getLongExtra("reminder_request",0),handledReminder);}
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);if(DailyReading.opensToday(intent.getAction())&&repository!=null){handledReminder=intent.getLongExtra("reminder_request",0);showToday();intent.setAction(null);}}
+    private String voiceChoice(){return preferences.getString("voice_choice","female");}
+    private void stopRecording(){android.media.MediaPlayer player=recording;recording=null;recordingStarted=false;audioHandler.removeCallbacksAndMessages(null);if(player!=null){player.setOnPreparedListener(null);player.setOnCompletionListener(null);player.setOnErrorListener(null);player.release();}}
+    private void stopReading(){stopRecording();if(speech!=null)speech.stop();}
+    private boolean playRecording(String path){
+        android.media.MediaPlayer player=new android.media.MediaPlayer();
+        try(android.content.res.AssetFileDescriptor file=getAssets().openFd(path)){
+            player.setAudioAttributes(new android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build());
+            player.setDataSource(file.getFileDescriptor(),file.getStartOffset(),file.getLength());recording=player;recordingStarted=false;
+            player.setOnPreparedListener(p->{if(recording!=p)return;audioHandler.removeCallbacksAndMessages(null);try{p.start();recordingStarted=true;updateVoiceStatus(speech.getState(),"");}catch(RuntimeException e){recordingFailed(p);}});
+            player.setOnCompletionListener(p->{if(recording==p){stopRecording();updateVoiceStatus(speech.getState(),"");}});
+            player.setOnErrorListener((p,what,extra)->{recordingFailed(p);return true;});
+            player.prepareAsync();updateVoiceStatus(speech.getState(),"");audioHandler.postDelayed(()->recordingFailed(player),10000);return true;
+        }catch(java.io.IOException|RuntimeException e){if(recording==player)stopRecording();else player.release();return false;}
+    }
+    private void recordingFailed(android.media.MediaPlayer player){if(recording!=player)return;stopRecording();if(!disposed){toast("녹음을 재생하지 못해 기기 음성으로 읽습니다.");speakDevice();}}
+    private void speak(){
+        if(selected==null||speech==null)return;
+        if(recording!=null){stopRecording();updateVoiceStatus(speech.getState(),"");return;}
+        if(speech.getState()==OfflineTtsController.State.SPEAKING||speech.getState()==OfflineTtsController.State.STARTING){speech.stop();return;}
+        VoiceChoice.play(voiceChoice(),selected.id,this::playRecording,this::speakDevice);
+    }
+    private void speakDevice() {
         if (selected == null || speech == null) return;
         OfflineTtsController.State state = speech.getState();
         if (state == OfflineTtsController.State.SPEAKING || state == OfflineTtsController.State.STARTING) { speech.stop(); return; }
@@ -260,17 +292,17 @@ public final class MainActivity extends Activity {
         for (int size : new int[]{24, 30, 36, 42}) { Button choice = button(String.valueOf(size), v -> { preferences.edit().putInt("font_size", size).apply(); showSettings(); }); if (size == current) { fillButton(choice); choice.setSelected(true); } choice.setContentDescription("본문 글씨 " + size + (size == current ? ", 현재 선택" : "")); sizes.addView(choice, weighted()); }
         reading.addView(sizes); TextView sample = text("나의 도움이 천지를 지으신 여호와에게서로다", current, INK); sample.setPadding(0, dp(18), 0, 0); sample.setTypeface(Typeface.create("serif", Typeface.NORMAL)); reading.addView(sample); reading.addView(text("시편 121:2 · 글씨 미리보기", 12, MUTED)); gap(16);
         LinearLayout audio = panel(); audio.addView(text("말씀 듣기", 19, GREEN));
+        fullButton(audio,button(VoiceChoice.LABELS[VoiceChoice.index(voiceChoice())]+" ▾",v->new AlertDialog.Builder(this).setTitle("읽어 주는 목소리").setSingleChoiceItems(VoiceChoice.LABELS,VoiceChoice.index(voiceChoice()),(dialog,which)->{stopReading();preferences.edit().putString("voice_choice",VoiceChoice.IDS[which]).apply();dialog.dismiss();showSettings();}).setNegativeButton("닫기",null).show()));
+        audio.addView(text("녹음된 목소리는 AI 음성으로 만든 것입니다. 녹음 파일이 없는 구절은 기존 기기 음성으로 읽습니다. 인터넷으로 음성을 요청하지 않습니다.",14,MUTED));
         voiceStatus = text("기기의 음성을 확인하고 있어요.", 14, MUTED); audio.addView(voiceStatus);
         voiceDiagnostics=text("",12,MUTED);audio.addView(voiceDiagnostics);
-        listenButton=button("짧은 소리 확인",v -> {
-            if(speech==null)return;
-            if(speech.getState()==OfflineTtsController.State.SPEAKING||speech.getState()==OfflineTtsController.State.STARTING){speech.stop();return;}
-            if(speech.getState()==OfflineTtsController.State.READY)speech.speak("오늘도 평안한 하루 보내세요.");else toast("음성 상태를 확인하고 다시 확인을 눌러 주세요.");
-        });fullButton(audio,listenButton);
+        listenButton=button("선택한 목소리 듣기",v -> {if(repository==null)return;if(selected==null)selected=repository.today();speak();});fullButton(audio,listenButton);
         fullButton(audio,button("한국어 음성 다시 확인",v -> {if(speech!=null)speech.retry();}));
         fullButton(audio, button("기기 음성 설정", v -> { if (speech != null) openVoiceIntent(false); }));
         audio.addView(text(voiceSetupHelp(), 13, MUTED));
         if (speech != null) updateVoiceStatus(speech.getState(), ""); gap(16);
+        LinearLayout backgrounds=panel();backgrounds.addView(text("말씀 카드 배경",19,GREEN));GridLayout grid=new GridLayout(this);grid.setColumnCount(3);backgrounds.addView(grid);
+        for(int i=0;i<VerseCard.BACKGROUNDS.length;i++){final int index=i;LinearLayout tile=new LinearLayout(this);tile.setOrientation(LinearLayout.VERTICAL);ImageView image=new ImageView(this);android.graphics.BitmapFactory.Options options=new android.graphics.BitmapFactory.Options();options.inSampleSize=8;image.setImageBitmap(android.graphics.BitmapFactory.decodeResource(getResources(),VerseCard.BACKGROUNDS[i],options));image.setScaleType(ImageView.ScaleType.CENTER_CROP);tile.addView(image,new LinearLayout.LayoutParams(-1,dp(90)));TextView name=text(VerseCard.BACKGROUND_NAMES[i],18,GREEN);name.setGravity(Gravity.CENTER);tile.addView(name);boolean chosen=VerseCard.backgroundIndex(preferences.getInt("card_background",0))==i;tile.setSelected(chosen);tile.setContentDescription(VerseCard.BACKGROUND_NAMES[i]+(chosen?", 선택됨":""));tile.setFocusable(true);tile.setPadding(dp(4),dp(4),dp(4),dp(4));tile.setBackgroundColor(chosen?0xffdbe9dd:Color.TRANSPARENT);tile.setOnClickListener(v->{preferences.edit().putInt("card_background",index).apply();for(int n=0;n<grid.getChildCount();n++){View cell=grid.getChildAt(n);cell.setSelected(n==index);cell.setBackgroundColor(n==index?0xffdbe9dd:Color.TRANSPARENT);cell.setContentDescription(VerseCard.BACKGROUND_NAMES[n]+(n==index?", 선택됨":""));}});GridLayout.LayoutParams params=new GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED),GridLayout.spec(GridLayout.UNDEFINED,1f));params.width=0;grid.addView(tile,params);}gap(16);
         LinearLayout reminder = panel(); reminder.addView(text("하루 한 번 알림", 19, GREEN));
         String time = String.format(Locale.KOREAN, "%02d:%02d", preferences.getInt("hour", 8), preferences.getInt("minute", 0));
         boolean enabled = preferences.getBoolean("reminder_enabled", false) && ReminderReceiver.canNotify(this);
@@ -291,7 +323,7 @@ public final class MainActivity extends Activity {
         fullButton(about, button("지원 문의", v -> {
             try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:baro76650@gmail.com")).putExtra(Intent.EXTRA_SUBJECT, "오늘의 성경말씀 앱 문의")); } catch (ActivityNotFoundException e) { new AlertDialog.Builder(this).setMessage("지원 문의: baro76650@gmail.com").setPositiveButton("확인", null).show(); }
         }));
-        gap(12); content.addView(text("오늘의 성경말씀 · 30개 선정 구절 | " + BuildConfig.VERSION_NAME, 12, MUTED));
+        gap(12); content.addView(text("오늘의 성경말씀 · 선정 구절 | " + BuildConfig.VERSION_NAME, 12, MUTED));
     }
     private void enableReminder() {
         boolean allowed = ReminderReceiver.canNotify(this);
@@ -327,13 +359,13 @@ public final class MainActivity extends Activity {
         if (code == 71 && pendingReminderPermission) { pendingReminderPermission = false; enableReminder(); }
     }
     @Override protected void onSaveInstanceState(Bundle state) {
-        rememberReading();state.putBoolean("returningFromVoiceSettings",returningFromVoiceSettings);state.putInt("readingY",scroll.getScrollY());writeReadingAnchor(state);
+        state.putLong("handledReminder",handledReminder);rememberReading();state.putBoolean("returningFromVoiceSettings",returningFromVoiceSettings);state.putInt("readingY",scroll.getScrollY());writeReadingAnchor(state);
         state.putString("page", currentPage); state.putBoolean("savedOnly", savedOnly); state.putString("searchQuery", searchQuery); state.putString("verseOrigin", verseOrigin); state.putBoolean("pendingReminderPermission", pendingReminderPermission);
         if (selected != null) state.putString("verseId", selected.id);
         super.onSaveInstanceState(state);
     }
     @Override public void onResume() { super.onResume(); if (speech != null) {if(returningFromVoiceSettings){returningFromVoiceSettings=false;speech.retry();}else speech.refresh();} if (ads != null) ads.resume(); if (repository != null && todaySelected && shownDate != null && !shownDate.equals(LocalDate.now())) showToday(); }
-    @Override public void onPause() { rememberReading();if (speech != null) speech.stop(); if (ads != null) ads.pause(); super.onPause(); }
-    @Override public void onDestroy() { disposed = true; if (speech != null) speech.close(); if (ads != null) ads.destroy(); sharing.shutdownNow(); super.onDestroy(); }
+    @Override public void onPause() { rememberReading();stopReading(); if (ads != null) ads.pause(); super.onPause(); }
+    @Override public void onDestroy() { disposed = true; stopRecording();if (speech != null) speech.close(); if (ads != null) ads.destroy(); sharing.shutdownNow(); super.onDestroy(); }
     private void toast(String message) { Toast.makeText(this, message, Toast.LENGTH_LONG).show(); }
 }

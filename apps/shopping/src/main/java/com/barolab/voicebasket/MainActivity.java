@@ -58,7 +58,7 @@ public final class MainActivity extends ComponentActivity {
         dock=new LinearLayout(this);dock.setOrientation(LinearLayout.VERTICAL);dock.setPadding(dp(16),dp(7),dp(16),dp(8));dock.setBackground(shape(0xffeff5f0));root.addView(dock);
         root.setOnApplyWindowInsetsListener((view,insets)->{if(Build.VERSION.SDK_INT>=30){android.graphics.Insets bars=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());android.graphics.Insets ime=insets.getInsets(WindowInsets.Type.ime());view.setPadding(bars.left,bars.top,bars.right,Math.max(bars.bottom,ime.bottom));}else view.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets;});
         banner=new LinearLayout(this);banner.setGravity(Gravity.CENTER);banner.setOrientation(LinearLayout.VERTICAL);root.addView(banner);setContentView(root);
-        voice=new VoiceInput(this,new VoiceInput.Listener(){public void state(String message,boolean active){voiceActive=active;if(voiceStatus!=null)voiceStatus.setText(message);if(voiceButton!=null)voiceButton.setEnabled(!active);updateCommitDock();}public void result(String text){voiceActive=false;draft=draft.isEmpty()?text:draft+"\n"+text;invalidateReview();if(draftInput!=null){draftInput.setText(draft);draftInput.setSelection(draftInput.length());}if(voiceStatus!=null)voiceStatus.setText("아직 추가되지 않았어요. 고친 뒤 미리보기로 확인해 주세요.");if(voiceButton!=null)voiceButton.setEnabled(true);updateCommitDock();}});
+        voice=new VoiceInput(this,new VoiceInput.Listener(){public void state(String message,boolean active){voiceActive=active;if(voiceStatus!=null)voiceStatus.setText(message);if(voiceButton!=null){voiceButton.setEnabled(true);voiceButton.setText(active?"말하기 끝내기":"말로 추가");}updateCommitDock();}public void result(String text){voiceActive=false;draft=draft.isEmpty()?text:draft+"\n"+text;invalidateReview();if(draftInput!=null){draftInput.setText(draft);draftInput.setSelection(draftInput.length());}if(voiceStatus!=null)voiceStatus.setText("아직 추가되지 않았어요. 고친 뒤 미리보기로 확인해 주세요.");if(voiceButton!=null){voiceButton.setEnabled(true);voiceButton.setText("말로 추가");}updateCommitDock();}});
         try{store=new BasketStore(this);}catch(Exception error){content.addView(text("목록 파일을 읽지 못했어요. 앱 데이터를 지우지 말고 지원 문의를 해 주세요.",22,INK));return;}
         LinearLayout adSlot=new LinearLayout(this);adSlot.setOrientation(LinearLayout.VERTICAL);banner.addView(adSlot);
         ads=new AdConsentBanner(this,adSlot,BuildConfig.AD_UNIT_ID);ads.start();render();
@@ -66,7 +66,7 @@ public final class MainActivity extends ComponentActivity {
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private TextView text(String value,int size,int color){TextView v=new TextView(this);v.setText(value);v.setTextSize(size);v.setTextColor(color);v.setLineSpacing(dp(3),1.08f);v.setPadding(0,dp(5),0,dp(9));return v;}
     private GradientDrawable shape(int color){GradientDrawable s=new GradientDrawable();s.setColor(color);s.setCornerRadius(dp(15));s.setStroke(dp(1),0xffd4e3df);return s;}
-    private Button button(String value,View.OnClickListener action){Button b=new Button(this);b.setText(value);b.setTextSize(17);b.setAllCaps(false);b.setTextColor(TEAL);b.setMinHeight(dp(52));b.setMinimumWidth(0);b.setPadding(dp(12),dp(10),dp(12),dp(10));b.setBackground(shape(Color.WHITE));b.setOnClickListener(action);return b;}
+    private Button button(String value,View.OnClickListener action){Button b=new Button(this);b.setText(value);b.setTextSize(18);b.setAllCaps(false);b.setTextColor(TEAL);b.setMinHeight(dp(56));b.setMinimumWidth(0);b.setPadding(dp(12),dp(10),dp(12),dp(10));b.setBackground(shape(Color.WHITE));b.setOnClickListener(action);return b;}
     private Button primary(String value,View.OnClickListener action){Button b=button(value,action);b.setTextColor(Color.WHITE);b.setTypeface(Typeface.DEFAULT,Typeface.BOLD);b.setBackground(shape(TEAL));return b;}
     private void full(LinearLayout parent,View view){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.setMargins(0,dp(4),0,dp(5));parent.addView(view,p);}
     private void rowButton(LinearLayout row,View b){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,-2,1);p.setMargins(dp(2),dp(3),dp(2),dp(3));row.addView(b,p);}
@@ -94,6 +94,7 @@ public final class MainActivity extends ComponentActivity {
     private void showOverview(){
         content.addView(text("말로 적고, 확인하고, 하나씩 체크해요",17,MUTED));
         LinearLayout tabs=new LinearLayout(this);String[] modes={"active","archived","template"};String[] labels={"장보기","보관함","템플릿"};for(int i=0;i<3;i++){final String m=modes[i];rowButton(tabs,mode.equals(m)?primary(labels[i],v->{}):button(labels[i],v->{mode=m;render();}));}full(content,tabs);
+        Button quick=primary("말로 추가",v->quickVoice());quick.setTextSize(24);quick.setMinHeight(dp(72));full(content,quick);
         full(content,primary("+ 새 장보기 목록",v->nameDialog(null,false)));
         int count=0;JSONArray all=store.all();for(int i=0;i<all.length();i++){JSONObject list=all.optJSONObject(i);boolean matches=mode.equals("template")?list.optBoolean("template"):!list.optBoolean("template")&&list.optBoolean("archived")==mode.equals("archived");if(!matches)continue;count++;LinearLayout card=panel();String id=list.optString("id");JSONArray items=list.optJSONArray("items");int checked=0;for(int j=0;j<items.length();j++)if(items.optJSONObject(j).optBoolean("checked"))checked++;
             card.addView(text(list.optString("title"),textSize,INK));card.addView(text(items.length()+"개 중 "+checked+"개 체크",16,MUTED));
@@ -190,7 +191,7 @@ public final class MainActivity extends ComponentActivity {
         draftInput=input("예: 우유, 달걀\n두부",draft,true);draftInput.setId(R.id.basket_draft);full(content,draftInput);
         draftInput.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence s,int start,int count,int after){}public void afterTextChanged(android.text.Editable s){}public void onTextChanged(CharSequence s,int start,int before,int count){if(!draft.equals(s.toString())){draft=s.toString();invalidateReview();}}});
         voiceStatus=text("아직 목록에 추가되지 않았어요. 직접 고친 뒤 확인해 주세요.",15,MUTED);voiceStatus.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);content.addView(voiceStatus);
-        LinearLayout voiceRow=new LinearLayout(this);voiceButton=button("마이크로 말하기",v->{captureDraft();startVoiceChoice();});rowButton(voiceRow,voiceButton);rowButton(voiceRow,button("끝내기",v->voice.stop()));rowButton(voiceRow,button("취소",v->{stopVoice();voiceButton.setEnabled(true);voiceStatus.setText("음성만 취소했어요. 입력한 글은 그대로입니다.");}));full(content,voiceRow);
+        voiceButton=primary("말로 추가",v->{captureDraft();if(voiceActive)voice.stop();else startVoiceChoice();});voiceButton.setTextSize(24);voiceButton.setMinHeight(dp(72));full(content,voiceButton);full(content,button("음성 설정",v->voiceSettings()));
         Button advanced=button(advancedOpen?"분리 옵션 닫기 ▴":"분리 옵션 ▾",v->{advancedOpen=!advancedOpen;advancedPanel.setVisibility(advancedOpen?View.VISIBLE:View.GONE);((Button)v).setText(advancedOpen?"분리 옵션 닫기 ▴":"분리 옵션 ▾");});full(content,advanced);
         advancedPanel=new LinearLayout(this);advancedPanel.setOrientation(LinearLayout.VERTICAL);advancedPanel.setVisibility(advancedOpen?View.VISIBLE:View.GONE);full(content,advancedPanel);
         CheckBox conjunctions=new CheckBox(this);conjunctions.setText("독립된 그리고·및·또는·하고도 나누기");conjunctions.setTextSize(16);conjunctions.setChecked(splitConjunctions);conjunctions.setOnCheckedChangeListener((v,b)->{splitConjunctions=b;invalidateReview();});full(advancedPanel,conjunctions);
@@ -243,8 +244,15 @@ public final class MainActivity extends ComponentActivity {
         catch(Exception error){toast(error.getMessage()==null?"새 목록을 만들지 못했어요.":error.getMessage());}
         finally{submissions.finish(token,success);}
     }
+    private void quickVoice(){
+        List<JSONObject> lists=new ArrayList<>();JSONArray all=store.all();for(int i=0;i<all.length();i++){JSONObject list=all.optJSONObject(i);if(!list.optBoolean("archived")&&!list.optBoolean("template"))lists.add(list);}
+        if(lists.size()>1){String[] names=new String[lists.size()];for(int i=0;i<names.length;i++)names[i]=lists.get(i).optString("title");new AlertDialog.Builder(this).setTitle("어느 목록에 추가할까요?").setItems(names,(d,i)->openVoiceList(lists.get(i).optString("id"))).setNegativeButton("닫기",null).show();return;}
+        act(()->openVoiceList(lists.isEmpty()?store.create("장보기",null,false):lists.get(0).optString("id")));
+    }
+    private void openVoiceList(String id){currentId=id;resetDraft();composer=true;render();startVoiceChoice();}
+    private void voiceSettings(){new AlertDialog.Builder(this).setTitle("음성 설정").setMessage("기기 안의 한국어 음성을 우선 사용합니다. 지원하지 않으면 매번 동의를 받은 뒤 음성 제공자를 사용합니다. 인식한 글은 미리보기 후에만 목록에 추가됩니다.").setPositiveButton("말하기 끝내기",(d,w)->voice.stop()).setNeutralButton("음성 입력 취소",(d,w)->{stopVoice();voiceButton.setText("말로 추가");voiceStatus.setText("음성만 취소했어요. 입력한 글은 그대로입니다.");}).setNegativeButton("닫기",null).show();}
     private void startVoiceChoice(){
-        if(voiceActive)return;
+        if(!VoiceInput.canStart(voiceActive,permissionPending,stopped))return;
         if(!voice.available()){voiceStatus.setText("기기에 음성 인식 서비스가 없어요. 키보드로 입력해 주세요.");return;}
         if(voice.onDeviceAvailable())ensureMic(false);
         else new AlertDialog.Builder(this).setTitle("음성 제공자를 사용할까요?").setMessage("이 기기에는 앱에서 사용할 온디바이스 음성 인식이 없어요. 선택한 Android 음성 제공자가 음성을 처리하며 서버 전송과 네트워크 사용이 발생할 수 있습니다. 제공자의 개인정보 정책이 적용됩니다. 원하지 않으면 키보드로 입력할 수 있어요.").setPositiveButton("이번에 음성 사용",(d,w)->ensureMic(true)).setNegativeButton("키보드로 입력",(d,w)->draftInput.requestFocus()).show();
@@ -258,6 +266,6 @@ public final class MainActivity extends ComponentActivity {
     private void navigateBack(){if(!reuseId.isEmpty()){reuseId="";reuseSelection.clear();reuseToken="";render();return;}if(composer){captureDraft();if(draft.trim().isEmpty()){resetDraft();render();}else leaveList();}else leaveList();}
     @Override protected void onSaveInstanceState(Bundle state){captureDraft();state.putString("currentId",currentId);state.putString("mode",mode);state.putString("draft",draft);state.putBoolean("composer",composer);state.putBoolean("split",splitConjunctions);state.putBoolean("merge",mergeDuplicates);state.putString("previewSource",previewSource);state.putStringArrayList("candidates",new ArrayList<>(candidates));state.putString("reviewToken",reviewToken);state.putBoolean("previewSplit",previewSplit);state.putBoolean("previewMerge",previewMerge);state.putBoolean("advancedOpen",advancedOpen);state.putString("reuseId",reuseId);state.putString("reuseTitle",reuseName==null?reuseTitle:reuseName.getText().toString());state.putString("reuseToken",reuseToken);state.putStringArrayList("reuseSelection",new ArrayList<>(reuseSelection));super.onSaveInstanceState(state);}
     @Override protected void onResume(){super.onResume();stopped=false;updateCommitDock();if(ads!=null)ads.resume();}
-    @Override protected void onPause(){captureDraft();stopVoice();if(voiceStatus!=null)voiceStatus.setText("음성 입력은 중지됐어요. 필요하면 마이크를 다시 눌러 주세요.");if(voiceButton!=null)voiceButton.setEnabled(true);stopped=true;if(ads!=null)ads.pause();super.onPause();}
+    @Override protected void onPause(){captureDraft();stopVoice();if(voiceStatus!=null)voiceStatus.setText("음성 입력은 중지됐어요. 필요하면 마이크를 다시 눌러 주세요.");if(voiceButton!=null){voiceButton.setEnabled(true);voiceButton.setText("말로 추가");}stopped=true;if(ads!=null)ads.pause();super.onPause();}
     @Override protected void onDestroy(){stopVoice();if(ads!=null)ads.destroy();super.onDestroy();}
 }

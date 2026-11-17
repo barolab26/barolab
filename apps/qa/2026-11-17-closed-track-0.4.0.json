@@ -1,0 +1,86 @@
+{
+ "date": "2026-11-17",
+ "by": "Claude Code (head) with Codex (Java changes) and the Gemini web reviewer; CEO instruction of the same day",
+ "plan": "apps/docs/update-2026-11-plan.md",
+ "storeSearchBasis": "apps/docs/store-search-2026-11.md",
+ "releases": {
+  "greeting": {
+   "playAppId": "4973731498485355571",
+   "track": "closed testing - Alpha",
+   "versionCode": 4,
+   "versionName": "0.4.0",
+   "installSize": "8.16MB (-3.23MB)",
+   "consoleWarnings": [
+    "no deobfuscation file (code is not obfuscated)"
+   ],
+   "status": "sent for review together with the listing change"
+  },
+  "magnifier": {
+   "playAppId": "4972819523776643880",
+   "track": "closed testing - Alpha",
+   "versionCode": 4,
+   "versionName": "0.4.0",
+   "consoleWarnings": [
+    "no deobfuscation file",
+    "native debug symbols not uploaded"
+   ],
+   "status": "sent for review together with the listing change"
+  },
+  "shopping": {
+   "playAppId": "4972748430542309887",
+   "track": "closed testing - Alpha",
+   "versionCode": 4,
+   "versionName": "0.4.0",
+   "consoleWarnings": [
+    "no deobfuscation file"
+   ],
+   "status": "sent for review together with the listing change"
+  },
+  "bible": {
+   "playAppId": "4975007773224005878",
+   "track": "closed testing - Alpha",
+   "versionCode": 6,
+   "versionName": "0.6.0",
+   "consoleWarnings": [
+    "download size increases noticeably (120 recorded verse files, about 4.7MB)",
+    "no deobfuscation file"
+   ],
+   "status": "sent for review together with the listing change (18:1x KST)",
+   "voices": {
+    "female": "Sulafat, 60 verses",
+    "male": "Algieba, 60 verses",
+    "check": "every file transcribed and compared with the verse text (match >= 90%, length 90-112%); record in apps/bible/tools/voice-verified.json",
+    "incident": "a second API check fell back to lite models that wrote down only the first sentence; 20 good files were deleted on that result and re-rendered; the check tool now uses full-size models only and the remaining files were checked through the Gemini web chat"
+   }
+  }
+ },
+ "listings": {
+  "greeting": {
+   "name": "오늘의 안부 - 좋은아침 인사말·좋은글귀 카드",
+   "short": "좋은아침 인사말과 좋은글귀를 예쁜 사진 카드로 만들어 가족·친구에게 바로 보내세요. 큰 글씨로 쉽게."
+  },
+  "bible": {
+   "name": "오늘의 성경말씀 - 성경구절 듣기·말씀카드",
+   "short": "오늘의 성경구절을 큰 글씨로 읽고 들으세요. 말씀카드로 만들어 가족·교우와 나눌 수 있습니다."
+  },
+  "magnifier": {
+   "name": "큰글씨 돋보기 - 스마트폰 확대경·손전등",
+   "short": "작은 글씨를 스마트폰으로 크게. 확대경처럼 확대하고 손전등으로 밝히고, 화면을 멈춰 천천히 보세요."
+  },
+  "shopping": {
+   "name": "말로 장보기 - 음성 장보기 리스트·메모",
+   "short": "살 것을 말하면 장보기 리스트가 됩니다. 큰 글씨로 체크하고 지난 목록을 다시 쓰세요."
+  }
+ },
+ "verifiedOnEmulator": [
+  "greeting: dated card, share sheet, next-day refresh with 이어서 쓰기, background grid",
+  "bible: recorded female and male voice playback, reminder opens today's verse, card background choice, 60 verses",
+  "magnifier: no banner on the camera screen",
+  "shopping: large 말로 추가 button"
+ ],
+ "notVerified": [
+  "release (non-debug) builds were not run on a device; the code is the same as the debug builds that were run",
+  "TalkBack, 200% font and landscape",
+  "long description text was left unchanged"
+ ]
+}
