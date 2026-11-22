@@ -638,7 +638,9 @@ if __name__ == "__main__":
 
 
 def gc_blank_tabs(port):
-    """Close empty unfocused blank tabs and prune stale benchmark/search tabs on port 9440; active/login/editor tabs are preserved."""
+    """Close empty unfocused blank tabs on dedicated account ports; shared EGO 9440 is a no-op (owned native TaskSpace.finish is the allowed cleanup)."""
+    if int(port) == 9440:
+        return 0
     import requests
     import websocket
     from urllib.parse import urlsplit, quote
@@ -651,16 +653,14 @@ def gc_blank_tabs(port):
             if len(tabs)-closed<=1:break
             url=str(tab.get('url') or '')
             is_blank=url in ('about:blank','chrome://newtab/','')
-            is_stale_bench=(port==9440 and ('search.naver.com/search.naver' in url or 'blog.naver.com/' in url) and 'PostWrite' not in url)
-            if not is_blank and not is_stale_bench:continue
+            if not is_blank:continue
             address=tab.get('webSocketDebuggerUrl','')
             u=urlsplit(address)
             if u.scheme!='ws' or u.hostname not in ('127.0.0.1','localhost') or u.port!=port:continue
             ws=None
             try:
                 ws=websocket.create_connection(address,timeout=.3,suppress_origin=True)
-                expr=("!document.hasFocus() && document.visibilityState !== 'visible'" if is_stale_bench
-                      else "(location.href === 'about:blank' || location.href.startsWith('chrome://newtab')) && !document.hasFocus()")
+                expr="(location.href === 'about:blank' || location.href.startsWith('chrome://newtab')) && !document.hasFocus()"
                 ws.send(json.dumps({'id':1,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True}}))
                 result=json.loads(ws.recv())
                 if result.get('id')==1 and result.get('result',{}).get('result',{}).get('value') is True:

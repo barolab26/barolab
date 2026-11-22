@@ -21,7 +21,47 @@ from naver_blog_posting import posting as nv
 from common import editorial_images as engine, flow_images
 
 
+class BrunchPreparationTests(unittest.TestCase):
+    def test_preparation_never_submits_and_unchanged_failure_is_not_rereviewed(self):
+        from brunch_posting import posting as brunch
+        from common import editorial_recovery as recovery
+        from common.collection_observability import write,load
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);module=root/'brunch_posting/posting.py';module.parent.mkdir();module.write_text('# fixture')
+            folder=module.parent/'output/prepared/part-13'
+            original={'part':13,'title':'Existing unpublished draft','paragraphs':['one','two','three','four']}
+            write(folder/'article.json',original)
+            with patch.object(brunch,'__file__',str(module)),patch.object(recovery,'ROOT',root), \
+                 patch.object(brunch,'sync_brunch_live_state',side_effect=AssertionError('browser opened')), \
+                 patch.object(brunch,'post_or_save_brunch_column',side_effect=AssertionError('submitted')), \
+                 patch.object(brunch,'_review_brunch_article',side_effect=ValueError('missing source')) as review:
+                one=brunch.prepare_brunch_content('brunch',13)
+                two=brunch.prepare_brunch_content('brunch',13)
+                self.assertEqual(one['status'],'needs_attention')
+                self.assertTrue(two['reusedUnchangedInput'])
+                review.assert_called_once()
+                self.assertEqual(load(folder/'article.json'),original)
+                write(folder/'research.json',{'sources':[{'url':'https://official.example','text':'new source'}]})
+                review.side_effect=None;review.return_value={**original,'paragraphs':['reviewed']*4}
+                prepared=brunch.prepare_brunch_content('brunch',13)
+                self.assertEqual(prepared['status'],'prepared')
+                self.assertFalse(prepared['publicationVerified'])
+                write(folder/'publication-intent.json',{'state':'unknown'})
+                before=(folder/'article.json').read_bytes()
+                with self.assertRaisesRegex(ValueError,'Protected Brunch'):
+                    brunch.prepare_brunch_content('brunch',13)
+                self.assertEqual((folder/'article.json').read_bytes(),before)
+
+
 class EditorialPosting(unittest.TestCase):
+    def test_failed_acquisition_wrapper_never_launches_a_second_attempt(self):
+        held={'status':'held','taskspace_id':707,'reasons':['no_suitable_region']}
+        path=self.folder/'editorial-images.json';path.write_text(json.dumps(held),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'no_suitable_region'):
+            flow_images.require_editorial_images('Article',[],self.folder,channel='cf')
+        self.build.assert_not_called()
+        self.assertEqual(json.loads(path.read_text(encoding='utf-8')),held)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -53,11 +93,14 @@ class EditorialPosting(unittest.TestCase):
 
     def article(self, title='Benefit application guide'):
         return {'title': title, 'summary': 'Two distinct source contexts', 'category': 'news', 'topicSlug': 'source-guide',
+                'sectionImages': [{'sectionHeading': h, 'image_optional': False}
+                                  for h in ('Application', 'Application update')],
                 'contentHtml': '<p>Introduction.</p><h2>Application</h2><p>Apply using the official form.</p>'
                                '<h2>Application update</h2><p>The event venue changed today.</p>'}
 
     def document(self, title='Benefit application guide'):
-        return {'title': title, 'published': False, 'blocks': [
+        return {'title': title, 'published': False,
+                'editorialSectionOptions': {'section-1': False, 'section-2': False}, 'blocks': [
             {'type': 'text', 'text': 'Introduction.'},
             {'type': 'heading', 'text': 'Application'}, {'type': 'text', 'text': 'Apply using the official form.'},
             {'type': 'heading', 'text': 'Application update'}, {'type': 'text', 'text': 'The event venue changed today.'},
@@ -89,6 +132,19 @@ class EditorialPosting(unittest.TestCase):
                 prepare()
         self.assertFalse((self.folder / 'article.json').exists())
         self.assertEqual(json.loads((self.folder / 'image-preparation-status.json').read_text())['status'], 'held')
+        self.generator.assert_not_called()
+
+    def test_cf_preparation_accepts_reviewed_text_only_but_rejects_missing_evidence(self):
+        from common.channel_parameters import cf_prepared_images_verified
+        article = self.article()
+        article['sectionImages'] = [{'sectionHeading': heading, 'image_optional': True}
+                                    for heading in ('Application', 'Application update')]
+        prepared = cf.ensure_article_images(article, self.folder)
+        self.assertEqual(prepared['imagePlans'], [])
+        self.assertTrue(cf_prepared_images_verified(prepared, self.folder))
+        self.validate.return_value = False
+        self.assertFalse(cf_prepared_images_verified(prepared, self.folder))
+        self.assertFalse(cf_prepared_images_verified(self.article(), self.folder))
         self.generator.assert_not_called()
 
     def test_core_rejection_blocks_reuse_and_upload(self):
@@ -200,11 +256,12 @@ class EditorialPosting(unittest.TestCase):
 
     def test_explicit_optional_section_is_omitted_without_losing_required_image(self):
         article = self.article()
-        article['sectionImages'] = [{'sectionHeading': 'Application', 'image_optional': True}]
+        article['sectionImages'] = [{'sectionHeading': 'Application', 'image_optional': True},
+                                   {'sectionHeading': 'Application update', 'image_optional': False}]
         result = cf.ensure_article_images(article, self.folder)
         self.assertEqual([p['sectionId'] for p in result['imagePlans']], ['section-2'])
         doc = self.document()
-        doc['editorialSectionOptions'] = {'section-1': True}
+        doc['editorialSectionOptions'] = {'section-1': True, 'section-2': False}
         plan = nv.prepare_document_images(doc, self.folder, 'guide', 'Thank you.')
         self.assertTrue(nv.validate_document(doc, plan, self.folder / 'images')['ok'])
         native = nv.basic_native_document({'document': {'components': [
@@ -213,7 +270,7 @@ class EditorialPosting(unittest.TestCase):
         self.assertEqual(plan['assets'][0]['sectionId'], 'section-2')
 
     def test_real_core_manifest_validates_five_section_writer_and_cf_roundtrip(self):
-        from dashboard.tests.test_editorial_images import Browser, model, TEXT
+        from dashboard.tests.test_editorial_images import Browser, model, TEXT, URL
         Browser.calls, Browser.failure = [], None
 
         def optional_model(stage, payload, *args):
@@ -230,12 +287,16 @@ class EditorialPosting(unittest.TestCase):
                   'sections': [{'heading': f'Capture instructions {i}', 'text': TEXT, 'image_optional': i > 3}
                                for i in range(1, 6)]}
         (self.folder / 'writer.json').write_text(json.dumps(writer), encoding='utf-8')
+        (self.folder / 'research.json').write_text(json.dumps({'sources': [
+            {'url': URL, 'status': 200, 'text': TEXT,
+             'textSha256': hashlib.sha256(TEXT.encode()).hexdigest()}]}), encoding='utf-8')
         with patch.object(engine, 'build_editorial_assets', self.real_build), \
              patch.object(engine, 'validate_editorial_assets', self.real_validate), \
              patch.object(engine, '_Browser', Browser), patch.object(engine, '_model', optional_model), \
              patch.object(engine.socket, 'getaddrinfo', return_value=[(2, 1, 6, '', ('93.184.215.14', 443))]), \
              patch.object(nv, 'BASE_DIR', self.root), patch.object(nv, 'update_pipeline_status'), \
-             patch('common.content_quality.ensure_publication_review'):
+             patch('common.content_quality.ensure_publication_review'), \
+             patch('common.naver_reader.ensure_reader_review'):
             _, _, document, plan = nv.prepare_basic_content('soultin', self.folder)
             self.assertEqual(len(plan['assets']), 3)
             self.assertEqual(plan['editorialImages']['status'], 'ready')
@@ -244,7 +305,8 @@ class EditorialPosting(unittest.TestCase):
             self.assertEqual(len(Browser.calls), before)
             cf_folder = self.root / 'cf'
             article = {'title': 'Screen capture instructions', 'summary': TEXT, 'category': 'guide',
-                       'topicSlug': 'capture-guide', 'contentHtml': f'<p>{TEXT}</p><h2>Capture controls</h2><p>{TEXT}</p>'}
+                       'topicSlug': 'capture-guide', 'contentHtml': f'<p>{TEXT}</p><h2>Capture controls</h2><p>{TEXT}</p>',
+                       'sectionImages': [{'sectionHeading': 'Capture controls', 'image_optional': False}]}
             article = cf.ensure_article_images(article, cf_folder)
             cf.verify_article_images(article, cf_folder)
             Path(article['editorialImages']['assets'][0]['path']).write_bytes(b'changed image')

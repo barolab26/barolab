@@ -530,6 +530,7 @@ def business_evidence(root=ROOT):
             'pageObservations': page_observations, 'matchedRevenuePv': matched_rpm,
             'trafficSites':traffic_sites,'trafficCheckedAt':traffic.get('checkedAt'),
             'availableSources':{'revenue':bool(revenue),'traffic':bool(traffic),'metrics':bool(metrics)},
+            'revenueFocus': load(root / 'dashboard/data/revenue-focus.json'),
             'coverage': feedback.get('coverage'), 'reasonCodes': feedback.get('reasonCodes', []),
             'measurementPriority': 'restore_page_revenue' if not (feedback.get('coverage') or {}).get('revenueComplete') else 'evaluate_measured_funnels',
             'revenueWinners': feedback.get('revenueWinners', [])[:5],

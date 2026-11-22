@@ -391,13 +391,14 @@ class CFPreparationAndQuery(unittest.TestCase):
             cf=ModuleType('cf_posting.posting')
             cf.load_current_schedule=lambda:{'date':day,'items':[{'domain':'example.com','status':'waiting'}]}
             cf.basic_progress=Mock();cf.basic_article=Mock(return_value=article);cf.ensure_article_images=Mock(return_value=article)
+            cf.verify_article_images=Mock(return_value={'status':'ready'})
             cf.slot_due=Mock(return_value=True);cf.cleaner_lock=Mock(side_effect=AssertionError('must not publish'));cf.run_basic_posting=Mock()
             agendas=ModuleType('common.work_agenda');agendas.enabled=lambda:False
             llm=ModuleType('common.llm_client');llm.generate_json=Mock(side_effect=AssertionError('no model'))
             assets=ModuleType('common.asset_map');assets.CF_DOMAINS={}
             modules={'common':ModuleType('common'),'common.work_agenda':agendas,'common.llm_client':llm,'common.asset_map':assets,
                      'cf_posting':ModuleType('cf_posting'),'cf_posting.posting':cf}
-            ns=functions('dashboard/common/channel_parameters.py',['prepare_cf'],{
+            ns=functions('dashboard/common/channel_parameters.py',['prepare_cf','cf_prepared_images_verified'],{
                 'ROOT':folder,'policy':lambda:{'cf':{'example.com':'00:00'},'effectiveDate':day},
                 'datetime':datetime.datetime,'KST':datetime.timezone(datetime.timedelta(hours=9)),
                 'folder_for':lambda *args:folder,'load':lambda p:read(p) if p.exists() else {},'write':write,'hashlib':hashlib,'json':json})
@@ -413,9 +414,9 @@ class CFPreparationAndQuery(unittest.TestCase):
             jobs=ModuleType('common.dashboard_jobs');jobs.write=write
             bridge=ModuleType('common.crew_chat_bridge');bridge.emit_work_event=Mock();bridge.work_task_id=lambda p:'test'
             synapse=ModuleType('dashboard.agents.synapse');synapse.research_query=Mock(return_value='unrelated topic')
-            search=Mock(return_value=[{'url':'https://example.com/source'}]);fetch=Mock(return_value={'url':'https://example.com/source','text':'actual source '*30})
-            ns=functions('dashboard/common/source_discovery.py',['research'],{
-                'search_urls':search,'public_text':fetch,'requests':SimpleNamespace(RequestException=RuntimeError)})
+            search=Mock(return_value=[{'url':'https://example.com/source'}]);fetch=Mock(return_value={'url':'https://example.com/source','text':'actual approved topic source '*30})
+            ns=functions('dashboard/common/source_discovery.py',['topic_matches','research'],{
+                're':__import__('re'),'search_urls':search,'public_text':fetch,'requests':SimpleNamespace(RequestException=RuntimeError)})
             with patch.dict(sys.modules,{'common':ModuleType('common'),'common.dashboard_jobs':jobs,'common.crew_chat_bridge':bridge,'dashboard.agents.synapse':synapse}):
                 ns['research']('approved topic',folder,exact_query=True)
             synapse.research_query.assert_not_called();search.assert_called_once_with('approved topic')
@@ -510,6 +511,7 @@ class CFRealModuleRouting(unittest.TestCase):
             cf.slot_due=lambda *a:True;cf.cleaner_lock=lambda **kw:nullcontext(True)
             def images(article,folder,**kwargs):write(folder/'photo-plan.json',{'prepared':True});return article
             cf.ensure_article_images=images
+            cf.verify_article_images=Mock(return_value={'status':'ready'})
             cf.run_basic_posting=Mock(return_value={'state':'published','publicPublicationVerified':True,'publicUrl':'https://example.com/post'})
             modules={'common':ModuleType('common'),'common.work_agenda':agendas,'common.collection_observability':store,
                      'common.llm_client':llm,'common.asset_map':assets,'cf_posting':ModuleType('cf_posting'),'cf_posting.posting':cf}

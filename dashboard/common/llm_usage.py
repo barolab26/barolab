@@ -57,46 +57,54 @@ class RouteCoolingDown(RuntimeError):
 def budget_policy(root=ROOT):
     from common.collection_observability import load
     configured = load(Path(root) / 'dashboard/data/llm-settings.json').get('resourceBudget', {})
-    return {k: configured.get(k) if type(configured.get(k)) is int and configured[k] > 0 else v
-            for k, v in DEFAULT_BUDGET.items()}
+    return {**{k: configured.get(k) if type(configured.get(k)) is int and configured[k] > 0 else v
+            for k, v in DEFAULT_BUDGET.items()},
+            'routineLimits': 'advisory' if configured.get('routineLimits') == 'advisory' else 'enforced'}
 
 
 def check_budget(state, call, policy, root=ROOT):
     models = list(state.get('byModel', {}).values())
     active = list(state.get('active', {}).values())
-    if sum(m.get('inputTokens', 0) + m.get('outputTokens', 0) for m in models) >= policy['dailyTokens']:
+    enforce = policy.get('routineLimits') != 'advisory'
+    if enforce and sum(m.get('inputTokens', 0) + m.get('outputTokens', 0) for m in models) >= policy['dailyTokens']:
         raise UsageBudgetExceeded('daily_token_budget_exhausted')
-    if sum(m.get('calls', 0) for m in models) + len(active) >= policy['dailyCalls']:
+    if enforce and sum(m.get('calls', 0) for m in models) + len(active) >= policy['dailyCalls']:
         raise UsageBudgetExceeded('daily_call_budget_exhausted')
     agenda = call.get('agendaId')
-    if not agenda:
-        return
+    if not agenda:return
     row = state.get('byAgenda', {}).get(agenda, {})
     from common.collection_observability import load
     experiment = load(Path(root) / 'dashboard/data/publication-conferences/operations' / (agenda + '.json')).get('businessExperiment') or {}
-    if not isinstance(experiment, dict):
-        raise UsageBudgetExceeded('experiment_call_budget_invalid')
-    call_limit = policy['agendaCalls']
+    if not isinstance(experiment, dict):raise UsageBudgetExceeded('experiment_call_budget_invalid')
+    call_limit = policy['agendaCalls'] if enforce else None
     if 'maxModelCalls' in experiment:
         planned_calls = experiment['maxModelCalls']
-        # Missing plans retain policy limits; explicit zero disables model calls.
-        if type(planned_calls) is not int or planned_calls < 0:
-            raise UsageBudgetExceeded('experiment_call_budget_invalid')
-        call_limit = min(call_limit, planned_calls)
+        if type(planned_calls) is not int or planned_calls < 0:raise UsageBudgetExceeded('experiment_call_budget_invalid')
+        call_limit = min(call_limit, planned_calls) if call_limit is not None else planned_calls
     experiment_id = experiment.get('id')
     if experiment_id is not None:
         if not isinstance(experiment_id, str) or not experiment_id.strip() or len(experiment_id) > 160:
             raise UsageBudgetExceeded('experiment_identity_invalid')
         call['experimentId'] = experiment_id
         total = state.get('byExperiment', {}).get(experiment_id, {}).get('modelCalls', 0)
-        if total + sum(a.get('experimentId') == experiment_id for a in active) >= call_limit:
+        if call_limit is not None and total + sum(a.get('experimentId') == experiment_id for a in active) >= call_limit:
             raise UsageBudgetExceeded('experiment_call_budget_exhausted')
-    if row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
+    if enforce and row.get('inputTokens', 0) + row.get('outputTokens', 0) >= policy['agendaTokens']:
         raise UsageBudgetExceeded('agenda_token_budget_exhausted')
-    if row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:
+    if call_limit is not None and row.get('modelCalls', 0) + sum(a.get('agendaId') == agenda for a in active) >= call_limit:
         raise UsageBudgetExceeded('agenda_call_budget_exhausted')
-    if row.get('modelLatencyMs', 0) >= policy['agendaModelSeconds'] * 1000:
+    if enforce and row.get('modelLatencyMs', 0) >= policy['agendaModelSeconds'] * 1000:
         raise UsageBudgetExceeded('agenda_time_budget_exhausted')
+
+
+def budget_admission(agenda_id=None, root=ROOT, now=None):
+    """Read actual current admission; never reset usage or an explicit experiment budget."""
+    from common.collection_observability import load
+    now=now or dt.datetime.now(KST);state=load(Path(root)/'dashboard/data/llm_usage_ledger.json')
+    if state.get('date')!=now.astimezone(KST).date().isoformat():state={**state,'byModel':{}}
+    try:check_budget(state,{'agendaId':agenda_id},budget_policy(root),root)
+    except UsageBudgetExceeded as exc:return {'ready':False,'reason':str(exc)}
+    return {'ready':True,'reason':None}
 
 
 def resource_summary(root=ROOT, now=None):
@@ -114,6 +122,7 @@ def resource_summary(root=ROOT, now=None):
                        'experiment': work.get('businessExperiment')})
     return {'date': day, 'reportedTokens': sum(m.get('inputTokens', 0) + m.get('outputTokens', 0) for m in models),
             'modelCalls': sum(m.get('calls', 0) for m in models), 'limits': budget_policy(root),
+            'currentAdmission':budget_admission(root=root,now=now),'lastBudgetBlockIsHistorical':True,
             'actualCostUsd': None, 'costStatus': 'billing_not_connected',
             'recentAgendas': recent,
             'routeHealth': state.get('routeHealth', {}), 'lastBudgetBlock': state.get('lastBudgetBlock')}
@@ -130,7 +139,10 @@ def route_attempt(provider, model, *, root=ROOT, now=None):
         state = load(path)
         route = state.setdefault('routeHealth', {}).setdefault(key, {})
         if route.get('retryAt', 0) > clock() or route.get('probeUntil', 0) > clock():
-            raise RouteCoolingDown('model_route_cooling_down: ' + key)
+            error = RouteCoolingDown('model_route_cooling_down: ' + key)
+            error.route = key
+            error.retry_at = max(route.get('retryAt', 0), route.get('probeUntil', 0))
+            raise error
         if route.get('failures', 0) >= 3:
             route['probeUntil'] = clock() + 600
         write(path, state)
@@ -237,6 +249,11 @@ def report_response(data=None, headers=None, status=None, model=None, events=Non
     for usage in usages:
         if isinstance(usage,dict) and all(type(usage.get(k)) is int and usage[k]>=0 for k in ('input_tokens','output_tokens')):
             call['inputTokens']+=usage['input_tokens'];call['outputTokens']+=usage['output_tokens'];call['usageReports']+=1
+            cached=usage.get('cached_input_tokens', (usage.get('input_tokens_details') or {}).get('cached_tokens'))
+            if type(cached) is int and 0<=cached<=usage['input_tokens']:
+                call['cachedInputTokens']=call.get('cachedInputTokens',0)+cached
+                call['uncachedInputTokens']=call.get('uncachedInputTokens',0)+usage['input_tokens']-cached
+                call['cacheUsageReportedCalls']=call.get('cacheUsageReportedCalls',0)+1
 
 
 def record_call(call, phase, *, root=None, now=None):
@@ -292,12 +309,15 @@ def record_call(call, phase, *, root=None, now=None):
                 calls=0,success=0,errors=0,inputTokens=0,outputTokens=0,usageReportedCalls=0,totalLatencyMs=0,rateLimited=0))
             row['calls']+=1;row['success' if phase=='completed' else 'errors']+=1
             for k in ('inputTokens','outputTokens'):row[k]+=call[k]
+            if call.get('cacheUsageReportedCalls'):
+                for k in ('cachedInputTokens','uncachedInputTokens','cacheUsageReportedCalls'):
+                    row[k]=row.get(k,0)+call[k]
             row['usageReportedCalls']+=int(call['usageReports']>0)
             row['totalLatencyMs']+=call['latencyMs'];row['averageLatencyMs']=round(row['totalLatencyMs']/row['calls'])
             row.update(lastLatencyMs=call['latencyMs'],lastAt=now.isoformat(),lastStatus=phase,
                        errorType=call.get('errorType'),rateLimitHeaders=call['rateLimitHeaders'],httpStatus=call.get('httpStatus'))
             row['rateLimited']+=int(call.get('rateLimited',False))
-            state['recent'].append({k:call.get(k) for k in ('id','agendaId','provider','model','startedAt','latencyMs','inputTokens','outputTokens','httpStatus','errorType','reasoningEffort')})
+            state['recent'].append({k:call.get(k) for k in ('id','agendaId','agentSlot','goalId','provider','model','startedAt','latencyMs','inputTokens','outputTokens','cachedInputTokens','uncachedInputTokens','cacheUsageReportedCalls','promptCharacters','httpStatus','errorType','reasoningEffort')})
             state['recent']=state['recent'][-40:]
         state['checkedAt']=now.isoformat();write(path,state)
 
@@ -325,6 +345,13 @@ def metered(function):
         actor,owner=current_model_identity()
         call=dict(id=uuid.uuid4().hex,agentSlot=kwargs.get('agent_slot') or owner or actor,provider=provider,model=model or 'unknown',startedAt=dt.datetime.now(KST).isoformat(),
                   inputTokens=0,outputTokens=0,usageReports=0,rateLimitHeaders={})
+        call['promptCharacters']=len(args[0]) if args and isinstance(args[0],str) else None
+        task=kwargs.get('crew_task_id','')
+        if not task:
+            from common.llm_client import _memory_session
+            session=_memory_session.get()
+            if session and str(session[0]).startswith('crew-goal:'):task='goal:'+str(session[0]).split(':',1)[1]
+        if isinstance(task,str) and re.fullmatch(r'goal:[a-f0-9]{64}',task):call['goalId']=task.split(':',1)[1]
         try:call['agendaId']=agenda_identity()
         except (OSError, ValueError, TypeError, KeyError, RuntimeError):pass
         record_call(call,'started')

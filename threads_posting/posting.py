@@ -204,6 +204,13 @@ def _threads_config_load(path=_threads_config_CONFIG):
         return _threads_config_defaults()
     raw = _threads_config_json.loads(_threads_config_Path(path).read_text(encoding='utf-8'))
     merged = {**_threads_config_defaults(), **raw}
+    from common.operating_plan import allocations
+    day=_threads_config_datetime.now(_threads_config_timezone.utc).astimezone(_threads_pipeline_KST).date().isoformat()
+    extra=[r['slot'] for r in allocations('threads',merged.get('account_key'),day)]
+    from common.operating_plan import enabled as adaptive_enabled, DATA as operating_data
+    carry=_threads_config_json.loads((operating_data/'daily_schedule.json').read_text(encoding='utf-8')).get('legacySlotsCarryThrough') if adaptive_enabled() else None
+    if carry and day>carry and extra:merged['preferredTimes']=[]
+    merged['preferredTimes']=sorted(set(merged.get('preferredTimes',[])+extra))
     return _threads_config_validate(merged)
 
 def _threads_config_save(config, path=_threads_config_CONFIG):
@@ -301,7 +308,8 @@ class _threads_adapter_Client:
             return self._request(method, endpoint, params, stage=stage)
 
     def _request(self, method, endpoint, params=None, *, stage='read'):
-        if not _threads_adapter_re.fullmatch('(?:me|\\d+)(?:/(?:threads|threads_publish|threads_publishing_limit|threads_insights|insights))?', endpoint) and (not (endpoint == 'debug_token' and method == 'GET')):
+        reply_read=method=='GET' and bool(_threads_adapter_re.fullmatch('\\d+/conversation',endpoint))
+        if not _threads_adapter_re.fullmatch('(?:me|\\d+)(?:/(?:threads|threads_publish|threads_publishing_limit|threads_insights|insights))?', endpoint) and not reply_read and (not (endpoint == 'debug_token' and method == 'GET')):
             raise _threads_adapter_AdapterError('invalid_api_endpoint', stage=stage)
         last_exc = None
         tries = 3 if method == 'GET' and stage != 'publish' else 1
@@ -566,6 +574,11 @@ def _threads_adapter_recover_unknown(config, part):
     query = parse_qs(parsed.query)
     if parsed.scheme != 'https' or any((query.get(k) != [v] for k, v in [('utm_source', 'threads'), ('utm_medium', 'social'), ('utm_campaign', 'cf_bridge')])) or len(query.get('utm_content', [])) != 1 or (not query['utm_content'][0]):
         return {**result, 'reason': 'recovery_unique_utm_required'}
+    followup=part.get('kind')=='followup'
+    parent=str(part.get('parent_platform_id') or '')
+    if followup and not _threads_adapter_re.fullmatch('\\d+',parent):
+        return {**result,'reason':'recovery_reply_parent_missing'}
+    endpoint=parent+'/conversation' if followup else 'me/threads'
     try:
         client = _threads_adapter_Client(config)
         _threads_adapter__identity(client)
@@ -576,9 +589,11 @@ def _threads_adapter_recover_unknown(config, part):
         read = 0
         for page in range(2):
             params = {'fields': 'id,text,username,permalink,timestamp', 'limit': 25, 'since': int(_threads_adapter_datetime.fromisoformat(intent).timestamp())}
+            if followup:
+                params.pop('since');params['fields']+=',is_reply,replied_to'
             if after:
                 params['after'] = after
-            report = client.request('GET', 'me/threads', params)
+            report = client.request('GET', endpoint, params)
             rows = report.get('data')
             if not isinstance(rows, list) or len(rows) > 25:
                 raise _threads_adapter_AdapterError('recovery_inventory_unverified')
@@ -590,6 +605,8 @@ def _threads_adapter_recover_unknown(config, part):
                 published = _threads_adapter__published_time(row.get('timestamp'))
                 pid = str(row.get('id', ''))
                 if row.get('username') != _threads_adapter_EXPECTED_ACCOUNT or actual != text or (not published) or (_threads_adapter_datetime.fromisoformat(published) < _threads_adapter_datetime.fromisoformat(intent)):
+                    continue
+                if followup and (row.get('is_reply') is not True or str((row.get('replied_to') or {}).get('id'))!=parent):
                     continue
                 if not _threads_adapter_re.fullmatch('\\d+', pid) or actual.count(outbound) != 1 or (not _threads_adapter__permalink(row.get('permalink'))):
                     continue
@@ -843,7 +860,8 @@ def _threads_pipeline_begin_send(db, part_id, config, now=None, expected=None):
                 if total >= trial_cap:
                     raise RuntimeError('trial_cap')
             n = db.execute("SELECT count(*) FROM parts WHERE account_key=? AND publication_date=? AND kind='main' AND state IN ('sending_intent','submitted_unknown','api_submitted','published_verified')", (row['account_key'], day)).fetchone()[0]
-            if n >= config['mainDailyCap']:
+            from common.operating_plan import cap_reached
+            if cap_reached(n,config['mainDailyCap']):
                 raise RuntimeError('daily_cap')
         else:
             parent = db.execute("SELECT * FROM parts WHERE attempt_id=? AND kind='main' AND state='published_verified'", (row['attempt_id'],)).fetchone()
@@ -1058,6 +1076,9 @@ def _threads_pipeline_snapshot(config, db_path=_threads_config_DB, output=_threa
         if key in connection:
             value['connection'][key] = connection[key]
     value['configuration']['endsAt'] = config.get('endsAt')
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled():
+        value['configuration'].update(mainDailyCap=None,quantityPolicy='manager_allocation_no_internal_daily_cap')
     value['configuration']['mainTrialCap'] = int(config.get('mainTrialCap', 56))
     value['today'] = {'date': today, 'timezone': 'Asia/Seoul', 'counts': [dict(x) for x in today_rows]}
     value['countsScope'] = 'all_time_parts_not_today'
@@ -1180,6 +1201,8 @@ def _threads_authoring_catalog(config, db_path=_threads_config_DB):
     for path in files:
         try:
             data = _threads_authoring_json.loads(path.read_text(encoding='utf-8'))
+            if not isinstance(data, dict):
+                continue
             if data.get('status') in ('verified', 'published') or data.get('publicPublicationVerified') is True:
                 u = (data.get('url') or data.get('publicUrl') or data.get('canonicalUrl') or '').strip()
                 if u:
@@ -1897,7 +1920,8 @@ def _threads_scheduler_tick(config_path=_threads_config_CONFIG, db_path=_threads
         if not target_slot:
             try:
                 from common import work_agenda as _ag
-                _cur = _ag.active()
+                _ctx = _ag.current()
+                _cur = _ag.get(_ctx['id']) if (_ctx and isinstance(_ctx.get('id'), str)) else _ag.active()
                 if _cur and _cur.get('project') == 'threads':
                     target_slot = ((_cur.get('workTarget') or _cur.get('source') or {}).get('arguments') or {}).get('slot')
             except Exception:
@@ -1907,10 +1931,14 @@ def _threads_scheduler_tick(config_path=_threads_config_CONFIG, db_path=_threads
             now_hm = now.astimezone(_threads_pipeline_KST).strftime('%H:%M')
             target_slot = target_slot if (target_slot and target_slot <= now_hm) else None
             eff_hm = now_hm
-            candidate_rows = db.execute("SELECT * FROM parts p WHERE state='queued' AND publication_date=? AND slot<=? AND ((kind='main' AND (slot=? OR slot=?)) OR (kind='followup' AND EXISTS(SELECT 1 FROM parts parent WHERE parent.attempt_id=p.attempt_id AND parent.kind='main' AND parent.state='published_verified'))) ORDER BY kind='followup',created_at", (day, eff_hm, latest_slot, target_slot or latest_slot)).fetchall()
+            candidate_rows = db.execute("SELECT * FROM parts p WHERE state='queued' AND publication_date=? AND slot<=? AND (kind='main' OR (kind='followup' AND EXISTS(SELECT 1 FROM parts parent WHERE parent.attempt_id=p.attempt_id AND parent.kind='main' AND parent.state='published_verified'))) ORDER BY kind='followup',slot,created_at", (day, eff_hm)).fetchall()
+            if target_slot:
+                candidate_rows = [c for c in candidate_rows if c['slot'] == target_slot] or candidate_rows
             due = None
             waiting_followup_delay = False
             for cand in candidate_rows:
+                if target_slot and cand['slot'] != target_slot:
+                    continue
                 if cand['kind'] == 'followup':
                     parent = db.execute("SELECT * FROM parts WHERE attempt_id=? AND kind='main' AND state='published_verified'", (cand['attempt_id'],)).fetchone()
                     doc = _threads_scheduler_json.loads(cand['document'])
@@ -1922,8 +1950,9 @@ def _threads_scheduler_tick(config_path=_threads_config_CONFIG, db_path=_threads
             used_slots = {x[0] for x in db.execute('SELECT DISTINCT slot FROM parts WHERE publication_date=?', (day,))}
             used_slots.update((x[0] for x in db.execute("SELECT slot FROM authoring_slots WHERE account_key=? AND day=? AND state='queued'", (config['account_key'], day))))
             attempted = db.execute("SELECT count(*) FROM parts WHERE publication_date=? AND kind='main' AND state IN ('sending_intent','submitted_unknown','api_submitted','published_verified')", (day,)).fetchone()[0]
-        if not due and attempted < config['mainDailyCap'] and (not waiting_followup_delay):
-            selected_slot = (target_slot if (target_slot and target_slot not in used_slots) else _threads_scheduler_current_slot(config, now, used_slots))
+        from common.operating_plan import cap_reached
+        if not due and not cap_reached(attempted,config['mainDailyCap']) and (not waiting_followup_delay):
+            selected_slot = ((target_slot if target_slot not in used_slots else None) if target_slot else _threads_scheduler_current_slot(config, now, used_slots))
             slots = [selected_slot] if selected_slot else []
             if slots:
                 from common.work_agenda import new_authoring_allowed

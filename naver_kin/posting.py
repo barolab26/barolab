@@ -328,9 +328,10 @@ def _naver_pipeline_preflight_send(db, qid, account, run_id=None, cap=_naver_pip
             raise ValueError('An exact active scheduler reservation is required')
         if cadence['last_account'] == account and cadence['last_completed_at'] and _naver_pipeline_datetime.now(_naver_pipeline_timezone.utc) < _naver_pipeline_datetime.fromisoformat(cadence['last_completed_at']) + _naver_pipeline_timedelta(minutes=15):
             raise ValueError('Minimum 15-minute global completion interval has not elapsed')
-    if db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0] >= cap:
+    from common.operating_plan import cap_reached
+    if cap_reached(db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0],cap):
         raise ValueError('Global daily submission cap')
-    if db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND account=? AND state IN ('publishing','submitted_unverified','published_verified')", (day, account)).fetchone()[0] >= _naver_pipeline_ACCOUNT_DAILY_CAP:
+    if cap_reached(db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND account=? AND state IN ('publishing','submitted_unverified','published_verified')", (day, account)).fetchone()[0],_naver_pipeline_ACCOUNT_DAILY_CAP):
         raise ValueError('Account daily submission cap')
     return document
 
@@ -351,10 +352,12 @@ def _naver_pipeline_begin_send(db, qid, account, cap=_naver_pipeline_GLOBAL_DAIL
         if document['attribution']['publicationDate'] != day:
             raise ValueError('Attribution date is stale; prepare and review for today')
         count = db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0]
-        if count >= cap:
+        from common.operating_plan import cap_reached
+        if cap_reached(count,cap):
             raise ValueError('Global pilot daily send cap reached')
         account_count = db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND account=? AND state IN ('publishing','submitted_unverified','published_verified')", (day, account)).fetchone()[0]
-        if account_count >= _naver_pipeline_ACCOUNT_DAILY_CAP:
+        from common.operating_plan import cap_reached
+        if cap_reached(account_count,_naver_pipeline_ACCOUNT_DAILY_CAP):
             raise ValueError('Account daily send cap reached (' + str(_naver_pipeline_ACCOUNT_DAILY_CAP) + ')')
         db.execute("UPDATE questions SET state='publishing',review_hash=?,send_day=?,updated_at=? WHERE question_id=?", (_naver_pipeline_draft_binding(document), day, _naver_pipeline_stamp(), qid))
         db.commit()
@@ -471,6 +474,10 @@ def _naver_pipeline_snapshot(db, output=_naver_pipeline_PUBLIC):
     published_today = sum((r['state'] == 'published_verified' for r in daily_rows))
     attempted_today = len(daily_rows)
     daily = {'date': _naver_pipeline_today_kst(), 'attempted': attempted_today, 'publishedVerified': published_today, 'remainingScheduled': max(0, _naver_pipeline_GLOBAL_DAILY_CAP - attempted_today), 'retryAttemptsToday': max(0, attempted_today - published_today), 'globalCap': _naver_pipeline_GLOBAL_DAILY_CAP, 'accountCap': _naver_pipeline_ACCOUNT_DAILY_CAP, 'byAccount': {account: {'attempted': sum((r['account'] == account for r in daily_rows)), 'publishedVerified': sum((r['account'] == account and r['state'] == 'published_verified' for r in daily_rows)), 'remainingScheduled': max(0, _naver_pipeline_ACCOUNT_DAILY_CAP - sum((r['account'] == account for r in daily_rows)))} for account in _naver_pipeline_ACCOUNTS}}
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled():
+        daily.update(globalCap=None,accountCap=None,remainingScheduled=None,quantityPolicy='manager_allocation_no_internal_daily_cap')
+        for row in daily['byAccount'].values():row['remainingScheduled']=None
     value = {'schema': 'naver-kin-pilot-v1', 'checkedAt': _naver_pipeline_stamp(), 'accounts': list(_naver_pipeline_ACCOUNTS), 'counts': counts, 'recent': rows, 'trackCounts': track_counts, 'inboundSessions': None, 'attributedRevenue': None, 'measurementStatus': 'unmeasured', 'complete': False, 'blockedReason': '; '.join((account + ': ' + reason for account, reason in reasons.items())) or None, 'byAccount': by_account, 'accountBlockedReasons': reasons, 'daily': daily}
     for key, filename in [('measurement', 'kin-measurement.json'), ('schedule', 'kin-automation-state.json'), ('retention', 'kin-retention.json')]:
         try:
@@ -481,6 +488,9 @@ def _naver_pipeline_snapshot(db, output=_naver_pipeline_PUBLIC):
         config = _naver_pipeline_json.loads((_naver_pipeline_ROOT / 'dashboard/data/kin-automation.json').read_text(encoding='utf-8'))
         value['automation'] = {key: config.get(key) for key in ('enabled', 'startDate', 'endDate', 'measurementEndDate', 'mode', 'intervalMinutes', 'intervalJitterMinutes', 'continuousMode', 'pollMinutes', 'globalDailyCap', 'accountDailyCap', 'model', 'provider')}
         value['automation']['scheduleDescription'] = '작업 종료 후 18~22분 지터(평균 20분) 계정 교대 · 개별 계정 40~45분 안전 텀 · 하루 20건(계정당 10건)'
+        if adaptive_enabled():
+            value['automation'].update(globalDailyCap=None,accountDailyCap=None,
+                scheduleDescription='팀장 성과 기반 계정 배정 · 내부 일일 수량 한도 없음 · 실제 계정 상태와 실행 중복 확인')
         value['automation']['lastRun'] = value.get('schedule')
         value['automation']['lastRunAt'] = value.get('schedule', {}).get('lastRunAt')
         for key in ('nextEligibleAt', 'nextAccount', 'activeRunId', 'activeAccount', 'activeStartedAt', 'cadenceState', 'globalRemainingRuns', 'byAccountRemainingRuns', 'operationCounts', 'submissionCounts', 'retryAttemptsToday'):
@@ -2252,7 +2262,40 @@ def _naver_scheduler_retry_counts(db, day):
     unverified_q = db.execute("SELECT COUNT(*) n FROM questions WHERE send_day=? AND state != 'published_verified' AND state != 'skipped'", (day,)).fetchone()
     return int(unverified_q['n'] if unverified_q else 0)
 
+def _naver_scheduler_reconcile_browser_control(db, *, observe=None):
+    """Resume only a proven returned native space; never claim or navigate a user space."""
+    import json
+    if db.in_transaction:return {'status':'transaction_preserved'}
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone():return {'status':'no_control_hold'}
+    holds=[dict(r) for r in db.execute("SELECT * FROM automation_halts WHERE reason='browser_user_control'")]
+    if not holds:return {'status':'no_control_hold'}
+    from common.ego_taskspace import run_ego_mjs,resolve_ego_profile
+    try:
+        snapshot=(observe or (lambda:run_ego_mjs('console.log("BAROLAB_EGO_JSON:"+JSON.stringify({spaces:await listTaskSpaces()}));',timeout=15)))()
+        spaces=snapshot.get('spaces',[])
+        if not isinstance(spaces,list):return {'status':'control_observation_unavailable'}
+    except Exception as exc:return {'status':'control_observation_unavailable','errorType':type(exc).__name__}
+    released=[]
+    for hold in holds:
+        account=hold['account']
+        if account not in _naver_pipeline_ACCOUNTS:continue
+        matches=[s for s in spaces if s.get('name')=='barolab-kin-'+account]
+        if (len(matches)!=1 or matches[0].get('ownership')!='agent'
+                or matches[0].get('profileId')!=resolve_ego_profile(account)):continue
+        proof={'space':matches[0],'observedAt':_naver_pipeline_stamp(),'previousHold':hold}
+        with db:
+            db.execute('CREATE TABLE IF NOT EXISTS automation_halt_history(account TEXT,halt_checked_at TEXT,reason TEXT,released_at TEXT,proof TEXT)')
+            current=db.execute('SELECT * FROM automation_halts WHERE account=?',(account,)).fetchone()
+            if not current or dict(current)!=hold:continue
+            db.execute('INSERT INTO automation_halt_history VALUES(?,?,?,?,?)',
+                       (account,hold['checked_at'],hold['reason'],proof['observedAt'],json.dumps(proof,ensure_ascii=False)))
+            db.execute("DELETE FROM automation_halts WHERE account=? AND reason='browser_user_control' AND checked_at=?",(account,hold['checked_at']))
+        released.append(account)
+    return {'status':'control_returned' if released else 'waiting_for_browser_control','releasedAccounts':released}
+
+
 def _naver_scheduler_cadence_status(db, config, now=None):
+    from common.operating_plan import cap_reached, remaining, account_available
     now = now or _naver_scheduler_now_kst()
     row = db.execute('SELECT * FROM operating_cadence WHERE id=1').fetchone()
     day = now.astimezone(_naver_scheduler_KST).date().isoformat()
@@ -2269,22 +2312,24 @@ def _naver_scheduler_cadence_status(db, config, now=None):
     order = [first] + [account for account in _naver_pipeline_ACCOUNTS if account != first]
     next_account = None
     for account in order:
+        if not account_available('naver_kin',account):continue
         halted = db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone()
         if halted and db.execute('SELECT 1 FROM automation_halts WHERE account=?', (account,)).fetchone():
             continue
         if _naver_scheduler__is_account_blog_busy(account):
             continue
         sends = sub_counts.get(account, 0)
-        if counts[account] < operation_account_cap and sends < account_cap:
+        if not cap_reached(counts[account],operation_account_cap) and not cap_reached(sends,account_cap):
             next_account = account
             break
     if next_account is None:
         for account in order:
+            if not account_available('naver_kin',account):continue
             halted = db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone()
             if halted and db.execute('SELECT 1 FROM automation_halts WHERE account=?', (account,)).fetchone():
                 continue
             sends = sub_counts.get(account, 0)
-            if counts[account] < operation_account_cap and sends < account_cap:
+            if not cap_reached(counts[account],operation_account_cap) and not cap_reached(sends,account_cap):
                 next_account = account
                 break
     if next_account:
@@ -2306,17 +2351,21 @@ def _naver_scheduler_cadence_status(db, config, now=None):
             except Exception:
                 pass
     cadence_state = 'waiting'
-    if sum(sub_counts.values()) >= global_cap or sum(counts.values()) >= operation_cap or next_account is None:
+    if cap_reached(sum(sub_counts.values()),global_cap) or cap_reached(sum(counts.values()),operation_cap) or next_account is None:
         tomorrow = (now.astimezone(_naver_scheduler_KST) + _naver_scheduler_timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         next_at = max(_naver_scheduler_datetime.fromisoformat(next_at), tomorrow).isoformat()
         cadence_state = 'daily_limit_or_account_unavailable'
         for account in order:
             if not (db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone() and db.execute('SELECT 1 FROM automation_halts WHERE account=?', (account,)).fetchone()):
+                if not account_available('naver_kin',account):continue
                 next_account = account
                 break
     if next_account is None:
         next_at = None
         cadence_state = 'accounts_suspended'
+        if db.execute("SELECT 1 FROM sqlite_master WHERE name='automation_halts'").fetchone():
+            reasons=[r['reason'] for r in db.execute('SELECT reason FROM automation_halts')]
+            if reasons and all(reason=='browser_user_control' for reason in reasons):cadence_state='waiting_for_browser_control'
     if not config.get('continuousMode', False):
         if day > config['endDate'] or (next_at and _naver_scheduler_datetime.fromisoformat(next_at).astimezone(_naver_scheduler_KST).date().isoformat() > config['endDate']):
             next_at = None
@@ -2325,11 +2374,12 @@ def _naver_scheduler_cadence_status(db, config, now=None):
     if row['active_run_id']:
         next_at = None
         cadence_state = 'running'
-    return {'intervalMinutes': cooldown_min, 'intervalJitterMinutes': config.get('intervalJitterMinutes', [30, 35]), 'pollMinutes': 5, 'lastRunAt': row['last_completed_at'], 'lastAccount': row['last_account'], 'nextEligibleAt': next_at, 'nextAccount': next_account, 'activeRunId': row['active_run_id'], 'activeAccount': row['active_account'], 'activeStartedAt': row['active_started_at'], 'cadenceState': cadence_state, 'operationCounts': counts, 'submissionCounts': sub_counts, 'retryAttemptsToday': retries, 'globalRemainingRuns': max(0, min(global_cap - sum(sub_counts.values()), operation_cap - sum(counts.values()))), 'byAccountRemainingRuns': {account: max(0, min(account_cap - sub_counts[account], operation_account_cap - counts[account])) for account in _naver_pipeline_ACCOUNTS}}
+    return {'intervalMinutes': cooldown_min, 'intervalJitterMinutes': config.get('intervalJitterMinutes', [30, 35]), 'pollMinutes': 5, 'lastRunAt': row['last_completed_at'], 'lastAccount': row['last_account'], 'nextEligibleAt': next_at, 'nextAccount': next_account, 'activeRunId': row['active_run_id'], 'activeAccount': row['active_account'], 'activeStartedAt': row['active_started_at'], 'cadenceState': cadence_state, 'operationCounts': counts, 'submissionCounts': sub_counts, 'retryAttemptsToday': retries, 'globalRemainingRuns': remaining(max(sum(sub_counts.values()),sum(counts.values())),min(global_cap,operation_cap)), 'byAccountRemainingRuns': {account: remaining(max(sub_counts[account],counts[account]),min(account_cap,operation_account_cap)) for account in _naver_pipeline_ACCOUNTS}}
 
 def _naver_scheduler_reserve_run(db, config, now=None, force=False):
     now = now or _naver_scheduler_now_kst()
     _naver_scheduler_initialize_cadence(db)
+    _naver_scheduler_reconcile_browser_control(db)
     db.execute('BEGIN IMMEDIATE')
     try:
         row = db.execute('SELECT * FROM operating_cadence WHERE id=1').fetchone()
@@ -2352,14 +2402,14 @@ def _naver_scheduler_reserve_run(db, config, now=None, force=False):
         elif not config.get('continuousMode', False) and (not config['startDate'] <= day <= config['endDate']):
             reason = 'outside_publication_window'
         elif status['nextEligibleAt'] is None:
-            reason = 'outside_publication_window'
+            reason = 'browser_control_required' if status['cadenceState']=='waiting_for_browser_control' else 'account_unavailable'
         elif not force and now < _naver_scheduler_datetime.fromisoformat(status['nextEligibleAt']):
             reason = 'minimum_interval_not_elapsed'
-        elif status['globalRemainingRuns'] <= 0 or not status['nextAccount']:
+        elif (status['globalRemainingRuns'] is not None and status['globalRemainingRuns'] <= 0) or not status['nextAccount']:
             reason = 'daily_operating_cap_or_account_unavailable'
         elif _naver_scheduler__is_account_blog_busy(status['nextAccount']):
             reason = f"account_blog_running:{status['nextAccount']}"
-        elif db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0] >= global_cap:
+        elif __import__('common.operating_plan',fromlist=['cap_reached']).cap_reached(db.execute("SELECT COUNT(*) FROM questions WHERE send_day=? AND state IN ('publishing','submitted_unverified','published_verified')", (day,)).fetchone()[0],global_cap):
             reason = 'daily_submission_cap'
         if reason is None and not db.execute("SELECT 1 FROM questions WHERE account=? AND state='drafted' LIMIT 1", (status['nextAccount'],)).fetchone():
             from common.work_agenda import new_authoring_allowed
@@ -2493,6 +2543,10 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                     elif type(exc).__name__ in ('QuestionUnavailableError', 'PostingRejectedError'):
                         reason = 'question_unavailable'
                         state = 'skipped'
+                    elif any(term in str(exc).lower() for term in ('user_takeover', 'user control', 'space is inactive', 'ego_task_space_name_in_use')):
+                        reason = 'browser_user_control'
+                    elif 'SyntaxError:' in str(exc):
+                        reason = 'browser_script_configuration_error'
                     import traceback
                     log = _naver_scheduler_ROOT / 'dashboard/data/kin-scheduler-errors.log'
                     log.parent.mkdir(parents=True, exist_ok=True)
@@ -2506,7 +2560,7 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                         db.execute('INSERT OR REPLACE INTO runtime VALUES (?,?,?)', (account, reason, _naver_pipeline_stamp()))
                 with db:
                     db.execute('UPDATE automation_slots SET state=?,reason=?,question_id=?,updated_at=?,discovered=? WHERE slot_id=?', (state, reason, qid, _naver_pipeline_stamp(), discovered, run_id))
-                    if reason == 'account_protected':
+                    if reason in ('account_protected', 'browser_user_control', 'browser_script_configuration_error'):
                         db.execute('CREATE TABLE IF NOT EXISTS automation_halts(account TEXT PRIMARY KEY,reason TEXT,checked_at TEXT)')
                         db.execute('INSERT OR REPLACE INTO automation_halts VALUES (?,?,?)', (account, reason, _naver_pipeline_stamp()))
                 result['runs'].append({'runId': run_id, 'account': account, 'state': state, 'reason': reason, 'discovered': discovered})
@@ -2526,7 +2580,7 @@ def _naver_scheduler_tick(config, now=None, dry_run=False, force=False):
                 except Exception:
                     pass
             if run_id:
-                if state in ('blocked', 'deferred', 'skipped') and prev_cadence is not None:
+                if state == 'deferred' and prev_cadence is not None:
                     with db:
                         db.execute('UPDATE operating_cadence SET last_completed_at=?,last_account=?,active_run_id=NULL,active_account=NULL,active_started_at=NULL WHERE id=1', (prev_cadence['last_completed_at'], prev_cadence['last_account']))
                 else:

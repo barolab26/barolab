@@ -1687,11 +1687,46 @@ def validate_staff_actions(actions):
         owner = action_owner(tool, args)
         if owner is not None and agent != owner:
             raise ValueError('Tool is assigned to ' + owner)
-        if tool == 'run_project_cycle' and set(args) == {'project'}:
+        if tool == 'run_project_cycle' and set(args) in ({'project'}, {'project', 'allocation_id'}):
             from common.project_autonomy import COMMANDS
             project = args.get('project')
             if project not in COMMANDS:
                 raise ValueError('Unregistered autonomous project owner')
+            if 'allocation_id' in args:
+                alloc_id = args['allocation_id']
+                if project not in ('cf_blog', 'naver_blog') or not isinstance(alloc_id, str) or not re.fullmatch(r'[0-9a-f]{64}', alloc_id):
+                    raise ValueError('Invalid allocation identity')
+        elif tool == 'verify_cf_corrected_publication' and set(args)=={'project','url','artifact_folder'}:
+            if args.get('project')!='cf_blog' or not isinstance(args.get('url'),str) or not isinstance(args.get('artifact_folder'),str):
+                raise ValueError('Exact CF correction URL and artifact folder required')
+        elif tool == 'verify_youtube_content' and set(args)=={'project','key'}:
+            if args.get('project')!='youtube' or not isinstance(args.get('key'),str) or not re.fullmatch(r'[a-f0-9]{64}',args['key']):
+                raise ValueError('Exact YouTube preparation identity required')
+        elif tool == 'prepare_brunch_content' and set(args) in ({'project','part_no'},{'project','part_no','source_queries'}):
+            if args.get('project')!='brunch' or type(args.get('part_no')) is not int or args['part_no']<1:
+                raise ValueError('Exact unpublished Brunch draft required')
+            if 'source_queries' in args and (not isinstance(args['source_queries'],list) or not all(isinstance(q,str) and q.strip() for q in args['source_queries'])):
+                raise ValueError('Source queries must be text')
+        elif tool == 'prepare_youtube_content' and set(args) in ({'project','channel_handle','topic'},{'project','channel_handle','topic','source_queries'}):
+            if args.get('project')!='youtube' or args.get('channel_handle') not in ('@yoon_autolab','@숨은지원금') or not isinstance(args.get('topic'),str) or not 1<=len(args['topic'].strip())<=300:
+                raise ValueError('Registered active channel and exact reader task required')
+            if 'source_queries' in args and (not isinstance(args['source_queries'],list) or not all(isinstance(q,str) and q.strip() for q in args['source_queries'])):
+                raise ValueError('Source queries must be text')
+        elif tool == 'repair_cf_normalization' and set(args) in ({'project','domain','day'},{'project','domain','day','source_queries'}):
+            from common.channel_parameters import policy
+            from datetime import date
+            if args.get('project')!='cf_blog' or args.get('domain') not in policy()['cf'] or args.get('day')!=date.today().isoformat():
+                raise ValueError('Exact current-day CF preparation required')
+            if 'source_queries' in args and (not isinstance(args['source_queries'],list) or not all(isinstance(q,str) and q.strip() for q in args['source_queries'])):
+                raise ValueError('Source queries must be text')
+        elif tool == 'prepare_cafe_content' and set(args) in ({'project','cafe_id','part_no','topic'},{'project','cafe_id','part_no','topic','source_queries'}):
+            from naver_cafe_posting.posting import CAFE_POLICIES
+            if (args.get('project')!='naver_cafe' or args.get('cafe_id') not in CAFE_POLICIES
+                    or type(args.get('part_no')) is not int or args['part_no']<1
+                    or not isinstance(args.get('topic'),str) or not 1<=len(args['topic'].strip())<=300):
+                raise ValueError('Invalid Cafe preparation request')
+            if 'source_queries' in args and (not isinstance(args['source_queries'],list) or not all(isinstance(q,str) and q.strip() for q in args['source_queries'])):
+                raise ValueError('Source queries must be text')
         elif tool == 'publish_strategy_link' and set(args)=={'project','target_url'} and args.get('project')=='threads':
             from threads_posting.posting import _threads_authoring__canonical, _threads_config_HOSTS
             _threads_authoring__canonical(args['target_url'],_threads_config_HOSTS)
@@ -1709,6 +1744,18 @@ def validate_staff_actions(actions):
                 from server.project_health import SOURCES
                 if args['project'] not in {row[0] for row in SOURCES}:
                     raise ValueError('Unregistered project inspection')
+        elif tool == 'inspect_url_acquisition' and set(args) in ({'url','start','end'}, {'project','url','start','end'}):
+            from datetime import date as _date
+            from urllib.parse import urlsplit as _urlsplit
+            from dashboard.collectors import traffic as _traffic
+            if args.get('project', 'cf_blog') != 'cf_blog':
+                raise ValueError('URL acquisition inspection requires cf_blog project scope')
+            parsed = _urlsplit(str(args.get('url') or ''))
+            domain = (parsed.hostname or '').lower().removeprefix('www.')
+            if parsed.scheme != 'https' or parsed.query or parsed.fragment or parsed.username or parsed.password or domain not in CF_16_DOMAINS or not _traffic.is_article_path(parsed.path):
+                raise ValueError('Exact clean HTTPS CF article URL required')
+            if not isinstance(args.get('start'), str) or not isinstance(args.get('end'), str) or _date.fromisoformat(args['start']) > _date.fromisoformat(args['end']):
+                raise ValueError('Valid start <= end ISO date window required')
         elif tool == 'advance_project_recovery' and set(args) == {'task_id','plan_sha256'}:
             from common.repair_workflow import recovery_expected_actor
             if recovery_expected_actor(args['task_id'], args['plan_sha256']) != agent:
@@ -1745,6 +1792,8 @@ def staff_instruction(action):
         text = '@패치, 등록된 프로젝트의 스케줄러·수집기 상태를 확인하고 중단된 실행만 복구해 주세요. 실행 중인 작업·명시적 보류를 보존하고 실제 원천 갱신을 별도로 확인합니다.'
     elif action['tool'] == 'read_agent_status':
         text = f'@{name}, 현재 담당 운영 상태를 확인하고 문제를 보고해 주세요. 이번 요청은 상태 조회이며, 발행·재시작·수리는 하지 않습니다.'
+    elif action['tool'] == 'inspect_url_acquisition':
+        text = f'@{name}, 지정된 클린 HTTPS 글 URL과 기간의 GA4 유입(attributed·excluded·unattributed)을 읽기 전용으로 조회해 주세요. 미완전 수집은 None으로 두고 도메인 수익은 배분하지 않습니다.'
     elif action['tool'] == 'advance_project_recovery':
         text = f'@{name}, 승인된 복구 계획에서 현재 배정된 한 단계만 실행하고 실제 결과를 보고해 주세요. 검수나 실행 결과가 불명확하면 재개하지 않습니다.'
     elif action['tool'] == 'run_cf_domain':
@@ -1753,6 +1802,10 @@ def staff_instruction(action):
         text = '@퍼블리, 지정된 실패 작업의 공식 근거를 확보하고 같은 질문의 원고를 준비·검수해 주세요. 기존 1회 재개 제한을 지키며 이번 명령은 발행하지 않습니다.'
     elif action['tool'] == 'verify_cf_source_fact_fix':
         text = '@패치, 현재 source_fact 복구 코드의 해시를 확인하고 고정 회귀검사를 실행해 결과를 보고해 주세요. 코드 수정·자료 수집·발행·재개는 실행하지 않습니다.'
+    elif action['tool'] in ('prepare_cafe_content','prepare_youtube_content','prepare_brunch_content'):
+        text = f'@{name}, 지정된 원고의 관측 출처를 확보하고 독립 검수를 통과한 준비 결과를 남겨 주세요. 기존 발행과 제출 불명확·수동 중지·예산 보류를 보존합니다. 준비 완료는 발행 완료가 아닙니다.'
+    elif action['tool'] in ('verify_youtube_content','verify_cf_corrected_publication'):
+        text = f'@{name}, 지정된 원래 작업의 공개 URL과 본문을 읽기 전용으로 대조해 주세요. 확인 중 재제출하거나 새로 발행하지 않습니다.'
     else:
         domain = action['args']['domain']
         text = f'@{name}, {domain}의 등록된 오류를 검증해 주세요. 기존 검수와 중복 방지 확인을 통과한 경우에만 같은 작업을 한 번 재개하고 결과를 보고해 주세요.'
@@ -1769,6 +1822,7 @@ def enqueue_staff_request(request_id, actions):
     if not isinstance(request_id, str) or not re.fullmatch(r'[A-Za-z0-9:_-]{1,160}', request_id):
         raise ValueError('Invalid request ID')
     actions = validate_staff_actions(actions)
+    instructions = [staff_instruction(action) for action in actions]
     from common import work_agenda as agendas
     business = agendas.staff_agenda(request_id,actions)
     key = hashlib.sha256(request_id.encode()).hexdigest()
@@ -1781,7 +1835,7 @@ def enqueue_staff_request(request_id, actions):
             return old
         row = {'requestId': request_id, 'taskId': 'staff:' + key, 'status': 'queued', 'requester': 'jarvis',
                'createdAt': time.time(), 'actions': actions, 'results': [], 'requests': [],
-               'instructions':[staff_instruction(action) for action in actions]}
+               'instructions':instructions}
         if business:row['businessAgendaId']=business
         write(path, row)
         for index, action in enumerate(actions):
@@ -1966,6 +2020,9 @@ def _finish_staff_repairs(path, row):
         item['result'] = terminal
         item['controllerSnapshot'] = snapshot  # Old controller file is never rewritten.
         item['initialStaffResponse'] = item.pop('staffResponse', None)
+        if isinstance(terminal.get('executorReceipt'), dict) and isinstance(row.get('currentExecution'), dict):
+            if row['currentExecution'].get('requestId') == terminal['executorReceipt'].get('requestId'):
+                row['currentExecution'] = dict(terminal['executorReceipt'])
         write(path, row)
         item['hostReport']={'source':'host','status':terminal.get('status')}
         write(path,row)
@@ -1987,14 +2044,25 @@ def process_staff_request_once():
     """Claim once, acknowledge, run registered tools, preserve actual return values."""
     import hashlib
     from common.collection_observability import locked, write
+    from common import work_agenda as agendas
     from common.crew_chat_bridge import emit_work_event
     row = None
     completing = False
     from common.collection_observability import load
+    def waiting(path, candidate, reason, **details):
+        observation={'reason':reason,**details}
+        previous=candidate.get('executionWait') or {}
+        if {k:v for k,v in previous.items() if k!='observedAt'}==observation:return
+        with locked(STAFF_REQUEST_DIR):
+            fresh=load(path)
+            if fresh.get('status')=='queued':
+                fresh['executionWait']={**observation,'observedAt':time.time()}
+                write(path,fresh)
     alerts=load(BASE_DIR/'dashboard/data/ego-alerts/tickets.json',{}).get('tickets',{})
     urgent={hashlib.sha256(r['requestId'].encode()).hexdigest() for r in alerts.values()
             if str(r.get('requestId','')).startswith('ego-alert:') and r.get('status') in ('inspection_queued','reported_reconciliation_queued')}
-    for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:(p.stem not in urgent,p.name)):
+    for path in sorted(STAFF_REQUEST_DIR.glob('*.json'),key=lambda p:(p.stem not in urgent,
+            load(p).get('status') not in ('awaiting_completion','unknown'),p.name)):
         if path.is_symlink():
             continue
         try:
@@ -2005,6 +2073,27 @@ def process_staff_request_once():
             import logging
             logging.getLogger(__name__).warning('Unreadable staff request preserved: %s', path.name)
             continue
+        if candidate.get('status')=='unknown' and candidate.get('reason')=='invalid_controller_receipt_no_retry':
+            # Observation only: a corrected receipt adapter may finish the ORIGINAL child.
+            # This path cannot enqueue, execute, claim a new browser or retry a submission.
+            from common.project_autonomy import terminal_result
+            items=candidate.get('results') or []
+            if not items or any(r.get('tool')!='run_project_cycle' or not r.get('result',{}).get('conferenceAgendaId') for r in items):continue
+            try:ready=any(terminal_result(r['result']) is not None for r in items)
+            except (ValueError,OSError):continue
+            with locked(STAFF_REQUEST_DIR):
+                fresh=load(path)
+                if fresh.get('status')!='unknown' or fresh.get('reason')!=candidate.get('reason'):continue
+                fresh.setdefault('observationHistory',[]).append({'status':'unknown','reason':fresh['reason'],'at':time.time()})
+                fresh.pop('reason',None)
+                if not ready:
+                    fresh.update(status='awaiting_completion',reconciliationMode='read_original_child_receipt_only')
+                    write(path,fresh)
+                    return True  # Resume observation, never execution of the unknown request.
+                row=fresh;completing=True
+                row.update(status='acknowledged',claimedAt=time.time(),reconciliationMode='read_original_child_receipt_only')
+                write(path,row)
+            break
         if candidate.get('status') not in ('queued', 'acknowledged', 'awaiting_completion'):
             continue
         from common import work_agenda as agendas
@@ -2013,7 +2102,11 @@ def process_staff_request_once():
                 candidate['businessAgendaId']=agendas.staff_agenda(candidate['requestId'],candidate['actions'])
                 write(path,candidate)
             if candidate['status']!='awaiting_completion':
-                if candidate['businessAgendaId'] not in agendas.active_ids():continue
+                if candidate['businessAgendaId'] not in agendas.active_ids():
+                    admission=agendas.admission_state(agendas.get(candidate['businessAgendaId']))
+                    waiting(path,candidate,'agenda_admission_pending',agendaId=candidate['businessAgendaId'],
+                            admission=admission)
+                    continue
                 active=agendas.get(candidate['businessAgendaId'])
                 from common.repair_workflow import agenda_recovery_blocker
                 cause=agenda_recovery_blocker(active)
@@ -2025,7 +2118,9 @@ def process_staff_request_once():
                                 resumeCondition='host_reconciliation_or_explicit_authorized_resume')
                             write(path,fresh)
                     continue
-                if not active.get('events',{}).get('opening',{}).get('receivedAt'):continue
+                if not active.get('events',{}).get('opening',{}).get('receivedAt'):
+                    waiting(path,candidate,'opening_delivery_pending',agendaId=active['id'])
+                    continue
                 if active.get('switchRequest') or active['status'] in ('closed','suspended','report_pending'):continue
                 if candidate['status']=='queued' and agendas.running(active):continue
         with locked(STAFF_REQUEST_DIR):
@@ -2051,6 +2146,7 @@ def process_staff_request_once():
                     break
             if candidate.get('status') == 'queued':
                 row = candidate
+                row.pop('executionWait',None)
                 row.update(status='acknowledged', claimedAt=time.time())
                 write(path, row)
                 break
@@ -2092,7 +2188,8 @@ def process_staff_request_once():
             if any(item['result'].get('status') in ('running','started','queued','awaiting_completion') for item in row['results']):
                 row['status'] = 'awaiting_completion'  # PID is not a terminal repair receipt.
         except Exception as exc:
-            row.update(status='failed', errorCode=type(exc).__name__)
+            from common.collection_observability import failure_details
+            row.update(status='failed', errorCode=type(exc).__name__, **failure_details(exc))
             emit_work_event(actor='jarvis', actor_label='팀장', task_id=row['taskId'], phase='failed',
                 stage='staff-dispatch', output_kind='dispatch failed; no automatic retry')
         row['finishedAt'] = time.time()
@@ -2341,6 +2438,8 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
     from common.ego_telemetry import execution_context, action, current_context
     import uuid
     from common import work_agenda as agendas
+    if tool_name == 'run_project_cycle':
+        validate_staff_actions([{'agent': slug, 'tool': tool_name, 'args': kwargs}])
     if agendas.enabled() and tool_name not in agendas.READ_ONLY and not agendas.current():
         try:
             receipt=enqueue_staff_request('direct:'+uuid.uuid4().hex,[{'agent':slug,'tool':tool_name,'args':kwargs}])
@@ -2350,7 +2449,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
     actor = slug if slug in STAFF_ROLES else 'unknown'
     fields = {'actor': actor}
     projects = {
-        'read_agent_status':'all_projects', 'repair_cf_known_failure':'cf_blog', 'verify_cf_source_fact_fix':'cf_blog', 'prepare_cf_source_fact':'cf_blog',
+        'read_agent_status':'all_projects', 'inspect_url_acquisition':'cf_blog', 'verify_cf_corrected_publication':'cf_blog', 'repair_cf_known_failure':'cf_blog', 'verify_cf_source_fact_fix':'cf_blog', 'prepare_cf_source_fact':'cf_blog',
         'run_cf_publish':'cf_blog', 'run_cf_domain':'cf_blog',
         'run_naver_publish':'naver_blog', 'run_naver_slot':'naver_blog',
         'repair_kin_submission':'naver_kin', 'run_kin_publish':'naver_kin', 'run_kin_now':'naver_kin',
@@ -2370,7 +2469,7 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         fields['task_id'] = 'direct:' + uuid.uuid4().hex
     safe_args = {key: value for key, value in kwargs.items()
                  if key in {'domain','account','source_sha256','artifact_sha256','review_sha256',
-                            'question_id','request_sha256','revision_mode','revision_sha256','task_id','plan_sha256','project','work_id','part_id'}
+                            'question_id','request_sha256','revision_mode','revision_sha256','task_id','plan_sha256','project','work_id','part_id','allocation_id'}
                  and isinstance(value, str) and re.fullmatch(r'[A-Za-z0-9_.:-]{1,180}', value)}
     token = _EGO_REGISTERED_ACTION.set({'agent': actor, 'tool': fields['tool'], 'args': safe_args,
                                       'argumentsComplete': len(safe_args) == len(kwargs)})
@@ -2378,6 +2477,9 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
         from contextlib import nullcontext
         scope=agendas.execution(kwargs.get('project')) if agendas.enabled() and tool_name not in agendas.READ_ONLY else nullcontext()
         with scope, execution_context(**fields), action('tool', 'registered-tool'):
+            if tool_name == 'run_project_cycle':
+                from common.project_autonomy import run_project_cycle
+                return run_project_cycle(kwargs['project'], allocation_id=kwargs.get('allocation_id'))
             return _execute_agent_tool(slug, tool_name, **kwargs)
     finally:
         _EGO_REGISTERED_ACTION.reset(token)
@@ -2385,6 +2487,30 @@ def execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, An
 
 def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
     """Directly invoke one of the registered agent tools by name."""
+    if tool_name == 'verify_cf_corrected_publication':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from common.cf_recovery import verify_cf_corrected_publication
+        return verify_cf_corrected_publication(**kwargs)
+    if tool_name == 'verify_youtube_content':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from youtube_posting.posting import verify_youtube_content
+        return verify_youtube_content(**kwargs)
+    if tool_name == 'prepare_brunch_content':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from brunch_posting.posting import prepare_brunch_content
+        return prepare_brunch_content(**kwargs)
+    if tool_name == 'prepare_youtube_content':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from youtube_posting.posting import prepare_youtube_content
+        return prepare_youtube_content(**kwargs)
+    if tool_name == 'repair_cf_normalization':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from common.cf_recovery import repair_normalized_preparation
+        return repair_normalized_preparation(**{k:v for k,v in kwargs.items() if k!='project'})
+    if tool_name == 'prepare_cafe_content':
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from common.project_autonomy import prepare_cafe_content
+        return prepare_cafe_content(**kwargs)
     if tool_name in {'repair_cf_known_failure','prepare_cf_source_fact','verify_cf_source_fact_fix'}:
         return {'ok':False,'status':'unsupported','replacement':'run_project_cycle'}
     if tool_name == 'repair_kin_submission':
@@ -2413,6 +2539,10 @@ def _execute_agent_tool(slug: str, tool_name: str, **kwargs: Any) -> Dict[str, A
         validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
         from common.project_autonomy import publish_strategy_link
         return publish_strategy_link(kwargs['target_url'])
+    if tool_name == "inspect_url_acquisition":
+        validate_staff_actions([{'agent':slug,'tool':tool_name,'args':kwargs}])
+        from dashboard.collectors.revenue_focus import inspect_url_acquisition
+        return inspect_url_acquisition(kwargs['url'], kwargs['start'], kwargs['end'])
     if tool_name == "read_agent_status":
         readers = {'publi': read_publi_data, 'trace': read_trace_data, 'patch': read_patch_data,
                    'doctor': read_doctor_data, 'radar': read_radar_data, 'jarvis': format_jarvis_context_block}

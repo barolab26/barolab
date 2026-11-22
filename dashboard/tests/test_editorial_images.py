@@ -36,9 +36,11 @@ def png(path):
 
 class Browser:
     calls = []
+    instances = []
     failure = None
     def __init__(self, directory, name):
         self.space = 123
+        self.instances.append(self)
     def call(self, op, timeout, **data):
         self.calls.append((op, data))
         if self.failure:
@@ -57,9 +59,9 @@ class Browser:
 def model(stage, payload, images, schema, timeout):
     if stage == 'plan':
         result = {'sections': [{'index': r['index'], 'decision': 'capture', 'query': 'official capture instructions',
-            'subject': 'screen capture', 'event': '', 'date': '', 'reason': 'shows actual instructions'} for r in payload['sections']]}
+            'subject': r['body'][:160], 'event': '', 'date': '', 'reason': 'shows actual instructions'} for r in payload['sections']]}
     elif stage == 'source':
-        result = {'index': 0}
+        result = {'index': 0,'reason':'Observed exact public source','focus_quote':''}
     elif stage == 'region':
         result = {'region_id': 0, 'historical': False, 'source_text': TEXT, 'source_date': '',
             'caption': 'Official documentation excerpt; explains capture controls.',
@@ -74,6 +76,226 @@ def model(stage, payload, images, schema, timeout):
 
 
 class EditorialTests(unittest.TestCase):
+    def test_explicit_cf_recovery_keeps_working_space_and_other_tabs(self):
+        result = e.build_editorial_assets('Capture guide', SECTION, self.folder,
+            sources=[URL], channel='cf', taskspace_id=123)
+        self.assertEqual(result['status'], 'ready', result)
+        browser = Browser.instances[-1]
+        self.assertEqual(browser.workspace_name, 'barolab-cf-flow')
+        self.assertEqual(browser.space, 123)
+
+    def test_experiment_can_omit_unavailable_optional_visual_with_durable_reason(self):
+        from common.naver_ab import scope
+        (self.folder/'workflow-assignment.json').write_text('{"experimentId":"fixture-trial"}')
+        sections=[{**SECTION[0],'image_optional':True}]
+        def unavailable(stage,payload,images,schema,timeout):
+            result,receipt=model(stage,payload,images,schema,timeout)
+            if stage=='source':
+                result={'index':-1,'reason':'No suitable observed visual','focus_quote':''}
+                receipt['response_sha256']=e._hash(result)
+            return result,receipt
+        with scope({'experimentId':'fixture-trial','arm':'B'},self.folder),patch.object(e,'_model',unavailable):
+            result=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[URL],channel='naver')
+        self.assertEqual(result['status'],'ready',result)
+        self.assertEqual(result['assets'],[])
+        self.assertEqual(result['optional_visual_failures'][0]['reason'],'no_suitable_source')
+        self.assertFalse(result['optional_visual_failures'][0]['approval'])
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,result,channel='naver'))
+
+    def test_experiment_never_omits_required_visual(self):
+        from common.naver_ab import scope
+        def unavailable(stage,payload,images,schema,timeout):
+            result,receipt=model(stage,payload,images,schema,timeout)
+            if stage=='source':
+                result={'index':-1,'reason':'No suitable observed visual','focus_quote':''}
+                receipt['response_sha256']=e._hash(result)
+            return result,receipt
+        with scope({'experimentId':'fixture-trial','arm':'B'},self.folder),patch.object(e,'_model',unavailable):
+            result=e.build_editorial_assets('Capture guide',SECTION,self.folder,sources=[URL],channel='naver')
+        self.assertEqual(result['status'],'held')
+        self.assertNotIn('optional_visual_failures',result)
+
+    def test_optional_policy_does_not_turn_budget_or_control_stops_into_ready(self):
+        from common.naver_ab import scope
+        for reason in ('model_budget_exhausted','user_takeover','unsafe_navigation'):
+            with self.subTest(reason=reason),tempfile.TemporaryDirectory() as directory:
+                Browser.failure=reason
+                with scope({'experimentId':'fixture-trial','arm':'B'},Path(directory)):
+                    result=e.build_editorial_assets('Capture guide',[{**SECTION[0],'image_optional':True}],
+                                                     Path(directory),sources=[URL],channel='naver')
+                self.assertEqual(result['status'],'held')
+                self.assertIn(reason,result['reasons'])
+
+    @unittest.skipUnless(shutil.which('node'),'Node required for public-alert scope test')
+    def test_public_news_alert_exception_never_matches_other_dialogs_or_redirects(self):
+        helper=Path(e.__file__).with_name('editorial_browser.mjs').resolve().as_uri()
+        script=r'''
+const {knownPublicNewsAlert:allowed}=await import(HELPER);
+const url='https://www.hyundaimotorgroup.com/ko/news/genesis-gv90-special-exhibition';
+const error='PageDialogOpenedError: a JavaScript alert dialog ("undefined") opened';
+console.log(JSON.stringify([allowed(error,url,url),allowed(error,url,url+'/other'),
+allowed(error,'https://example.com',url),allowed('JavaScript confirm dialog ("undefined")',url,url),
+allowed('PageDialogOpenedError: a JavaScript alert dialog ("login required")',url,url)]));
+'''.replace('HELPER',json.dumps(helper))
+        result=subprocess.run(['node','--input-type=module','-e',script],capture_output=True,text=True,encoding='utf-8',timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(json.loads(result.stdout),[True,False,False,False,False])
+
+    def test_explicit_source_url_avoids_another_choice_call_but_keeps_visual_reviews(self):
+        sections=[{**SECTION[0],'purpose':'Read the original public guide at '+URL}]
+        stages=[]
+        def choose(stage,payload,images,schema,timeout):
+            stages.append(stage)
+            if stage=='source':raise AssertionError('Source already exactly specified')
+            return model(stage,payload,images,schema,timeout)
+        with patch.object(e,'_model',choose):
+            result=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[{'url':URL,'text':TEXT}])
+        self.assertEqual(result['status'],'ready',result)
+        self.assertEqual(stages,['plan','region','review'])
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,result))
+
+    @unittest.skipUnless(shutil.which('node'),'Node required for public-notice scope test')
+    def test_only_the_observed_public_suji_notice_can_be_closed(self):
+        helper=Path(e.__file__).with_name('editorial_browser.mjs').resolve().as_uri()
+        for scenario in ('public','private_form','other_dialog','hidden'):
+            script=r'''
+const scenario=SCENARIO;let clicks=0;
+const button={type:'button',innerText:'닫기',click(){clicks++;}};
+const dialog={innerText:scenario==='other_dialog'?'로그인 확인':'운영 안내 수지 전시 안내 주말 주차 안내',
+ getBoundingClientRect:()=>({width:scenario==='hidden'?0:520,height:600}),
+ querySelector:selector=>selector.startsWith('input')?(scenario==='private_form'?{}:null):button};
+globalThis.document={querySelectorAll:()=>[dialog]};
+const changed=(await import(HELPER)).dismissSujiOperatingNotice();
+console.log(JSON.stringify({changed,clicks}));
+'''.replace('SCENARIO',json.dumps(scenario)).replace('HELPER',json.dumps(helper))
+            result=subprocess.run(['node','--input-type=module','-e',script],capture_output=True,text=True,encoding='utf-8',timeout=10)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(json.loads(result.stdout),{'changed':scenario=='public','clicks':int(scenario=='public')})
+
+    def test_source_focus_uses_only_a_quote_observed_on_the_actual_page(self):
+        for quote,expected in ((TEXT,True),('An invented source sentence that is absent from the observed page.',False)):
+            with self.subTest(quote=quote), tempfile.TemporaryDirectory() as directory:
+                Browser.calls=[]
+                def focused(stage,payload,images,schema,timeout):
+                    result,receipt=model(stage,payload,images,schema,timeout)
+                    if stage=='source':
+                        result['focus_quote']=quote;receipt['response_sha256']=e._hash(result)
+                    return result,receipt
+                with patch.object(e,'_model',focused):
+                    result=e.build_editorial_assets('Capture guide',SECTION,Path(directory),sources=[URL])
+                self.assertEqual(result['status'],'ready',result)
+                self.assertEqual(any(op=='scroll' for op,_ in Browser.calls),expected)
+                if expected:self.assertIn('-focus.png',result['assets'][0]['evidence']['source_screenshot'])
+                self.assertTrue(e.validate_editorial_assets('Capture guide',SECTION,Path(directory),result))
+
+    def test_complete_dom_rule_is_not_expanded_to_a_broad_vision_box(self):
+        from common import jev
+        rule='Every optional examination in this specific service is excluded from private insurance claims.'
+        observed={'regions':[{'id':0,'tag':'EXCERPT','text':'Specific service scope\n'+rule,
+                             'clip':{'x':20,'y':60,'width':400,'height':150}}]}
+        before=copy.deepcopy(observed)
+        with patch.object(jev,'inspect_capture_box') as inspect:
+            e._refine_regions_with_jev('unused.png',observed,{'subject':'The hospital notice states: '+rule},{})
+        inspect.assert_not_called()
+        self.assertEqual(observed,before)
+
+    def test_transport_failure_preserves_diagnosis_without_source_retry(self):
+        Browser.failure='browser_transport_unavailable'
+        result=self.build()
+        self.assertEqual(result['reasons'],['browser_transport_unavailable'])
+        self.assertEqual(len(Browser.calls),1)
+        self.assertFalse(any(op=='finish' for op,_ in Browser.calls))
+
+    def test_real_browser_transport_exception_is_durable_and_never_replayed(self):
+        browser=REAL_BROWSER(self.folder,'owned-task')
+        with patch('common.ego_taskspace.find_ego_cli',return_value=Path('fixture.exe')), \
+             patch('common.ego_taskspace.run_ego_mjs',side_effect=RuntimeError('Failed to connect to ego_cli bootstrap')) as run:
+            with self.assertRaisesRegex(e.Held,'browser_transport_unavailable'):
+                browser.call('observe',10,url=URL)
+        self.assertEqual(run.call_count,1)
+        diagnosis=json.loads((self.folder/'browser-01-error.json').read_text(encoding='utf-8'))
+        self.assertTrue(diagnosis['effectsUnknown'])
+        self.assertIsNone(diagnosis['taskspace'])
+        self.assertIn('bootstrap',diagnosis['detail'])
+
+    def test_cf_missing_source_never_generates_a_fallback(self):
+        original_name=Browser.__name__
+        def choose(stage,payload,images,schema,timeout):
+            if stage=='source':
+                result={'index':-1,'reason':'No matching public source','focus_quote':''}
+                return result,{'at':e._now(),'model':'fixture','response_sha256':e._hash(result),'input_sha256':e._hash(payload)}
+            return model(stage,payload,images,schema,timeout)
+        try:
+            Browser.__name__='_Browser'
+            with patch.object(e,'_model',choose),patch.object(e,'_build_flow_asset') as generated:
+                result=e.build_editorial_assets('Capture guide',SECTION,self.folder,sources=[URL],channel='cf')
+                generated.assert_not_called()
+        finally:
+            Browser.__name__=original_name
+        self.assertEqual(result['status'],'held')
+        self.assertIn('no_suitable_source',result['reasons'])
+
+    def test_cf_explicit_optional_sections_can_omit_all_images(self):
+        sections=[{**SECTION[0],'image_optional':True}]
+        def omit(stage,payload,images,schema,timeout):
+            result={'sections':[{'index':0,'decision':'omit','query':'','subject':'','event':'','date':'','reason':'text and table resolve the reader task'}]}
+            return result,{'at':e._now(),'model':'fixture','response_sha256':e._hash(result),'input_sha256':e._hash(payload)}
+        with patch.object(e,'_model',omit):
+            result=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[URL],channel='cf')
+        self.assertEqual(result['status'],'ready',result)
+        self.assertEqual(result['assets'],[])
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,result,channel='cf'))
+
+    def test_official_google_help_is_not_misclassified_as_search_results(self):
+        self.assertFalse(e._is_search('https://support.google.com/accounts/answer/1187538?hl=ko'))
+        self.assertFalse(e._is_search('https://support.google.com/calendar/answer/37100'))
+        for url in ('https://www.google.com/search?q=backup','https://www.google.co.kr/search?q=backup',
+                    'https://www.bing.com/search?q=backup','https://search.naver.com/search.naver?query=backup'):
+            self.assertTrue(e._is_search(url),url)
+        with self.assertRaises(e.Held):e._public_url('https://accounts.google.com/signin/recovery')
+
+    def test_naver_budget_hold_cannot_become_ready_by_omitting_a_later_optional_capture(self):
+        from common import jev
+        (self.folder/'planning.json').write_text(json.dumps({'identity':'soultin'}),encoding='utf-8')
+        sections=[{**SECTION[0],'id':'first'},
+                  {**SECTION[0],'id':'second','image_optional':True}]
+        original_name=Browser.__name__
+        try:
+            Browser.__name__='_Browser'
+            with patch.object(e,'MAX_MODEL_CALLS',4), \
+                 patch.object(jev,'inspect_published_visual',return_value={'status':'ok','passed':True}):
+                result=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[URL],channel='naver')
+        finally:
+            Browser.__name__=original_name
+        self.assertEqual(result['status'],'held',result)
+        self.assertIn('model_budget_exhausted',result['reasons'])
+        self.assertFalse(result['assets'])
+        self.assertEqual(len(result['partial_assets']),1)
+
+    def test_naver_can_require_five_images_without_a_four_image_quota(self):
+        sections=[{**SECTION[0],'id':'step-'+str(i)} for i in range(5)]
+        result=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[URL],channel='naver')
+        self.assertEqual(result['status'],'ready',result)
+        self.assertEqual(len(result['assets']),5)
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,result,channel='naver'))
+
+    def test_text_complete_naver_article_can_have_no_images_with_bound_omissions(self):
+        sections=[{**SECTION[0],'image_optional':True}]
+        def omit(stage,payload,images,schema,timeout):
+            result={'sections':[{'index':0,'decision':'omit','query':'','subject':'','event':'','date':'',
+                                'reason':'Text already gives the complete reader action.'}]}
+            return result,{'provider':'fixture','model':'fixture','stage':stage,'at':e._now(),
+                'input_sha256':e._hash(payload),'image_sha256':[],'response_sha256':e._hash(result)}
+        with patch.object(e,'_model',omit):
+            result=e.build_editorial_assets('Capture guide',sections,self.folder,channel='naver')
+        self.assertEqual(result['status'],'ready',result)
+        self.assertFalse(Browser.calls)
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,result,channel='naver'))
+        result['plan']['sections'][0]['reason']=''
+        result.pop('manifest_sha256');result['manifest_sha256']=e._hash(result)
+        (self.folder/e.MANIFEST).write_text(e._json(result),encoding='utf-8')
+        self.assertFalse(e.validate_editorial_assets('Capture guide',sections,self.folder,result,channel='naver'))
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -90,6 +312,18 @@ class EditorialTests(unittest.TestCase):
 
     def build(self, sections=SECTION):
         return e.build_editorial_assets('Capture guide', sections, self.folder, sources=[URL])
+
+    def test_source_selection_sees_evidence_after_long_navigation_prefix(self):
+        seen=[]
+        def inspect_source(stage,payload,images,schema,timeout):
+            if stage=='source':
+                seen.append(payload['candidates'][0]['text'])
+            return model(stage,payload,images,schema,timeout)
+        with patch.object(e,'_model',inspect_source):
+            result=e.build_editorial_assets('Capture guide',SECTION,self.folder,
+                sources=[{'url':URL,'text':'navigation '*500+TEXT}])
+        self.assertEqual(result['status'],'ready',result)
+        self.assertIn(TEXT,seen[0])
 
     def valid(self, result, sections=SECTION):
         return e.validate_editorial_assets('Capture guide', sections, self.folder, result)
@@ -121,11 +355,40 @@ class EditorialTests(unittest.TestCase):
         Path(result['assets'][0]['path']).write_bytes(b'changed')
         self.assertFalse(self.valid(result))
 
+    def test_research_excerpt_guides_selection_but_cannot_approve_capture(self):
+        observed = {}
+        def inspect(stage, payload, images, schema, timeout):
+            if stage == 'source':
+                observed.update(payload['candidates'][0])
+            result, receipt = model(stage, payload, images, schema, timeout)
+            if stage == 'review':
+                result['entity_matches'] = False
+                receipt['response_sha256'] = e._hash(result)
+            return result, receipt
+        with patch.object(e, '_model', inspect):
+            result = e.build_editorial_assets('Capture guide', SECTION, self.folder,
+                sources=[{'url': URL, 'title': 'Guide', 'excerpt': 'Observed FAQ answer', 'text': 'Old overview'}])
+        self.assertEqual(observed['text'], 'Observed FAQ answer')
+        self.assertEqual(result['status'], 'held')
+        self.assertTrue(any(op == 'observe' and data.get('url') == URL for op, data in Browser.calls))
+        self.assertFalse(self.valid(result))
+
     def test_manifest_mutation_is_rejected(self):
         result = self.build()
         result['assets'][0]['caption'] = 'Wrong event'
         (self.folder/e.MANIFEST).write_text(json.dumps(result), encoding='utf-8')
         self.assertFalse(self.valid(result))
+
+    def test_naver_cannot_promote_a_generated_asset_to_verified_source_capture(self):
+        result=e.build_editorial_assets('Capture guide',SECTION,self.folder,sources=[URL],channel='naver')
+        self.assertEqual(result['status'],'ready')
+        asset=result['assets'][0]
+        asset['origin']='flow_illustration'
+        asset['evidence']['flowGenerated']=True
+        result.pop('manifest_sha256')
+        result['manifest_sha256']=e._hash(result)
+        (self.folder/e.MANIFEST).write_text(e._json(result),encoding='utf-8')
+        self.assertFalse(e.validate_editorial_assets('Capture guide',SECTION,self.folder,result,channel='naver'))
 
     def test_rehashed_manifest_cannot_relabel_reviewed_source(self):
         result = self.build()
@@ -179,6 +442,37 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(self.build()['reasons'], ['existing_manifest_requires_review'])
         self.assertEqual(len(Browser.calls), 1)
 
+    def test_failed_acquisition_requires_same_explicit_space_and_preserves_protected_holds(self):
+        Browser.failure='browser_held'
+        failed=self.build();self.assertEqual(failed['taskspace_id'],123)
+        calls=len(Browser.calls)
+        self.assertEqual(e.build_editorial_assets('Capture guide',SECTION,self.folder,sources=[URL],taskspace_id=999)['reasons'],['existing_manifest_requires_review'])
+        self.assertEqual(len(Browser.calls),calls)
+        Browser.failure=None
+        resumed=e.build_editorial_assets('Capture guide',SECTION,self.folder,sources=[URL],taskspace_id=123)
+        self.assertEqual(resumed['status'],'ready',resumed)
+
+    def test_explicit_resume_reuses_bound_partial_approval_and_keeps_call_budget(self):
+        sections=[{**SECTION[0],'id':'one'},{**SECTION[0],'id':'two'}]
+        def fail_second(stage,payload,images,schema,timeout):
+            if stage=='source' and payload['section']['index']==1:raise e.Held('no_suitable_region')
+            return model(stage,payload,images,schema,timeout)
+        with patch.object(e,'_model',fail_second):
+            failed=self.build(sections)
+        self.assertEqual(len(failed['partial_assets']),1)
+        self.assertFalse(e.validate_editorial_assets('Capture guide',sections,self.folder,failed))
+        calls=[]
+        def observe_model(stage,payload,images,schema,timeout):
+            calls.append((stage,payload.get('section',{}).get('index')))
+            return model(stage,payload,images,schema,timeout)
+        with patch.object(e,'_model',observe_model):
+            ready=e.build_editorial_assets('Capture guide',sections,self.folder,sources=[URL],taskspace_id=123)
+        self.assertEqual(ready['status'],'ready',ready)
+        self.assertEqual(ready['reused_section_indices'],[0])
+        self.assertEqual(calls,[('source',1),('region',1),('review',1)])
+        self.assertEqual(ready['budget']['model_calls'],failed['budget']['model_calls']+3)
+        self.assertTrue(e.validate_editorial_assets('Capture guide',sections,self.folder,ready))
+
     def test_negative_visual_evidence_holds(self):
         def reject(*args):
             result, receipt = model(*args)
@@ -226,11 +520,37 @@ class EditorialTests(unittest.TestCase):
                 REAL_MODEL('review',{},['unused.png'],{},10)
             call.assert_not_called()
 
+    def test_real_adapter_preserves_negative_review_and_source_rejection(self):
+        shot = self.folder/'fixture.png'
+        png(shot)
+        rejected = {**dict.fromkeys(FIELDS, True), 'entity_matches': False,
+                    'credits_preserved': False, 'page_attribution_preserved': False,
+                    'legible': False, 'reason': 'Relevant but not official; credit is missing.'}
+        def generate(prompt, **kw):
+            kw['observer']('codex', 'configured-vision', 'returned', actual_model='configured-vision')
+            return copy.deepcopy(rejected if kw.get('images') else {'index': -1})
+        with patch('common.llm_settings.get_agent_brain', return_value={'provider':'codex','model':'configured-vision'}), patch('common.llm_client.generate_json',side_effect=generate):
+            review, _ = REAL_MODEL('review', {'intention': {'event':'','date':''},
+                'evidence': {'text': TEXT*3}}, [str(shot)], e._schema({}), 10)
+            self.assertEqual(review, rejected)
+            choice, _ = REAL_MODEL('source', {'candidates':[{'url':URL}]}, [], e._schema({}), 10)
+            self.assertEqual(choice['index'], -1)
+
+    def test_real_adapter_preserves_observed_attribution_and_exact_anchor(self):
+        selected = {'region_id': -1, 'attribution_quotes': ['Copyright observed author'],
+                    'source_text': 'not observed', 'anchor_text': 'wrong anchor'}
+        def generate(prompt, **kw):
+            kw['observer']('codex','configured-vision','returned',actual_model='configured-vision')
+            return copy.deepcopy(selected)
+        with patch('common.llm_settings.get_agent_brain', return_value={'provider':'codex','model':'configured-vision'}), patch('common.llm_client.generate_json',side_effect=generate):
+            result, _ = REAL_MODEL('region', {'evidence': {'text':TEXT}, 'section':{'body':TEXT}}, [], e._schema({}), 10)
+            self.assertEqual(result, selected)
+
     def test_injection_code_is_never_executed(self):
         def malicious(*args):
             result, receipt = model(*args)
             if args[0] == 'source':
-                result = {'index': '__import__("os").system("anything")'}
+                result = {'index': '__import__("os").system("anything")','reason':'Untrusted injected source choice','focus_quote':''}
             return result, receipt
         with patch.object(e, '_model', malicious):
             result = self.build()
@@ -258,6 +578,47 @@ class EditorialTests(unittest.TestCase):
             return result, receipt
         with patch.object(e, '_model', wrong):
             self.assertEqual(self.build()['reasons'], ['source_quote_not_observed'])
+
+    def test_short_observed_author_is_preserved_without_substring_attribution(self):
+        pick={'caption':'Actual recipe photo','attribution_quotes':['Lee']}
+        caption, credit=e._attributed_caption(pick, {'title':'Recipe','url':URL,'text':'Author: Lee. Actual recipe.'})
+        self.assertIn('Lee',caption)
+        self.assertIn('Lee',credit)
+        with self.assertRaisesRegex(e.Held,'attribution_not_observed'):
+            e._attributed_caption(pick, {'title':'Recipe','url':URL,'text':'Author: LeeAnn.'})
+
+    def test_pixel_only_attribution_requires_an_independent_bound_transcription(self):
+        quote='Copyright 2026 Example Publisher.'
+        pick={'caption':'Actual source view','attribution_quotes':[quote]}
+        ev={'url':URL,'title':'Official guide','text':TEXT,'source_screenshot_sha256':'source-image-hash'}
+        with self.assertRaisesRegex(e.Held,'attribution_not_observed'):
+            e._attributed_caption(pick,ev)
+        payload={'source_url':URL,'source_screenshot_sha256':'source-image-hash'}
+        ev['visual_attribution']={'quotes':[quote],'receipt':{'stage':'attribution','at':e._now(),
+            'input_sha256':e._hash(payload),'image_sha256':['source-image-hash'],
+            'response_sha256':e._hash({'quotes':[quote]})}}
+        self.assertIn(quote,e._attributed_caption(pick,ev)[0])
+        ev['visual_attribution']['receipt']['image_sha256']=['different-image']
+        with self.assertRaisesRegex(e.Held,'attribution_not_observed'):
+            e._attributed_caption(pick,ev)
+
+    def test_account_keeper_never_claims_or_closes_live_capture_spaces(self):
+        from common import ego_taskspace
+        with patch.object(ego_taskspace,'_ensure_ego_window_visible_on_desktop',return_value={'mode':'sandbox_desktop'}), patch.object(ego_taskspace,'run_ego_mjs',return_value={}) as call:
+            ego_taskspace.ensure_persistent_ego_spaces()
+        script=call.call_args.args[0]
+        harness="""
+const touched=[];
+const names=['barolab-soultin','barolab-soul5373','barolab-yoon_master','barolab-kin-adinfo0905','barolab-kin-stone0747','barolab-cf-flow'];
+globalThis.listTaskSpaces=async()=>[...names.map((name,id)=>({name,id,recentTabTitles:id===0?['Existing page','Live SmartEditor']:['Existing page']})),
+ {id:100,name:'editorial-live-agent',ownership:'agent'},
+ {id:101,name:'editorial-live-user',ownership:'user'}];
+globalThis.profiles=async()=>[];
+globalThis.taskSpace=globalThis.claimTaskSpace=globalThis.takeOverTaskSpace=async id=>{
+ touched.push(id);return {finish:async()=>touched.push('finished')};};
+"""+script+"\nconsole.log('TOUCHES:'+JSON.stringify(touched));"
+        result=subprocess.run(['node','--input-type=module','-e',harness],capture_output=True,text=True,check=True)
+        self.assertIn('TOUCHES:[]',result.stdout)
 
     def test_observed_page_attribution_is_rendered_or_review_holds(self):
         credit = 'Copyright Example contributors. Content available under a Creative Commons license.'
@@ -322,6 +683,7 @@ class EditorialTests(unittest.TestCase):
             result, receipt = model(*args)
             if args[0] == 'plan':
                 result['sections'][0]['decision'] = 'omit'
+                receipt['response_sha256'] = e._hash(result)
             return result, receipt
         with patch.object(e, '_model', omitted):
             required = self.build()
@@ -329,8 +691,9 @@ class EditorialTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as directory:
                 optional = [{**SECTION[0], 'image_optional': True}]
                 value = e.build_editorial_assets('Capture guide', optional, directory)
-                self.assertEqual(value['reasons'], ['no_required_editorial_asset'])
-                self.assertFalse(e.validate_editorial_assets('Capture guide', optional, directory, value))
+                self.assertEqual(value['status'], 'ready', value)
+                self.assertEqual(value['assets'], [])
+                self.assertTrue(e.validate_editorial_assets('Capture guide', optional, directory, value))
         self.assertEqual(Browser.calls, [])
 
     def test_budget_and_model_failures_hold(self):
@@ -394,7 +757,7 @@ const fixture=FIXTURE;
 Object.assign(globalThis,{innerWidth:640,innerHeight:360,scrollX:0,scrollY:0,
   location:{href:'https://8.8.8.8/source'}});
 function element(data) {
-  const e={tagName:data.tag||'H2',role:data.role,innerText:data.text??'Visible source heading',
+  const e={tagName:data.tag||'H2',role:data.role,children:[],innerText:data.text??'Visible source heading',
     closest(selector){
       for(let node=this;node;node=node.parentElement) {
         if(selector==='nav,[role=navigation]' && (node.tagName==='NAV'||node.role==='navigation'))return node;
@@ -415,20 +778,36 @@ function element(data) {
   for(const ancestor of data.ancestors||[]) {
     child.parentElement=element({...ancestor,tag:ancestor.tag||'DIV'});child=child.parentElement;
   }
+  if(data.brParagraphs) {
+    e.childNodes=[];
+    for(const p of data.brParagraphs)e.childNodes.push({nodeType:3,textContent:p.text,_rect:p.rect,_parent:e},
+      {nodeType:1,tagName:'BR',textContent:'',_parent:e},{nodeType:1,tagName:'BR',textContent:'',_parent:e});
+    e.children=e.childNodes.filter(n=>n.nodeType===1);
+  }
   return e;
 }
 const headings=(fixture.headings||[]).map(element),regions=(fixture.regions||[]).map(element);
 globalThis.getComputedStyle=e=>e.style;
-globalThis.document={body:{innerText:'Observed public fixture text'},title:'Fixture',
+globalThis.document={readyState:'complete',images:[],body:{innerText:'Observed public fixture text'},title:'Fixture',
+  createRange(){let start,end;const selected=()=>{const a=start._parent.childNodes;return a.slice(a.indexOf(start),a.indexOf(end)+1);};return {
+    setStartBefore:n=>{start=n;},setEndAfter:n=>{end=n;},toString:()=>selected().map(n=>n.textContent).join(''),
+    getBoundingClientRect:()=>{const rects=selected().filter(n=>n._rect).map(n=>n._rect);
+      const x=Math.min(...rects.map(r=>r[0])),y=Math.min(...rects.map(r=>r[1]))-scrollY;
+      const right=Math.max(...rects.map(r=>r[0]+r[2])),bottom=Math.max(...rects.map(r=>r[1]+r[3]))-scrollY;
+      return {x,y,left:x,top:y,right,bottom,width:right-x,height:bottom-y};}};},
   querySelector:()=>null,querySelectorAll:selector=>{
     if(selector==='h1,h2,h3')return headings;
-    if(selector==='figure,img,table,article,main,section,[role=main]')return regions;
+    if(selector==='div,dl,ul,ol,p')return (fixture.blocks||[]).map(element);
+    if(selector==='p,li')return (fixture.paragraphs||[]).map(element);
+    if(selector==='div,p')return (fixture.brBlocks||[]).map(element);
+    if(selector==='figure,img,table,td,th,article,main,section,[role=main]')return [...regions,...(fixture.cells||[]).map(element)];
     if(selector==='a[href]')return [];
+    if(selector==='iframe')return [];
     if(selector==='h1,h2,h3,figure,img,main')return [...headings,...regions];
     throw Error('Unexpected selector: '+selector);
   }};
-const page={cdp:async()=>{},url:async()=>location.href,evaluate:async(fn)=>fn()};
-globalThis.taskSpace=async()=>({spaceId:314,ownership:'agent',page:()=>page});
+const page={cdp:async()=>({result:{value:true}}),events:async()=>[],url:async()=>location.href,evaluate:async(fn)=>fn()};
+globalThis.taskSpace=async()=>({spaceId:314,ownership:'agent',tabs:async()=>[{label:'p1',openedBy:'agent'}],page:()=>page});
 const {run}=await import(HELPER);
 for(const y of fixture.scrolls||[0]) {globalThis.scrollY=y;await run(REQUEST);}
 '''
@@ -457,6 +836,73 @@ for(const y of fixture.scrolls||[0]) {globalThis.scrollY=y;await run(REQUEST);}
                     'clip':{'x':20,'y':60,'width':400,'height':130}}])
 
     @unittest.skipUnless(shutil.which('node'), 'Node is required for real observe DOM fixtures')
+    def test_observe_exposes_actual_formula_boxes_without_semantic_headings(self):
+        text = 'Financial assets less 20000000, multiplied by 0.04 and divided by 12 months.'
+        rows = self.observe_dom_fixture({'blocks':[{'tag':'DIV','text':text,'rect':[30,80,500,140]}]})[0]['regions']
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['tag'], 'CONTENT')
+        self.assertEqual(rows[0]['text'], text)
+        self.assertEqual(rows[0]['clip'], {'x':30,'y':80,'width':500,'height':140})
+
+    def test_short_faq_paragraph_keeps_the_adjacent_qualification_in_crop(self):
+        first='An actual official answer explaining the requested policy condition.'
+        second='An adjacent qualification that must remain visible with the rule.'
+        rows=self.observe_dom_fixture({'paragraphs':[{'tag':'P','text':first,'rect':[20,60,400,32],
+                  'following':[{'tag':'P','text':second,'rect':[20,110,400,35]}]}]})[0]['regions']
+        excerpt=next(r for r in rows if r['tag']=='PARAGRAPH_EXCERPT')
+        self.assertIn(first,excerpt['text']);self.assertIn(second,excerpt['text'])
+        self.assertEqual(excerpt['clip'],{'x':20,'y':60,'width':400,'height':85})
+
+    def test_br_only_faq_answer_exposes_the_rule_with_its_qualification(self):
+        first='A complete official answer stating the eligibility and guarantee rule.'
+        second='A separate qualification about the application limits and assessment.'
+        rows=self.observe_dom_fixture({'brBlocks':[{'tag':'DIV','rect':[20,20,400,300],
+              'brParagraphs':[{'text':first,'rect':[20,60,400,30]},
+                              {'text':second,'rect':[20,110,400,35]}]}]})[0]['regions']
+        excerpt=next(r for r in rows if r['tag']=='BR_PARAGRAPH_EXCERPT')
+        self.assertIn(first,excerpt['text']);self.assertIn(second,excerpt['text'])
+        self.assertEqual(excerpt['clip'],{'x':20,'y':60,'width':400,'height':85})
+
+    def test_long_paragraph_with_br_separators_exposes_visible_procedure(self):
+        text='Login, select the insurance contract, select the hospital and visit, review and transmit.'
+        rows=self.observe_dom_fixture({'brBlocks':[{'tag':'P','rect':[20,-1500,400,3000],
+            'brParagraphs':[{'text':text,'rect':[20,60,400,64]},
+                            {'text':'Read the complete public procedure before transmitting.','rect':[20,170,400,32]}]}]})[0]['regions']
+        excerpt=next(r for r in rows if r['tag']=='BR_PARAGRAPH_EXCERPT')
+        self.assertIn(text,excerpt['text'])
+        self.assertEqual(excerpt['clip'],{'x':20,'y':60,'width':400,'height':142})
+
+    def test_public_procedure_list_items_form_a_complete_readable_excerpt(self):
+        text='Open the public result guide and follow the stated identity-check procedure.'
+        rows=self.observe_dom_fixture({'paragraphs':[{'tag':'LI','text':text,'rect':[20,60,400,30],
+            'following':[{'tag':'LI','text':'After verification, open the result list to inspect the application.','rect':[20,110,400,35]}]}]})[0]['regions']
+        excerpt=next(r for r in rows if r['tag']=='PARAGRAPH_EXCERPT')
+        self.assertIn(text,excerpt['text'])
+        self.assertIn('After verification',excerpt['text'])
+        self.assertEqual(excerpt['clip'],{'x':20,'y':60,'width':400,'height':85})
+
+    def test_observe_includes_narrow_price_table_cells(self):
+        rows=self.observe_dom_fixture({'cells':[{'tag':'TD','text':'Black Ink 54,000,000','rect':[20,40,210,200]}]})[0]['regions']
+        self.assertEqual(rows[0]['tag'],'TD')
+        self.assertIn('54,000,000',rows[0]['text'])
+        self.assertEqual(rows[0]['clip']['width'],210)
+
+    def test_only_public_bokjiro_screen_metadata_can_initialize_a_child_frame(self):
+        helper = Path(e.__file__).with_name('editorial_browser.mjs').resolve().as_uri()
+        script = """
+import {publicScreenInitialization as allowed} from HELPER;
+const parent='https://www.bokjiro.go.kr/ssis-tbu/twatbz/mkclAsis/mkclInsertBspnPage.do';
+const p={resourceType:'Document',frameId:'child',request:{method:'POST',
+url:'https://www.bokjiro.go.kr/ssis-tbu/twatbz/mkclAsis/mkclInsertBspnEmp.do',postData:'curScrId=screen&menuParam=menu&pageParam='}};
+console.log(JSON.stringify([allowed(p,parent,'main'),
+ allowed({...p,frameId:'main'},parent,'main'),
+ allowed({...p,request:{...p.request,postData:p.request.postData+'&name=person'}},parent,'main'),
+ allowed({...p,request:{...p.request,url:'https://www.bokjiro.go.kr/apply'}},parent,'main'),
+ allowed(p,'https://other.example/page','main')]));
+""".replace('HELPER', json.dumps(helper))
+        result = subprocess.run(['node','--input-type=module','-e',script],capture_output=True,text=True,check=True)
+        self.assertEqual(json.loads(result.stdout), [True,False,False,False,False])
+
     def test_observe_skips_blank_zero_size_hidden_and_script_text(self):
         rejected = [{'text':' \n\t'}, {'text':'Zero height','rect':[20,60,400,0]},
             {'text':'Zero width','rect':[20,60,0,30]},
@@ -511,17 +957,23 @@ for(const y of fixture.scrolls||[0]) {globalThis.scrollY=y;await run(REQUEST);}
         request = self.folder/'request.json'
         request.write_text(json.dumps({'op':'observe','space':314,'url':'https://8.8.8.8/source'}),encoding='utf-8')
         harness = r'''
-const actions=[];let navigated=false,sent=false;
+const actions=[];let navigated=false,sent=false,replaced=false,probed=false,loaded=false,loadSent=false;
 const scenario=SCENARIO;
 const page={
- cdp:async(method,params)=>{actions.push({method,params});},
+ label:'p1',
+ snapshot:async()=>{actions.push({method:'snapshot'});if(scenario==='hung_renderer')throw Error('PageUnresponsiveError: renderer is probably hung');if(scenario==='unconfirmed_timeout')throw Error('snapshot transport unavailable');return {};},
+ close:async()=>{actions.push({method:'close',label:page.label});},
+ cdp:async(method,params)=>{actions.push({method,params});if(method==='Runtime.evaluate'&&navigated&&!loaded)throw Error('Readiness evaluated before pending load requests were serviced');if(method==='Page.getFrameTree'&&!probed&&['hung_renderer','unconfirmed_timeout','responsive_timeout'].includes(scenario)){probed=true;throw Error('Page.getFrameTree timed out');}return method==='Runtime.evaluate'?{result:{value:true}}:method==='Page.getFrameTree'?{frameTree:{frame:{id:'main'}}}:undefined;},
  events:async()=>{
+   if(navigated&&sent&&scenario==='deferred_load'&&!loadSent){loadSent=true;loaded=true;return [{method:'Page.loadEventFired',params:{}}];}
    if(!navigated||sent)return [];
    sent=true;
-   const pause=(id,url,method='GET')=>({method:'Fetch.requestPaused',params:{requestId:id,resourceType:'Document',request:{url,method,headers:{Cookie:'secret',Authorization:'secret',Accept:'text/html'}}}});
+   loaded=scenario!=='deferred_load';
+   const pause=(id,url,method='GET',frameId='main')=>({method:'Fetch.requestPaused',params:{requestId:id,frameId,resourceType:'Document',request:{url,method,headers:{Cookie:'secret',Authorization:'secret',Accept:'text/html'}}}});
    return [pause('a','https://8.8.8.8/source',scenario==='post'?'POST':'GET'),
      ...(scenario==='private_redirect'?[pause('b','http://127.0.0.1/secret')]:[]),
-     {method:'Page.domContentEventFired',params:{}}];
+     ...(scenario==='private_frame'?[pause('b','http://127.0.0.1/secret','GET','child')]:[]),
+     {method:'Page.domContentEventFired',params:{}},...(loaded?[{method:'Page.loadEventFired',params:{}}]:[])];
  },
  evaluate:async(fn,arg)=>{
    if(arg){navigated=true;return true;}
@@ -529,13 +981,24 @@ const page={
    if(fn.toString().includes('=>[scrollX'))return [0,0,[0,0,640,360]];
    return {url:'https://8.8.8.8/source',title:'Public',text:'Public source evidence',regions:[{id:0,tag:'FIGURE',text:'Public source evidence',credit:'',clip:{x:0,y:0,width:640,height:360}}],links:[],sensitive:false,scroll:{x:0,y:200}};
  },
- url:async()=>'https://8.8.8.8/source',screenshot:async(params)=>{actions.push({method:'screenshot',params});},
+ url:async()=>navigated||['capture','changed_region','same_source'].includes(scenario)?'https://8.8.8.8/source':'https://8.8.8.8/previous',screenshot:async(params)=>{actions.push({method:'screenshot',params});},
 };
-globalThis.taskSpace=async()=>({spaceId:314,ownership:scenario==='takeover'?'user':'agent',page:()=>page});
+globalThis.listTaskSpaces=async()=>scenario==='shared_missing'?[]:[{id:314,name:'barolab-cf-flow',ownership:scenario==='shared_takeover'?'user':'agent'}];
+globalThis.taskSpace=async()=>({spaceId:314,name:'barolab-cf-flow',ownership:scenario==='takeover'?'user':'agent',
+ tabs:async()=>scenario==='ambiguous_page'?[{label:'p1',openedBy:'agent'},{label:'p2',openedBy:'agent'}]:
+   ['shared_resume','shared_finish'].includes(scenario)?[{label:'p1',openedBy:'agent'},{label:'p2',openedBy:'agent'},{label:'u1',openedBy:'user'}]:
+   [{label:replaced||scenario==='replaced_page'?'p2':'p1',openedBy:'agent',url:'https://8.8.8.8/source'}],
+ newPage:async()=>{actions.push({method:'newPage',space:314});replaced=true;page.label='p2';return page;},
+ page:label=>{if(label!==((replaced||scenario==='replaced_page'||['shared_resume','shared_finish'].includes(scenario))?'p2':'p1'))throw Error('Wrong page selected');page.label=label;return page;}});
 await (await import(HELPER)).run(REQUEST);
 console.log('ACTIONS:'+JSON.stringify(actions));
 '''
-        for scenario in ('public', 'private_redirect', 'post', 'takeover', 'capture', 'changed_region'):
+        for scenario in ('public', 'deferred_load', 'private_frame', 'replaced_page', 'hung_renderer', 'unconfirmed_timeout', 'responsive_timeout', 'ambiguous_page', 'private_redirect', 'post', 'takeover', 'shared_new','shared_resume','shared_finish','shared_missing','shared_takeover', 'same_source', 'capture', 'changed_region'):
+            request.write_text(e._json({'op':'observe','space':314,'url':'https://8.8.8.8/source'}),encoding='utf-8')
+            if scenario.startswith('shared_'):
+                request.write_text(e._json({'op':'finish' if scenario=='shared_finish' else 'observe',
+                    'work_space_name':'barolab-cf-flow','page_label':'p2' if scenario in ('shared_resume','shared_finish') else None,
+                    'url':'https://8.8.8.8/source'}),encoding='utf-8')
             if scenario in ('capture', 'changed_region'):
                 request.write_text(e._json({'op':'capture','space':314,'url':'https://8.8.8.8/source',
                     'expected_text_sha256': e._hash(b'Public source evidence'), 'screenshot':str(self.folder/'clip.png'),
@@ -553,10 +1016,39 @@ console.log('ACTIONS:'+JSON.stringify(actions));
             elif scenario == 'changed_region':
                 self.assertFalse(value['ok'])
                 self.assertEqual(value['reason'],'source_changed')
-            elif scenario == 'public':
+            elif scenario=='ambiguous_page':
+                self.assertFalse(value['ok'])
+                self.assertEqual(actions,[])
+            elif scenario=='unconfirmed_timeout':
+                self.assertFalse(value['ok'])
+                self.assertFalse(any(a['method'] in ('close','newPage') for a in actions))
+                self.assertEqual(sum(a['method']=='Page.getFrameTree' for a in actions),1)
+            elif scenario=='same_source':
+                self.assertTrue(value['ok'],value)
+                self.assertFalse(any(a['method']=='Fetch.continueRequest' for a in actions))
+            elif scenario.startswith('shared_'):
+                self.assertEqual(value['ok'],scenario not in ('shared_missing','shared_takeover'),value)
+                if scenario in ('shared_missing','shared_takeover'):
+                    self.assertEqual(actions,[])
+                elif scenario=='shared_finish':
+                    self.assertTrue(value['workingSpacePreserved'])
+                    self.assertEqual(actions,[{'method':'close','label':'p2'}])
+                else:
+                    self.assertEqual(value['page'],'p2')
+                    self.assertEqual(sum(a['method']=='newPage' for a in actions),int(scenario=='shared_new'))
+                    self.assertFalse(any(a['method']=='close' for a in actions))
+            elif scenario in ('public','deferred_load','private_frame','replaced_page','hung_renderer','responsive_timeout'):
                 self.assertTrue(value['ok'])
                 headers = next(a['params']['headers'] for a in actions if a['method']=='Fetch.continueRequest')
                 self.assertEqual(headers,[{'name':'Accept','value':'text/html'}])
+                if scenario=='private_frame':
+                    self.assertTrue(value['blockedDocuments'])
+                    self.assertTrue(any(a['method']=='Fetch.failRequest' for a in actions))
+                if scenario=='hung_renderer':
+                    self.assertTrue(value['rendererRecovery']['sameTaskspace']==314)
+                    self.assertEqual([a['method'] for a in actions if a['method'] in ('snapshot','close','newPage')],['snapshot','close','newPage'])
+                else:
+                    self.assertFalse(any(a['method'] in ('close','newPage') for a in actions))
             else:
                 self.assertFalse(value['ok'])
                 self.assertEqual(value['reason'],'user_takeover' if scenario=='takeover' else 'unsafe_navigation')

@@ -21,6 +21,10 @@ class AgendaOutcomeTests(unittest.TestCase):
                              ('ROWS', self.data/'publication-conferences/operations')]:
             patched = patch.object(agenda, field, value)
             patched.start(); self.addCleanup(patched.stop)
+        from common import operating_plan, llm_usage
+        for module,field,value in [(operating_plan,'ROOT',self.root),(operating_plan,'DATA',self.data),
+                                   (operating_plan,'STATE',self.data/'operating-plan.json'),(llm_usage,'ROOT',self.root)]:
+            mocked=patch.object(module,field,value);mocked.start();self.addCleanup(mocked.stop)
         self.now = dt.datetime.now(dt.timezone.utc)
         self.url = 'https://example.com/article'
         agenda.write(agenda.STATE, {'enabled': True})
@@ -634,6 +638,256 @@ class AgendaOutcomeTests(unittest.TestCase):
             with patch.object(agenda, 'execution') as execute:
                 self.assertFalse(agenda._step_single_agenda(row))
             execute.assert_not_called()
+
+    def test_verified_account_narrows_same_project_recovery_while_preserving_uncertain_and_unverified_locks(self):
+        binding_soultin = {'project': 'naver_blog', 'date': '2026-11-08', 'identity': 'soultin', 'slot': '09:00'}
+        wid_soultin = hashlib.sha256(json.dumps(binding_soultin, sort_keys=True).encode()).hexdigest()
+        binding_adinfo = {'project': 'naver_blog', 'date': '2026-11-08', 'identity': 'adinfo0905', 'slot': '10:00'}
+        wid_adinfo = hashlib.sha256(json.dumps(binding_adinfo, sort_keys=True).encode()).hexdigest()
+        agenda.write(self.data / 'naver/automation-journal.json', {'attempts': [
+            {'account': 'soultin', 'publicationDate': '2026-11-08', 'scheduledSlot': '09:00', 'status': 'failed', 'lastError': 'timeout'},
+            {'account': 'adinfo0905', 'publicationDate': '2026-11-08', 'scheduledSlot': '10:00', 'status': 'failed', 'lastError': 'timeout'},
+        ]})
+        existing_conf = {'id': '1'*64, 'kind': 'conference', 'project': 'naver_blog', 'status': 'recovering',
+                         'workTarget': {'arguments': {'action': 'naver', 'account': 'adinfo0905', 'date': '2026-11-08', 'slot': '10:00'}}}
+        chosen_soultin = {'id': '2'*64, 'kind': 'staff', 'project': 'naver_blog', 'status': 'queued',
+                          'source': {'actions': [{'agent': 'publi', 'tool': 'recover_project_work', 'args': {'project': 'naver_blog', 'work_id': wid_soultin}}]}}
+        chosen_adinfo = {'id': '3'*64, 'kind': 'staff', 'project': 'naver_blog', 'status': 'queued',
+                         'source': {'actions': [{'agent': 'publi', 'tool': 'recover_project_work', 'args': {'project': 'naver_blog', 'work_id': wid_adinfo}}]}}
+        chosen_unknown = {'id': '4'*64, 'kind': 'staff', 'project': 'naver_blog', 'status': 'queued',
+                          'source': {'actions': [{'agent': 'publi', 'tool': 'recover_project_work', 'args': {'project': 'naver_blog', 'work_id': 'f'*64}}]}}
+        with patch.object(agenda, 'running', return_value=False):
+            # Verified distinct account in same project does not collide
+            self.assertFalse(agenda.shares_execution_lane(existing_conf, chosen_soultin))
+            # Verified same account in same project collides
+            self.assertTrue(agenda.shares_execution_lane(existing_conf, chosen_adinfo))
+            # Unverified work_id keeps the project lane locked
+            self.assertTrue(agenda.shares_execution_lane(existing_conf, chosen_unknown))
+            # Uncertain submission state (submitting/unknown/pendingEffect) keeps the project lane locked
+            for uncertain in ({**existing_conf, 'status': 'submitting'}, {**existing_conf, 'status': 'unknown'}, {**existing_conf, 'pendingEffect': True}):
+                self.assertTrue(agenda.shares_execution_lane(uncertain, chosen_soultin))
+
+    def test_operating_plan_separates_lifecycle_stages_and_binds_decision_verification_fields(self):
+        from common import operating_plan as operating
+        from agents import crew_reasoning as crew
+        now = self.now.timestamp()
+        future_iso = (self.now + dt.timedelta(hours=2)).replace(second=0, microsecond=0).isoformat()
+        self.assertEqual(operating.lifecycle_stage('preparation_queued'), 'preparing')
+        self.assertEqual(operating.lifecycle_stage('preparation_running'), 'preparing')
+        self.assertEqual(operating.lifecycle_stage('preparation_failed'), 'preparation_failed')
+        self.assertEqual(operating.lifecycle_stage('preparation_unknown'), 'uncertain_or_protected_hold')
+        self.assertEqual(operating.lifecycle_stage('preparation_held'), 'uncertain_or_protected_hold')
+        self.assertEqual(operating.lifecycle_stage('review_required'), 'preparation_failed')
+        self.assertEqual(operating.lifecycle_stage('needs_source_repair'), 'preparation_failed')
+        self.assertEqual(operating.lifecycle_stage('prepared'), 'prepared')
+        with patch.object(operating, 'ROOT', self.root), patch.object(operating, 'DATA', self.data), \
+             patch.object(operating, 'STATE', self.data / 'operating-plan.json'):
+            agenda.write(self.data / 'daily_schedule.json', {'operatingMode': 'adaptive', 'cf': {'must-pick.com': {}}, 'naver': {'soultin': {'slots': []}}})
+            agenda.write(self.data / 'crew-goals/g1.json', {'id': 'g1', 'observations': [{'id': 'e0'}, {'id': 'e2'}]})
+            res = operating.allocate({
+                'publications': [{'project': 'cf_blog', 'account': 'must-pick.com', 'publishAt': future_iso,
+                                  'topic': '청년월세 지원 절차', 'why': 'Must-pick observed 28d revenue leader',
+                                  'expectedOutcome': 'qualified_acquisition_above_baseline',
+                                  'verificationMethod': 'cf_publication_receipt_and_inspect_url_acquisition',
+                                  'nextCheckAt': future_iso,
+                                  'evidenceIds': ['e0', 'e2']}],
+                'accounts': [{'project': 'cf_blog', 'account': 'must-pick.com', 'mode': 'expand',
+                              'why': 'Observed 28d revenue 0.81 USD', 'reviewAt': future_iso,
+                              'expectedOutcome': 'verify_7d_qualified_sessions',
+                              'verificationMethod': 'operating_plan_account_review',
+                              'evidenceIds': ['e2']}]
+            }, actor='jarvis', goal_id='g1', now=now)
+            self.assertTrue(res['ok'])
+            self.assertFalse(res['publicationVerified'])
+            alloc_id = res['allocationIds'][0]
+            saved = operating.load(self.data / 'operating-plan.json')['publications'][alloc_id]
+            self.assertEqual(saved['owner'], 'publi')
+            self.assertEqual(saved['exactTarget']['account'], 'must-pick.com')
+            self.assertEqual(saved['evidenceIds'], ['e0', 'e2'])
+            self.assertTrue(saved['observationsValidated'])
+            self.assertTrue(saved['rationaleBound'])
+            self.assertEqual(saved['lifecycleStage'], 'queued_or_accepted')
+            self.assertFalse(saved['publicationVerified'])
+            self.assertFalse(saved['businessOutcomeVerified'])
+            with self.assertRaisesRegex(ValueError, 'Unknown allocation observation'):
+                operating.allocate({
+                    'publications': [{'project': 'cf_blog', 'account': 'must-pick.com', 'publishAt': future_iso,
+                                      'topic': '청년월세 지원 절차', 'why': 'Invalid evidence check', 'evidenceIds': ['nonexistent']}]
+                }, actor='jarvis', goal_id='g1', now=now)
+            # Verify cf-prepare conference states are never misclassified as 'prepared'
+            prep_args = {'action': 'cf-prepare', 'date': saved['day'], 'account': 'must-pick.com', 'slot': saved['slot']}
+            prep_id = hashlib.sha256(json.dumps(['parameters', prep_args], sort_keys=True).encode()).hexdigest()
+            for p_status, expected_stage in (('running', 'preparing'), ('failed', 'preparation_failed'), ('unknown', 'uncertain_or_protected_hold')):
+                agenda.write(self.data / 'publication-conferences' / (prep_id + '.json'),
+                             {'kind': 'parameters', 'arguments': prep_args, 'status': p_status, 'failureReason': 'check'})
+                exec_state = operating.allocation_execution(saved, now=now)
+                self.assertEqual(exec_state['status'], 'preparation_' + p_status)
+                self.assertEqual(exec_state['lifecycleStage'], expected_stage)
+            (self.data / 'publication-conferences' / (prep_id + '.json')).unlink()
+            # Verify track_operating_action binds cited evidenceIds and due nextCheckAt routes to followup_verification_due
+            req_id = 'goal:g1:act1'
+            stem = hashlib.sha256(req_id.encode()).hexdigest()
+            receipt_file = self.data / 'chats/staff-requests' / (stem + '.json')
+            agenda.write(receipt_file, {'requestId': req_id, 'taskId': 't1', 'status': 'queued', 'results': []})
+            mgr = {'id': 'g1', 'actor': 'jarvis', 'origin': 'company-manager', 'observations': [{'id': 'e0'}, {'id': 'e2'}, {'id': 'e9'}],
+                   'pendingNextAction': {'evidenceIds': ['e2'], 'expectedResult': 'Verify CF slot',
+                                         'verificationMethod': 'staff_request:' + stem + '+inspect_url_acquisition'},
+                   'pendingAction': {'requestId': req_id, 'action': {'agent': 'publi', 'tool': 'run_project_cycle', 'args': {'project': 'cf_blog'}},
+                                     'nextCheckAt': now + 30}}
+            with patch('server.agent_tools.STAFF_REQUEST_DIR', self.data / 'chats/staff-requests'), \
+                 patch.object(crew, 'save'):
+                crew.track_operating_action(mgr, {'taskId': 't1', 'status': 'queued'})
+                tracked = mgr['operatingActions'][0]
+                self.assertEqual(tracked['evidenceIds'], ['e2'])
+                self.assertTrue(tracked['observationsValidated'])
+                self.assertTrue(tracked['rationaleBound'])
+                # Complete receipt and advance clock past nextCheckAt -> surfaces in refresh_operating_actions and execution_board
+                agenda.write(receipt_file, {'requestId': req_id, 'taskId': 't1', 'status': 'completed',
+                                            'results': [{'result': {'ok': True, 'publicationVerified': True}}]})
+                with patch.object(crew.time, 'time', return_value=now + 60):
+                    crew.refresh_operating_actions(mgr)
+            self.assertTrue(mgr['operatingActions'][0]['followupDue'])
+            self.assertEqual(mgr['operatingActions'][0]['lifecycleStage'], 'published_verified')
+            board_due = operating.execution_board(now=now + 8000)
+            due_ids = {w['id']: w for w in board_due['work']}
+            self.assertIn('followup:' + req_id, due_ids)
+            self.assertEqual(due_ids['followup:' + req_id]['state'], 'followup_verification_due')
+            self.assertEqual(due_ids['followup:' + req_id]['evidenceIds'], ['e2'])
+            self.assertIn('account-review-due:cf_blog:must-pick.com', due_ids)
+            self.assertEqual(due_ids['account-review-due:cf_blog:must-pick.com']['state'], 'account_review_due')
+            # Reviewing URL A must NEVER close URL B, broader account actions, or held actions under the same project/account
+            url_a = 'https://must-pick.com/entry/article-a'
+            url_b = 'https://must-pick.com/entry/article-b'
+            rec_a = self.data / 'chats/staff-requests' / ('a' * 64 + '.json')
+            rec_b = self.data / 'chats/staff-requests' / ('b' * 64 + '.json')
+            rec_broad = self.data / 'chats/staff-requests' / ('c' * 64 + '.json')
+            for r_path, r_url in ((rec_a, url_a), (rec_b, url_b)):
+                agenda.write(r_path, {'status': 'completed', 'results': [{'result': {'ok': True, 'publicationVerified': True, 'publicUrl': r_url}}]})
+            agenda.write(rec_broad, {'status': 'completed', 'results': [{'result': {'ok': True, 'publicationVerified': True}}]})
+            plan_state = operating.load(self.data / 'operating-plan.json')
+            plan_state['actions']['act_a'] = {'requestId': 'act_a', 'receiptPath': str(rec_a), 'nextCheckAt': now + 10,
+                'exactTarget': {'project': 'cf_blog', 'account': 'must-pick.com', 'url': url_a}}
+            plan_state['actions']['act_b'] = {'requestId': 'act_b', 'receiptPath': str(rec_b), 'nextCheckAt': now + 10,
+                'exactTarget': {'project': 'cf_blog', 'account': 'must-pick.com', 'url': url_b}}
+            plan_state['actions']['act_broad'] = {'requestId': 'act_broad', 'receiptPath': str(rec_broad), 'nextCheckAt': now + 10,
+                'exactTarget': {'project': 'cf_blog', 'account': 'must-pick.com'}}
+            plan_state['actions']['act_held_a'] = {'requestId': 'act_held_a', 'status': 'held', 'nextCheckAt': now + 10,
+                'exactTarget': {'project': 'cf_blog', 'account': 'must-pick.com', 'url': url_a}}
+            operating.write(self.data / 'operating-plan.json', plan_state)
+            with patch.object(operating, 'publication_inventory', return_value=[
+                {'url': url_a, 'project': 'cf_blog', 'account': 'must-pick.com'},
+                {'url': url_b, 'project': 'cf_blog', 'account': 'must-pick.com'}
+            ]):
+                # 1) Unvalidated evidence without goal record records review assessment but NEVER closes followupVerified
+                rev_unval = operating.review_publication({
+                    'url': url_a, 'assessment': 'Initial unvalidated note',
+                    'nextAction': 'Measure article A in 7d', 'nextReviewAt': future_iso,
+                    'evidenceIds': ['unvalidated-evidence']
+                }, actor='jarvis')
+                self.assertFalse(rev_unval['observationsValidated'])
+                self.assertEqual(rev_unval['matchedActionIds'], [])
+                self.assertFalse(bool(operating.load(self.data / 'operating-plan.json')['actions']['act_a'].get('followupVerified')))
+                # 2) Unrelated observation, failed inspection with URL in arguments, or URL only in arguments must NEVER validate or close followupVerified
+                for bad_obs in (
+                    [{'id': 'e0', 'tool': 'inspect_url', 'arguments': {}, 'result': {'ok': False, 'reason': 'inspection_failed'}}],
+                    [{'id': 'e0', 'tool': 'inspect_url', 'arguments': {'url': url_a}, 'result': {'ok': False, 'reason': 'inspection_failed'}}],
+                    [{'id': 'e0', 'tool': 'inspect_url', 'arguments': {'url': url_a}, 'result': {'ok': True, 'status': 'collected', 'url': url_b, 'complete': True, 'reconciled': True, 'limited': False, 'qualifiedSessions': 4}}],
+                ):
+                    rev_bad = operating.review_publication({
+                        'url': url_a, 'assessment': 'Attempt review with failed/mismatched obs',
+                        'nextAction': 'Retry measurement', 'nextReviewAt': future_iso,
+                        'evidenceIds': ['e0']
+                    }, actor='jarvis', goal_id='g1', observations=bad_obs)
+                    self.assertFalse(rev_bad['observationsValidated'])
+                    self.assertEqual(rev_bad['matchedActionIds'], [])
+                    self.assertFalse(bool(operating.load(self.data / 'operating-plan.json')['actions']['act_a'].get('followupVerified')))
+                # 3) Valid successful observation for URL A closes ONLY act_a while preserving reviewHistory, act_b, act_broad, and act_held_a
+                valid_obs = [{'id': 'e_ok', 'tool': 'inspect_url_acquisition', 'arguments': {'url': url_a},
+                              'result': {'ok': True, 'status': 'collected', 'url': url_a, 'complete': True,
+                                         'reconciled': True, 'limited': False, 'qualifiedSessions': 6, 'qualifiedPageViews': 10}}]
+                rev_res = operating.review_publication({
+                    'url': url_a, 'assessment': 'Verified article A acquisition',
+                    'nextAction': 'Re-evaluate article A in 7d', 'nextReviewAt': future_iso,
+                    'evidenceIds': ['e_ok']
+                }, actor='jarvis', goal_id='g1', observations=valid_obs)
+                self.assertTrue(rev_res['observationsValidated'])
+                self.assertEqual(rev_res['matchedActionIds'], ['act_a'])
+            saved_plan = operating.load(self.data / 'operating-plan.json')
+            self.assertGreaterEqual(len(saved_plan.get('reviewHistory', [])), 4)
+            after_rev = saved_plan['actions']
+            self.assertTrue(after_rev['act_a'].get('followupVerified'))
+            self.assertFalse(bool(after_rev['act_b'].get('followupVerified')))
+            self.assertFalse(bool(after_rev['act_broad'].get('followupVerified')))
+            self.assertFalse(bool(after_rev['act_held_a'].get('followupVerified')))
+            board_after = operating.execution_board(now=now + 8000)
+            after_ids = {w['id'] for w in board_after['work']}
+            self.assertNotIn('followup:act_a', after_ids)
+            self.assertIn('followup:act_b', after_ids)
+            self.assertIn('followup:act_broad', after_ids)
+
+    def test_reconcile_action_receipt_preserves_protected_and_verifies_identity(self):
+        from common import operating_plan as operating
+        action = {}
+        receipt = {
+            'status': 'completed',
+            'pendingEffect': True,
+            'results': [{'result': {'publicationVerified': True}}],
+        }
+        changed = operating.reconcile_action_receipt(action, receipt, now=1)
+        self.assertTrue(changed)
+        self.assertEqual(action['lifecycleStage'], 'uncertain_or_protected_hold')
+        self.assertFalse(action['publicationVerified'])
+        self.assertFalse(action['reservationVerified'])
+        self.assertEqual(action['status'], 'held')
+        self.assertTrue(action.get('pendingEffect'))
+
+        for child_res in (
+            {'status': 'submitting', 'publicationVerified': True},
+            {'status': 'unknown', 'reservationVerified': True},
+            {'status': 'completed', 'reason': 'auth_required', 'publicationVerified': True},
+            {'status': 'completed', 'reason': 'user_takeover', 'publicationVerified': True},
+            {'status': 'completed', 'manualResolutionRequired': True, 'publicationVerified': True},
+        ):
+            act = {'requestId': 'req-1', 'taskId': 'staff:1', 'status': 'queued'}
+            rec = {'requestId': 'req-1', 'taskId': 'staff:1', 'status': 'completed', 'results': [{'result': child_res}]}
+            operating.reconcile_action_receipt(act, rec, now=2)
+            self.assertEqual(act['lifecycleStage'], 'uncertain_or_protected_hold')
+            self.assertFalse(act['publicationVerified'])
+            self.assertFalse(act['reservationVerified'])
+
+        held_action = {
+            'requestId': 'req-held',
+            'taskId': 'staff:held',
+            'status': 'held',
+            'lifecycleStage': 'uncertain_or_protected_hold',
+            'publicationVerified': False,
+        }
+        completed_rec = {
+            'requestId': 'req-held',
+            'taskId': 'staff:held',
+            'status': 'completed',
+            'results': [{'result': {'publicationVerified': True}}],
+        }
+        operating.reconcile_action_receipt(held_action, completed_rec, now=3)
+        self.assertEqual(held_action['status'], 'held')
+        self.assertEqual(held_action['lifecycleStage'], 'uncertain_or_protected_hold')
+        self.assertFalse(held_action['publicationVerified'])
+
+        mismatch_act = {'requestId': 'req-a', 'taskId': 'staff:a', 'status': 'queued'}
+        other_rec = {'requestId': 'req-b', 'taskId': 'staff:a', 'status': 'completed', 'results': [{'result': {'publicationVerified': True}}]}
+        self.assertFalse(operating.reconcile_action_receipt(mismatch_act, other_rec, now=4))
+        self.assertEqual(mismatch_act['status'], 'queued')
+        self.assertFalse(bool(mismatch_act.get('publicationVerified')))
+
+        mismatch_task = {'requestId': 'req-a', 'taskId': 'staff:a', 'status': 'queued'}
+        other_task_rec = {'requestId': 'req-a', 'taskId': 'staff:b', 'status': 'completed', 'results': [{'result': {'publicationVerified': True}}]}
+        self.assertFalse(operating.reconcile_action_receipt(mismatch_task, other_task_rec, now=5))
+        self.assertEqual(mismatch_task['status'], 'queued')
+
+        anon_act = {'status': 'queued'}
+        named_rec = {'requestId': 'req-other', 'status': 'completed', 'results': [{'result': {'publicationVerified': True}}]}
+        self.assertFalse(operating.reconcile_action_receipt(anon_act, named_rec, now=6))
+        self.assertEqual(anon_act['status'], 'queued')
 
 
 if __name__ == '__main__':

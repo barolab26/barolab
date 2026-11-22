@@ -454,7 +454,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         for idx, filename in enumerate(images or [], 1):
             image = Path(filename).resolve()
             allowed_roots = (*tuple(jobs.ROOT / channel / 'output' for channel in
-                                   ('cf_posting', 'naver_blog_posting', 'naver_kin', 'threads_posting')), scratch)
+                                   ('cf_posting', 'naver_blog_posting', 'naver_cafe_posting', 'naver_kin', 'threads_posting', 'brunch_posting', 'youtube_posting')), scratch)
             if not image.is_file() or image.suffix.lower() not in ('.jpg', '.jpeg', '.png') or not any(image.is_relative_to(root.resolve()) for root in allowed_roots):
                 raise RuntimeError('검증된 작업 산출물 이미지 경로가 아닙니다.')
             original_images.append(image)
@@ -463,7 +463,7 @@ def generate_local(prompt, model, images=None, response_schema=None, audit_direc
         if audit_directory is not None:
             from PIL import Image
             audit_root = Path(audit_directory).resolve()
-            approved = tuple(jobs.ROOT / channel / 'output' for channel in ('cf_posting', 'naver_blog_posting', 'naver_kin', 'threads_posting'))
+            approved = tuple(jobs.ROOT / channel / 'output' for channel in ('cf_posting', 'naver_blog_posting', 'naver_cafe_posting', 'naver_kin', 'threads_posting', 'brunch_posting', 'youtube_posting'))
             if not any(audit_root.is_relative_to(root.resolve()) for root in approved):
                 raise RuntimeError('모델 진단 기록은 포스팅 산출물 폴더에만 저장할 수 있습니다.')
             call_id = uuid.uuid4().hex

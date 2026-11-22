@@ -58,6 +58,65 @@ class PublicationClaims(unittest.TestCase):
         model.assert_called_once()
         self.assertEqual(model.call_args.kwargs['agent_slot'], 'doctor')
 
+    def test_source_id_resolves_exact_observed_quote_without_retyping(self):
+        catalog=quality.source_quote_catalog(self.research['sources'])
+        key=next(iter(catalog))
+        response={**self.response,'claimSources':[{'claim':self.claim,'sourceId':'0','quote':key}]}
+        result=quality.ensure_publication_review(self.document,self.folder,generate=MagicMock(return_value=response))
+        self.assertEqual(result['status'],'passed')
+        self.assertEqual(result['claimSources'][0]['quote'],self.research['sources'][0]['text'])
+        self.assertEqual(json.loads((self.folder/'claim-review-model-response.json').read_text())['claimSources'][0]['quote'],key)
+
+    def test_source_id_does_not_waive_numeric_or_primary_source_checks(self):
+        self.research['sources'][0]['text']='보험 지급 한도는 10만원입니다.'
+        self.save_research()
+        key=next(iter(quality.source_quote_catalog(self.research['sources'])))
+        response={**self.response,'claimSources':[{'claim':self.claim,'sourceId':'0','quote':key}]}
+        with self.assertRaisesRegex(ValueError,'quote/number'):
+            quality.ensure_publication_review(self.document,self.folder,generate=MagicMock(return_value=response))
+        with self.assertRaisesRegex(ValueError,'mismatched'):
+            quality.resolve_source_quotes({'claimSources':[{'sourceId':'1','quote':key}]},quality.source_quote_catalog(self.research['sources']))
+
+    def test_publication_date_can_substantiate_its_year_without_waiving_amounts(self):
+        from common.content_improvement import fact_valid, number_tokens
+        source={'status':200,'text':'2026.10.06 보험 지급 한도는 100만원입니다.'}
+        quote=source['text']
+        self.assertTrue(fact_valid({'claim':'2026년 보험 지급 한도는 100만원입니다.',
+                                    'sourceId':'0','quote':quote},{'0':source}))
+        self.assertFalse(fact_valid({'claim':'2027년 보험 지급 한도는 1000만원입니다.',
+                                     'sourceId':'0','quote':quote},{'0':source}))
+        self.assertIn('6',number_tokens('2026.10.06'))
+        self.assertNotIn('2026',number_tokens('2026.13.06'))
+
+    def test_kepco_support_authority_does_not_trust_unrelated_enter_pages(self):
+        from common.content_improvement import primary_url
+        self.assertTrue(primary_url('https://en-ter.co.kr/support/bbs/faq/info.do'))
+        self.assertFalse(primary_url('https://en-ter.co.kr/community/example'))
+        self.assertFalse(primary_url('https://en-ter.co.kr/support/bbs/faq/info.do?account=private'))
+
+    def test_dated_official_year_abbreviation_does_not_create_amounts_or_other_years(self):
+        from common.content_improvement import fact_valid
+        text='2026-09-16 안내입니다. 정부는 ‘27년 모집과 ‘25년 국세청 소득을 안내했습니다.'
+        source={'status':200,'text':text}
+        quote='정부는 ‘27년 모집과 ‘25년 국세청 소득을 안내했습니다.'
+        self.assertTrue(fact_valid({'claim':'2027년 모집 및 2025년 국세청 소득',
+                                    'sourceId':'0','quote':quote},{'0':source}))
+        self.assertFalse(fact_valid({'claim':'2028년 모집 및 2025만원',
+                                     'sourceId':'0','quote':quote},{'0':source}))
+
+    def test_explicitly_rejected_example_is_not_an_asserted_quantity(self):
+        doc={**self.document,'contentHtml':'<p>'+self.claim+'</p><p>‘보험금 999만원’처럼 금액을 고정해서 판단하지 마세요.</p>'}
+        self.assertEqual(quality.ensure_publication_review(doc,self.folder,generate=MagicMock(return_value=self.response))['status'],'passed')
+        actual={**self.document,'contentHtml':'<p>'+self.claim+'</p><p>보험금 999만원이 지급됩니다.</p>'}
+        with self.assertRaisesRegex(ValueError,'primary-source evidence'):
+            quality.ensure_publication_review(actual,self.folder,generate=MagicMock(return_value=self.response))
+
+    def test_natural_korean_example_label_is_accepted_without_turning_it_into_a_fact(self):
+        example='예를 들어 보험 지급액을 999만원으로 놓고 비교합니다.'
+        response={**self.response,'hypotheticalClaims':[example]}
+        doc={**self.document,'contentHtml':'<p>'+self.claim+'</p><p>'+example+'</p>'}
+        self.assertEqual(quality.ensure_publication_review(doc,self.folder,generate=MagicMock(return_value=response))['status'],'passed')
+
     def test_collected_long_source_hash_survives_research_storage_and_review(self):
         from common import source_discovery
         body = self.claim + ' 적용 대상과 지급 조건을 확인합니다.' * 1000
@@ -70,7 +129,7 @@ class PublicationClaims(unittest.TestCase):
              patch('dashboard.agents.synapse.research_query', side_effect=lambda keyword, folder: keyword), \
              patch('common.crew_chat_bridge.emit_work_event'), \
              patch('common.crew_chat_bridge.work_task_id', return_value='fixture'):
-            collected = source_discovery.research('fixture', self.folder)
+            collected = source_discovery.research('보험', self.folder)
         stored = json.loads((self.folder / 'research.json').read_text(encoding='utf-8'))
         self.assertEqual(stored['sources'], collected)
         self.assertEqual(len(collected[0]['text']), 9000)
@@ -84,6 +143,10 @@ class PublicationClaims(unittest.TestCase):
         response = {**self.response, 'claimSources': [], 'highRiskClaims': []}
         with self.assertRaisesRegex(ValueError, 'primary-source evidence'):
             quality.ensure_publication_review(self.document, self.folder, generate=MagicMock(return_value=response))
+
+    def test_collected_source_alone_cannot_auto_approve_sensitive_draft(self):
+        with self.assertRaisesRegex(ValueError, 'source collection alone'):
+            quality.ensure_publication_review(self.document, self.folder)
 
     def test_source_quote_and_sensitive_number_must_match(self):
         self.research['sources'][0]['text'] = '보험 지급 한도는 10만원입니다.'
@@ -170,6 +233,7 @@ class PublicationClaims(unittest.TestCase):
              patch.object(naver, 'write_attempt'), patch.object(naver, 'read_journal', return_value={'attempts': []}), \
              patch.object(naver, 'start_browser') as browser, \
              patch('common.ubuntu_naver_browser.close_account'), \
+             patch('common.naver_reader.ensure_reader_review', return_value={'status':'passed'}), \
              patch.object(quality, 'ensure_publication_review', side_effect=ValueError('draft held')):
             with self.assertRaisesRegex(ValueError, 'draft held'):
                 naver.run_basic_pipeline('fixture', folder=folder)

@@ -158,6 +158,40 @@ def validate_basic_article(article):
         for key, value in tag.attrs.items():
             if key.lower().startswith('on') or (key.lower() in ('href', 'src') and str(value).lower().lstrip().startswith(('javascript:', 'data:text/html'))):
                 raise ValueError('Unsafe HTML attribute')
+    validate_cf_reader_content(article)
+    return article
+
+
+def validate_cf_reader_content(article, *, published=False):
+    """Reject observed CF content failures; captions/widgets cannot prove topic fit."""
+    from common.content_quality import validate_no_refusal_or_corruption
+    soup = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
+    for node in list(soup.select('figure, script, style, nav, aside, [data-cf-interactive-widget]')):
+        node.decompose()
+    body = soup.get_text(' ', strip=True)
+    incomplete = (
+        '본문 흐름에 맞게 기재', '기본 자격 요건: 해당 항목별 기본 가이드라인',
+        '정부 지원 및 공식 서비스가 제공하는 실질적 혜택 총망라',
+        '제가 확인한 자료에서 중간에 끊겨 있어',
+        '수수료 등 비용 조건은 제가 가진 자료에서 확인되지 않았습니다',
+    )
+    if any(value in body for value in incomplete):
+        raise ValueError('CF reader gate: incomplete or unrelated template text')
+    if len(body) < 80:
+        raise ValueError('draft held: CF reader gate: article body cannot fulfill its title')
+    # Do not accept a repeated title or summary card as evidence of subject coverage.
+    for node in list(soup.find_all(['p', 'div', 'h2', 'h3'])):
+        if node.parent is not None and node.get_text(' ', strip=True) == article.get('title'):
+            node.decompose()
+    validate_no_refusal_or_corruption({
+        'title': article.get('title', ''), 'summary': '', 'contentHtml': str(soup),
+    })
+    if published:
+        live = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
+        for image in live.find_all('img'):
+            src = str(image.get('src') or '')
+            if not src or '{{' in src or src.startswith(('images/', 'file:', 'data:')):
+                raise ValueError('CF reader gate: unresolved published image')
     return article
 
 from common.source_discovery import research as basic_research
@@ -179,16 +213,10 @@ def article_image_sections(article):
             spec = next((x for x in specs if isinstance(x, dict) and x.get('sectionHeading') == heading), {})
             sections.append({'id': f'section-{index}', 'index': index, 'heading': heading,
                              'body': '', 'purpose': spec.get('purpose') or 'evidence',
-                             'image_optional': spec.get('image_optional') is True})
+                             'image_optional': spec.get('image_optional', True) is True})
         else:
             sections[-1]['body'] += ('\n' if sections[-1]['body'] else '') + node.get_text(' ', strip=True)
     sections[0]['body'] = sections[0]['body'] or article.get('summary', '')
-    req_cnt = 0
-    for sec in sections:
-        if not sec['image_optional']:
-            req_cnt += 1
-            if req_cnt > 3:
-                sec['image_optional'] = True
     return sections
 
 
@@ -270,6 +298,9 @@ def verify_article_images(article, folder):
         hold_editorial_images(folder, 'prepared_images_have_no_browser_evidence; reprepare in a new draft folder')
     result = require_editorial_images(article['title'], article_image_sections(article), folder,
                                       channel='cf', existing=result)
+    if any(a.get('origin') != 'screenshot' or (a.get('evidence') or {}).get('flowGenerated')
+           for a in result['assets']):
+        hold_editorial_images(folder, 'cf_requires_source_bound_browser_screenshots')
     plans = [_cf_image_plan(a) for a in result['assets']]
     digest = hashlib.sha256(article['contentHtml'].encode('utf-8')).hexdigest()
     if article.get('imagePlans') != plans or article.get('imageDocumentSha256') != digest:
@@ -298,6 +329,8 @@ def ensure_article_images(article, folder, domain=None):
     if domain:
         basic_progress(domain, 5, '실제 자료 이미지 검색·검토', 75, article.get('title', domain))
     result = require_editorial_images(article['title'], sections, folder, sources=sources, channel='cf')
+    from common.editorial_images import append_observed_image_sources
+    append_observed_image_sources(folder, result)
     soup = BeautifulSoup(article['contentHtml'], 'html.parser')
     headings = soup.find_all('h2')
     plans = []
@@ -395,8 +428,9 @@ def validate_cached_cf_evidence(article, folder, keyword):
     """Fail closed with one preserved repair revision; never relabel old collection times."""
     from common.content_quality import validate_research_freshness
     try:
-        if article_topic_consistency(article, folder, keyword):
-            raise ValueError('Input/research/article topic identity mismatch; independent factual review required')
+        topic_issues=article_topic_consistency(article, folder, keyword)
+        if topic_issues:
+            raise ValueError('Input/research/article topic identity mismatch; independent factual review required: '+json.dumps(topic_issues))
         research = json.loads((folder / 'research.json').read_text(encoding='utf-8'))
         validate_research_freshness(article, research)
         sources = research.get('sources')
@@ -438,7 +472,7 @@ def validate_cached_cf_evidence(article, folder, keyword):
                     json.dump(payload, handle, ensure_ascii=False, indent=2)
                     handle.flush(); os.fsync(handle.fileno())
             except FileExistsError:pass
-        raise ValueError('Draft held: cached evidence requires the registered bounded repair revision') from exc
+        raise ValueError('Draft held: cached evidence requires the registered bounded repair revision: '+str(exc)) from exc
 
 
 def basic_article(domain, item, folder):
@@ -463,22 +497,13 @@ def basic_article(domain, item, folder):
         handoff = folder / 'handoff.json'
         if handoff.is_file() and json.loads(handoff.read_text(encoding='utf-8')).get('domain') not in (None, domain):
             raise ValueError('Saved article belongs to another domain')
-        article = validate_basic_article(json.loads(path.read_text(encoding='utf-8')))
+        article = json.loads(path.read_text(encoding='utf-8'))
         receipt = folder / 'publication-receipt.json'
         if receipt.is_file() and json.loads(receipt.read_text(encoding='utf-8')).get('state') in ('published', 'accepted', 'submitting', 'submission_unknown'):
             return article
-        body_check = BeautifulSoup(article.get('contentHtml', ''), 'html.parser').get_text(' ', strip=True)
-        summary_check = str(article.get('summary') or '')
-        is_refusal_or_broken = (
-            len(body_check) < 400
-            or not BeautifulSoup(article.get('contentHtml', ''), 'html.parser').find('h2')
-            or bool(re.search(r'(원고\s*작성에\s*필요한.*없어|원고\s*작성이\s*보류됐습니다|제공해\s*주시면.*작성하겠습니다|보내주시면.*작성하겠습니다|제공된\s*연구자료가)', body_check + ' ' + summary_check))
-        )
-        if is_refusal_or_broken and type(basic_research).__module__ == 'common.source_discovery':
-            path.unlink(missing_ok=True)
-            for fn in ('editor-content.json', 'editorial-images.json', 'photo-plan.json', 'image-preparation-status.json', 'evidence-refresh-request.json'):
-                (folder / fn).unlink(missing_ok=True)
     if path.is_file():
+        from common.editorial_recovery import review_and_repair
+        review_and_repair(article,folder,[lambda d:validate_basic_article(d)])
         target_kw = planned_kw or article.get('mainKeyword') or item.get('mainKeyword') or ''
         if not article.get('editorialImages'):
             soup_clean = BeautifulSoup(article.get('contentHtml', ''), 'html.parser')
@@ -521,11 +546,16 @@ def basic_article(domain, item, folder):
             res_obj['keyword'] = ref_kw
             res_obj['requestedKeyword'] = ref_kw
             if not res_obj.get('sources'):
-                txt = str(article.get('summary') or article.get('title') or ref_kw)
-                res_obj['sources'] = [{'url': f'https://www.{domain}/', 'status': 200, 'text': txt, 'textSha256': hashlib.sha256(txt.encode('utf-8')).hexdigest()}]
+                raise ValueError('Draft held: no observed public source after refresh')
             write(res_path, res_obj)
             validate_cached_cf_evidence(article, folder, planned_kw)
-        return ensure_article_images(article, folder, domain=domain)
+        from common.content_quality import ensure_publication_review
+        from common.llm_client import generate_json
+        review_and_repair(article,folder,[lambda d:ensure_publication_review(d,folder,generate=generate_json)])
+        write(path,article)
+        article = ensure_article_images(article, folder, domain=domain)
+        ensure_publication_review(article, folder, generate=generate_json)
+        return article
     from common.work_agenda import new_authoring_allowed
     if not new_authoring_allowed('cf_blog', domain=domain):
         raise ValueError('Draft held: new_authoring_requires_focused_agenda')
@@ -567,6 +597,9 @@ def basic_article(domain, item, folder):
     item['mainKeyword'] = keyword
     basic_progress(domain,2,'리서치',25,str(keyword))
     sources = basic_research(keyword, folder, exact_query=True)
+    if not sources:
+        raise ValueError('Draft held: no relevant observed public source; collect evidence before writing')
+    from dashboard.agents.style_strategy import search_writing_context
     from common.llm_client import generate_json
     sec_img_schema = {
         'type': 'object',
@@ -575,8 +608,9 @@ def basic_article(domain, item, folder):
             'image_optional': {'type': 'boolean'},
             'imagePrompt': {'type': 'string'},
             'imageCaption': {'type': 'string'},
+            'purpose': {'type': 'string'},
         },
-        'required': ['sectionHeading', 'imagePrompt', 'imageCaption', 'image_optional'],
+        'required': ['sectionHeading', 'imagePrompt', 'imageCaption', 'purpose', 'image_optional'],
         'additionalProperties': False,
     }
     schema = {
@@ -593,41 +627,39 @@ def basic_article(domain, item, folder):
     persona = dom_meta.get('persona', '분야별 전문 에디터')
     title_style = dom_meta.get('titleStyle', '핵심 키워드 + 구체적 해결 가이드형')
     writing_tone = dom_meta.get('writingTone', '독자의 상황에 맞춰 핵심 기준과 실전 해결책을 자연스럽게 설명하는 전문 블로거 톤.')
-    prompt = CONTENT_QUALITY_POLICY + '\n' + (
-        f'당신은 [{domain}] 블로그의 전담 필진인 "{persona}"이다. 독자가 끝까지 읽고 행동하게 만드는 진짜 사람의 한국어 블로그 원고를 작성한다. "공무원 공고문 요약 매크로"나 기계적인 템플릿 말투는 절대 쓰지 않는다.\n'
-        f'[이 도메인({domain})의 고유 페르소나 & 문체 규칙]\n'
-        f'- 전문 분야: {dom_meta.get("niche", "")} ({dom_meta.get("desc", "")})\n'
-        f'- 고유 문체(Tone & Manner): {writing_tone}\n'
-        f'- 고유 제목 스타일: {title_style}\n'
-        '[4대 집필 원칙 (필수 준수)]\n'
-        f'1. 제목(title — 검색어 전진 배치 & 도메인 맞춤형 후킹): 제목 앞머리에 타깃 검색어("{keyword}")의 핵심 명사 어절을 자연스럽게 배치하고, 이 도메인의 제목 스타일({title_style})에 맞춰 독자가 클릭하고 싶어지는 구체적 이득·해결 포인트를 붙여라. (16개 블로그가 똑같은 쉼표 패턴으로 보이지 않도록 `: `, ` · `, ` - `, 자연스러운 서술형 등을 주제에 맞게 활용하라.)\n'
-        '2. 도입부(contentHtml 첫 1~2문단): 교과서적 정의나 "이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑으로 시작하지 마라. 독자가 이 검색어를 검색할 때 겪는 가장 현실적인 고민·궁금증·손실 포인트를 첫 문장부터 짚고, 핵심 결론이나 수치/기준을 바로 제시하라.\n'
-        '3. 본문(contentHtml — 도메인 맞춤형 구조 + 실용 정리표 + 모바일 2~3줄 호흡):\n'
-        '   - 어려운 용어를 나열하지 말고 독자가 스마트폰을 보며 내 상황에 바로 적용할 수 있게 구체적인 사례와 수치를 들어 설명하라.\n'
-        '   - 본문 중간에는 주제 성격에 맞는 실용 비교/정리 <table>(예: 정책/금융은 자격·금액 비교표, 건강은 수치·증상별 가이드표, 맛집/나들이/여행은 시간대·주차·코스·요금 정리표, IT/살림은 옵션·비율·단계별 비교표)을 1개 포함하라.\n'
-        '   - 한 문단(<p>)은 스마트폰 화면 기준 2~3줄이 넘지 않게 호흡을 짧고 자연스럽게 끊어 써라.\n'
-        '4. 마무리(실천 가이드): 마지막 문단에 "해설 글이며 개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 관료적 면책 문구를 절대 넣지 마라. 대신 독자가 글을 읽은 직후 바로 실행할 수 있는 실전 팁(먼저 챙길 준비물, 확인해볼 설정 메뉴, 방문/신청 팁 등)으로 자연스럽게 마무리하라.\n'
-        '[시각 자료 및 기술 규칙]\n'
-        '- imagePrompt와 sectionImages.imagePrompt는 실제 웹 자료를 찾을 검색 의도로 작성한다. 정보성 글과 사건·이슈 글 모두 해당 문단의 인물·사건·장소·시점·기관에 정확히 맞는 실제 자료를 사용한다. 생성 사진이나 모사 화면을 요청하지 않는다.\n'
-        '- imageCaption과 sectionImages.imageCaption에는 독자에게 자연스러운 한국어 사진 설명을 한 줄로 작성하고, sectionImages에는 모든 본문 <h2> 구간을 포함하고 sectionHeading에 해당 소제목을 정확히 기입한다. 실제 화면·사건·인물·장소를 보여주어야 하는 섹션은 image_optional=false로, 이미지가 사실 확인에 필요 없는 정리·설명은 image_optional=true로 적는다.\n'
-        '- topicSlug는 영문 소문자·하이픈 조합으로 작성하며, 등록된 categories 중 하나를 선택한다.\n'
-        '[절대 금지 가드레일]\n'
-        '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 (단, 자료의 한계를 변명하는 "제공된 자료에서는 알 수 없습니다", "이 글은 제공된 안내를 바탕으로..." 같은 리서치 메타 발언은 본문에 절대 노출 금지)\n'
-        '- AI/봇 메타 발언("AI 생성", "참고사진") 및 면피·회피성 문구("공식 공고 참고", "조회 서비스가 아닙니다", "담당자에게 질문하세요", "조건에 따라 달라집니다") 절대 금지.\n'
-        + f'- [당일 타 도메인 및 최근 14일 중복 절대 금지]: 이미 사용된 주제/제목/슬러그({json.dumps(used_today[:20], ensure_ascii=False)})와 겹치는 주제나 슬러그는 절대 작성하지 마라.\n'
-        + json.dumps({'domain': domain, 'topic': keyword, 'categories': registered_categories(domain), 'research': sources}, ensure_ascii=False)
-    )
+    prompt = CONTENT_QUALITY_POLICY + '\n' + json.dumps({
+        'businessGoal': '독자의 검색 과제를 해결하는 유용한 글을 만들고, 검색 유입과 회사 수익 기여 여부를 실측한다.',
+        'assignment': {'domain':domain,'topic':keyword,'persona':persona,'niche':dom_meta.get('niche',''),
+                       'audienceContext':dom_meta.get('desc','')},
+        'editorialAuthority': '담당자가 자료와 독자에게 맞는 구성, 문체, 분량, 표와 이미지의 필요성을 직접 판단한다. 벤치마크는 판단 자료다.',
+        'observedSources': sources, 'observedSearchContext': search_writing_context(folder),
+        'recentlyUsedTopics': used_today[:20], 'availableCategories':registered_categories(domain),
+        'deliveryFormat': 'JSON의 contentHtml에 읽을 수 있는 HTML을 담고, 이미지 담당자에게 전달할 의도는 sectionImages.purpose에 기록한다. sectionHeading은 대응하는 본문 H2와 일치시킨다. topicSlug는 URL용 영문 소문자와 하이픈을 쓴다. 실제 이미지 파일은 이 단계에서 삽입하지 않는다.'
+    },ensure_ascii=False)
     basic_progress(domain,4,'원고 작성',55,str(keyword))
+    prompt += ('\n이미지와 원고의 공통 계약: sectionImages.purpose에 수집한 실제 source URL과 그 페이지의 관측 문구를 명시한다. '
+               '사실 확인에 필요한 이미지는 실제 자료로 보여 줄 수 있는 단일 주장에만 배정한다. '
+               '로그인·결제·개인 신청내역은 공개 도움말 화면으로 설명하며 실제 처리를 했다고 쓰지 않는다. '
+               '자료에서 보지 못한 사진·도표·재료 비교 장면을 필수 이미지로 상상하지 않는다. '
+               '독자의 이해에 추가 가치가 없는 장면은 image_optional=true로 두며 이미지 개수를 강제하지 않는다.')
     raw_article = generate_json(prompt, agent_slot='cf_pipeline', response_schema=schema, audit_directory=folder / 'model-audit', timeout_seconds=600)
     if isinstance(raw_article, dict) and not str(raw_article.get('category') or '').strip():
         cats = registered_categories(domain)
         if cats:
             raw_article['category'] = cats[0]
-    article = validate_basic_article(raw_article)
+    from common.editorial_recovery import review_and_repair
+    article=raw_article
+    review_and_repair(article,folder,[lambda d:validate_basic_article(d)])
     article['mainKeyword'] = clean_naver_search_keyword(keyword)
     article['title'] = enforce_naver_seo_title(article.get('title', ''), keyword, domain=domain)
     write(path, article)
-    return ensure_article_images(article, folder, domain=domain)
+    from common.content_quality import ensure_publication_review
+    # Reject unsupported claims before spending the screenshot acquisition budget.
+    review_and_repair(article,folder,[lambda d:ensure_publication_review(d,folder,generate=generate_json)])
+    write(path,article)
+    article = ensure_article_images(article, folder, domain=domain)
+    ensure_publication_review(article, folder, generate=generate_json)
+    return article
 
 def ping_indexnow(domain, public_url):
     key = ''
@@ -678,12 +710,15 @@ def verify_live_published_visuals(url, folder):
         shot_path = Path(folder) / 'live-browser-verified.png'
         script = f"""
 const existing = await listTaskSpaces();
-const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-cf-verify") : null;
-const task = found ? await taskSpace(found.id) : await taskSpace("barolab-cf-verify", {{ profileId: "Default" }});
+const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-cf-flow") : null;
+if(!found || found.ownership!=="agent")throw Error("working_taskspace_unavailable");
+const task = await taskSpace(found.id);
+if(task.ownership!=="agent")throw Error("user_takeover");
+const page = await task.newPage();
+let completed=false;
 try {{
-const page = task.page("p1");
 await page.goto({json.dumps(url)}, {{ waitUntil: "domcontentloaded", timeout: 25000 }});
-await page.waitForTimeout(2000);
+await page.waitForFunction(()=>document.readyState==='complete',undefined,{{timeout:10000}});
 const report = await page.evaluate(async () => {{
   const figs = Array.from(document.querySelectorAll("figure.post-image, article figure"));
   const items = [];
@@ -707,9 +742,10 @@ const report = await page.evaluate(async () => {{
   return {{ url: location.href, figureCount: items.length, figures: items }};
 }});
 await page.screenshot({{ path: {json.dumps(str(shot_path.resolve()))}, fullPage: false }});
+completed=true;
 console.log("BAROLAB_EGO_JSON:" + JSON.stringify({{ ok: true, report }}));
 }} finally {{
-  await task.finish({{ keep: [] }}).catch(() => {{}});
+  if(completed && task.ownership==="agent")await page.close();
 }}
 """
         res = run_ego_mjs(script, timeout=45)
@@ -810,39 +846,10 @@ def publish_basic_article(domain, article, folder):
     verify_rendered_images(content, plans, folder, urls=urls)
     if re.search('\\{\\{IMAGE|src=[\\"\\\'](?:images/|file:)', content):
         raise ValueError('Unresolved image reference')
-    try:
-        soup_pub = BeautifulSoup(content, 'html.parser')
-        for fc in soup_pub.find_all('figcaption'):
-            for bad_a in list(fc.find_all('a')):
-                if 'flow.google.com' in (bad_a.get('href') or '') or bad_a.get_text(strip=True).strip('() ') == '참고':
-                    bad_a.decompose()
-            a_el = fc.find('a')
-            raw_txt = fc.get_text(' ', strip=True)
-            if a_el and a_el.get('style') != 'display:none':
-                lbl = a_el.get_text(' ', strip=True)
-                if raw_txt.endswith(lbl):
-                    raw_txt = raw_txt[:-len(lbl)].rstrip(' ·|｜-')
-            clean_t = re.split(r'(?i)(?:\s*(?:·|\||｜|;)\s*|\.\s+)(?:감수|출처|저자|작성자|작성|자료검토|제공|담당|담당부서|문의|보도|영상|사진\s*=|copyright|©|ⓒ)\b', raw_txt)[0].strip()
-            clean_t = re.sub(r'(?i)\s*\((?:감수|출처|작성|담당|보도|영상|사진|copyright|©|ⓒ|all\s*rights)[^)]*\)\s*', '', clean_t).strip()
-            clean_t = re.sub(r'(?i)\s*(?:©|ⓒ|copyright)\s*.*$', '', clean_t).strip()
-            clean_t = re.sub(r'\s*\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*수정\.?\s*$', '', clean_t).strip()
-            clean_t = re.sub(r'\s*(?:확인\s*가이드|참고)\s*$', '', clean_t).strip(' ·')
-            if clean_t:
-                if not clean_t.startswith('▲'):
-                    clean_t = f'▲ {clean_t}'
-                fc.clear()
-                if a_el and a_el.get('style') != 'display:none':
-                    fc.append(f'{clean_t} · ')
-                    fc.append(a_el)
-                elif a_el:
-                    fc.append(clean_t)
-                    fc.append(a_el)
-                else:
-                    fc.append(clean_t)
-        content = str(soup_pub)
-    except Exception:
-        pass
+    # Captions and page-level credits were approved with the exact pixels above.
+    # Do not strip contributor, date, or copyright text after that review.
     thumb_url = urls[0] if urls else ''
+    validate_cf_reader_content({**article, 'contentHtml': content}, published=True)
     payload = {
         'title': article['title'],
         'content': content,
@@ -870,6 +877,7 @@ def publish_basic_article(domain, article, folder):
 
 
 def slot_due(item, now):
+    if item.get('status')=='unallocated':return False
     if (item.get('retryable') is False or item.get('status') in (
             'published', 'published_verified', 'verified', 'accepted', 'submitted',
             'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending')
@@ -966,9 +974,10 @@ def load_current_schedule():
     for index, domain in enumerate(ALL_DOMAINS):
         prior = old.get(domain, {})
         item = {key: prior[key] for key in ('order','id','name','color','icon','category') if key in prior}
+        from common.operating_plan import enabled as adaptive_enabled
         item.update(domain=domain, order=index+1, id=prior.get('id', index+1),
                     scheduledTime=prior.get('scheduledTime', f'{9+(30+50*index)//60:02d}:{(30+50*index)%60:02d}'),
-                    status='waiting')
+                    status='unallocated' if adaptive_enabled() else 'waiting')
         items.append(item)
     schedule = {'date': today, 'items': items}
     save_schedule_file(SCHEDULE_JSON, schedule)

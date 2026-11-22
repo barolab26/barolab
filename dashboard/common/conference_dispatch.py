@@ -26,12 +26,19 @@ def request(kind, arguments, *, one=False, automatic=None):
     deferred_preparation = False
     for item in choices:
         existing = _existing_concrete_work(kind, item)
+        from common.naver_ab import approved_request
+        approved_workflow = approved_request(kind, item)
+        if approved_workflow:
+            from naver_blog_posting.posting import pipeline_busy
+            if pipeline_busy():
+                receipts.append({'status':'owned_workflow_in_progress','arguments':item})
+                continue
         if (automatic and not existing and kind == 'parameters' and item.get('action') == 'cf-prepare'
                 and arguments.get('action') in ('prepare', 'cf-cycle') and not arguments.get('account')
                 and not cf_preparation_window_open(item)):
             deferred_preparation = True
             continue
-        if automatic and not existing:
+        if automatic and not existing and not approved_workflow:
             project = {'threads':'threads','kin':'naver_kin'}.get(kind, 'cf_blog' if item.get('action') in ('cf','cf-prepare') else 'naver_blog')
             experiment = load(agendas.STATE).get('activeExperiment') or {}
             if project == 'threads':
@@ -40,7 +47,7 @@ def request(kind, arguments, *, one=False, automatic=None):
             if project not in ('threads','cf_blog') or not agendas.autonomous_experiment_allows(project,
                     target_url=item.get('targetUrl',''), domain=item.get('account','') if project=='cf_blog' else ''):
                 continue
-        rec = _request_single(kind,item,automatic=automatic and not existing)
+        rec = _request_single(kind,item,automatic=automatic and not existing and not approved_workflow)
         receipts.append(rec)
         if one and rec.get('status') == 'conference_requested':
             break
@@ -106,8 +113,11 @@ def concrete_requests(kind, arguments):
             day=max(day,plan['effectiveDate'])
             from naver_blog_posting.posting import needs_quality_revision
             nv_eff=plan.get('naverEffectiveDate')
-            nv_map=plan['naverPrior'] if (nv_eff and day<nv_eff and plan.get('naverPrior')) else plan['naver']
+            from common.channel_parameters import naver_slots_for_date
+            from common.operating_plan import account_available
+            nv_map=naver_slots_for_date(plan,day)
             for account,settings in nv_map.items():
+                if not account_available('naver_blog',account):continue
                 for slot in settings['slots']:
                     slot_folder=folder_for('naver_blog_posting',day,account+'-'+slot.replace(':',''))
                     receipt=load(slot_folder/'reservation-evidence.json')
@@ -120,6 +130,8 @@ def concrete_requests(kind, arguments):
                 for domain,slot in plan['cf'].items():
                     if domain in pub_domains:
                         continue
+                    from common.cf_recovery import owns_slot
+                    if owns_slot(day,domain,slot=slot):continue
                     folder=folder_for('cf_posting',day,domain)
                     pub_rec = load(folder/'publication-receipt.json')
                     if (pub_rec.get('state') == 'published' and pub_rec.get('publicPublicationVerified')) or ((folder/'photo-plan.json').is_file() and (folder/'article.json').is_file()):
@@ -128,9 +140,13 @@ def concrete_requests(kind, arguments):
         elif action in ('dispatch','cf-cycle'):
             import cf_posting.posting as cf_engine
             schedule=cf_engine.load_current_schedule()
+            from common.operating_plan import cf_folder, account_available
             for item in sorted(schedule.get('items',[]),key=lambda r:r.get('scheduledTime','')):
-                domain=item.get('domain');slot=plan['cf'].get(domain)
-                folder=folder_for('cf_posting',today,domain)
+                domain=item.get('domain');slot=item.get('scheduledTime') or plan['cf'].get(domain)
+                if not account_available('cf_blog',domain):continue
+                from common.cf_recovery import owns_slot
+                if owns_slot(today,domain,slot=slot):continue
+                folder=cf_folder(item,today,folder_for('cf_posting',today,domain))
                 if slot and slot <= now.strftime('%H:%M') and (folder/'photo-plan.json').exists() and item.get('status') not in ('published','failed','error'):
                     result.append({'action':'cf','date':today,'account':domain,'slot':slot})
                 elif action=='cf-cycle' and slot and item.get('status') not in ('published','failed','error'):
@@ -159,7 +175,7 @@ def concrete_requests(kind, arguments):
             parts=db.execute("SELECT * FROM parts WHERE account_key=? AND publication_date=?",(config['account_key'],day)).fetchall()
             latest=engine._threads_scheduler_current_slot(config,now)
             for part in parts:
-                due=part['kind']=='main' and part['slot']==latest
+                due=part['kind']=='main' and part['slot']<=now.strftime('%H:%M')
                 if part['kind']=='followup':
                     parent=next((p for p in parts if p['attempt_id']==part['attempt_id'] and p['kind']=='main' and p['state']=='published_verified'),None)
                     due=bool(parent and engine._threads_pipeline_is_followup_delay_satisfied(parent,json.loads(part['document']),now))
@@ -169,7 +185,8 @@ def concrete_requests(kind, arguments):
             used.update(r[0] for r in db.execute('SELECT slot FROM authoring_slots WHERE account_key=? AND day=?',(config['account_key'],day)))
             slot=engine._threads_scheduler_current_slot(config,now,used)
             attempted=sum(p['kind']=='main' and p['state'] in ('sending_intent','submitted_unknown','api_submitted','published_verified') for p in parts)
-            if slot and attempted<config['mainDailyCap']:
+            from common.operating_plan import cap_reached,account_available
+            if slot and not cap_reached(attempted,config['mainDailyCap']) and account_available('threads',config['account_key']):
                 return [{'date':day,'account':config['account_key'],'slot':slot}]
         return []
     raise ValueError('Unknown conference channel')
@@ -206,6 +223,10 @@ def _request_single(kind, arguments, *, automatic=False):
             except Exception:
                 not_before = 0
         source={'conferenceId':key,'kind':kind,'arguments':arguments,'businessPurpose':purpose}
+        from common.naver_ab import approved_request
+        approved_workflow=approved_request(kind,arguments)
+        if approved_workflow:
+            source['approvedWorkflowExperiment']=approved_workflow
         if automatic:
             experiment=load(agendas.STATE).get('activeExperiment') or {}
             source.update(autonomousExperiment=True,experimentId=experiment.get('id'),
@@ -234,12 +255,8 @@ def _request_single(kind, arguments, *, automatic=False):
             if not row.get('businessAgendaId'):
                 row['businessAgendaId']=business;write(path,row)
             biz_row = agendas.get(business)
-            if row.get('status') in ('failed', 'unknown') and biz_row and biz_row.get('status') == 'queued' and not biz_row.get('verification', {}).get('verified'):
-                row.update(status='queued', retryAt=0, attempts=1, requestedAt=time.time())
-                for k in ('errorType', 'failureReason', 'failureDiagnostic', 'failureReport', 'interruptedAt', 'completedAt'):
-                    row.pop(k, None)
-                write(path, row)
-                return {'status': 'conference_requested', 'agendaId': key, 'requestedAt': row['requestedAt'], 'businessAgendaId': business}
+            # A queued agenda is not retry authority. Only the native original-work
+            # resume tools may consume new reviewed input; unknown effects stay fenced.
             # A timer tick cannot replace a failed/finished business attempt.
             return {'status':'conference_'+row['status'],'agendaId':key,'requestedAt':row['requestedAt'],'businessAgendaId':business}
         if row.get('status') in ('queued', 'running'):
@@ -598,6 +615,10 @@ def conference_failure_reason(exc):
     """Retain a safe actionable cause rather than only the outer RuntimeError."""
     for _ in range(8):
         message = str(exc)
+        if 'RouteCoolingDown' in message or 'model_route_cooling_down' in message:
+            return 'model_route_cooling_down'
+        if 'editorial_images_held' in message:
+            return 'editorial_images_held'
         if isinstance(exc,FileExistsError):
             return 'execution_evidence_directory_collision'
         if 'Verified browser window is not visible on DISPLAY for port ' in message:
@@ -746,7 +767,7 @@ def _work(identity):
                     dispatch = engine._threads_scheduler_tick()
                 if isinstance(dispatch,dict):
                     row['eligibility'] = {k:dispatch[k] for k in ('state','status','reason') if k in dispatch}
-            if row['kind']=='threads' and not engine._conference_results and row['arguments'].get('slot'):
+            if row['kind']=='threads' and not engine._conference_results and row['arguments'].get('slot') and (row.get('eligibility') or {}).get('status')!='busy':
                 # Authoring and its matching main post finish inside the SAME agenda.
                 config=engine._threads_config_load()
                 with engine._threads_pipeline_connect() as db:
@@ -945,7 +966,7 @@ def authorize_repaired_retry(current, original, task_id, plan_sha256):
         'workId':target['workId'], 'approvedDocumentSha256':plan['approvedDocumentSha256']}
 
 
-def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
+def retry_active(*, repair_task_id=None, repair_plan_sha256=None, editorial_revision=None):
     from common import work_agenda as agendas
     current=agendas.require()
     target=current.get('workTarget') or current.get('source',{})
@@ -972,9 +993,14 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
         if row.get('businessAgendaId')!=current['id'] or (row.get('status')!='failed' and not (row.get('status')=='completed' and not row.get('outcomes') and (kind=='threads' or (row.get('eligibility') or {}).get('status')=='busy'))) or any(p.get('pid') != os.getpid() for p in agendas.running(current)):
             raise ValueError('Original attempt is pending, unknown or owned by a live execution')
         if row.get('attempts',1)>=limit:
-            if kind in ('kin','threads') or args.get('action') == 'cf-prepare':raise ValueError('Original retry budget is exhausted')
-            generation=authorize_repaired_retry(current,row,repair_task_id,repair_plan_sha256)
-            row['executionGeneration']=generation
+            if editorial_revision is not None:
+                from common.editorial_recovery import reviewed_input_revision
+                revision=reviewed_input_revision(current,row,editorial_revision)
+                row.setdefault('editorialInputRevisions',[]).append(revision)
+            else:
+                if kind in ('kin','threads') or args.get('action') == 'cf-prepare':raise ValueError('Original retry budget is exhausted')
+                generation=authorize_repaired_retry(current,row,repair_task_id,repair_plan_sha256)
+                row['executionGeneration']=generation
         if kind=='kin':row['retryTarget']=kin_retry_target(row)
         terminal_raw=file.read_bytes();terminal_sha=hashlib.sha256(terminal_raw).hexdigest()
         archive=QUEUE/'attempt-receipts'/(identity+'-'+str(row.get('attempts',1))+'-'+terminal_sha+'.json')
@@ -986,6 +1012,8 @@ def retry_active(*, repair_task_id=None, repair_plan_sha256=None):
         row.setdefault('attemptHistory',[]).append({**{k:row.get(k) for k in ('status','failureReason','errorType','completedAt','outcomes','eligibility','executionFailures')},
             'terminalReceipt':{'path':str(archive),'sha256':terminal_sha,'attempt':row.get('attempts',1)}})
         row.update(status='queued',attempts=row.get('attempts',1)+1,retryRequestedAt=time.time())
+        for key in ('errorType','failureReason','failureDiagnostic','failureReport','interruptedAt','completedAt','outcomes','eligibility','executionFailures'):
+            row.pop(key,None)  # The immutable terminal receipt above retains the old attempt in full.
         if agendas.require()['id']!=current['id']:raise ValueError('Agenda ownership changed before retry consumption')
         from common.dashboard_jobs import write as durable_write
         durable_write(file,row,durable=True)

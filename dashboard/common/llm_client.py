@@ -190,7 +190,7 @@ def format_writer_badge(provider, model):
         return {
             'abArm': 'gemini',
             'writerProvider': p or 'agy',
-            'writerModel': str(model or 'gemini-2.5-pro'),
+            'writerModel': str(model or 'gemini-3.8-flash-medium'),
             'writerBadge': '🔵 Gemini Pro',
             'writerShortBadge': '🔵 Gemini',
             'writerFamily': 'Gemini (AGY)',
@@ -357,7 +357,11 @@ def memory_call(function):
             session_id = str(explicit_session)
         event_id = 'llm:' + uuid.uuid4().hex
         is_writer = is_article_writer_call(kwargs.get('agent_slot'), kwargs.get('response_schema'), prompt)
-        if is_writer:
+        from common.naver_ab import CURRENT as workflow_context, writer_prompt, polish_article
+        workflow = workflow_context.get()
+        if is_writer and workflow:
+            prompt = writer_prompt(prompt, workflow['assignment'])
+        elif is_writer:
             prompt = deconstrain_writer_prompt(prompt, kwargs.get('agent_slot'))
         synapse_card = ''
         try:
@@ -392,6 +396,10 @@ def memory_call(function):
         delivery = _memory_delivery.set({'eventId':event_id,'sessionId':session_id,'trace':trace,'prefix':prefix} if prefix else None)
         try:
             result = function(prompt, *args, **kwargs)
+            if is_writer and workflow:
+                result = polish_article(function, result, prompt, args, kwargs)
+                from common.naver_ab import normalize_article_tags
+                result = normalize_article_tags(result)
         except Exception as exc:
             memory_event(event_id, 'llm_call_failed', 'Provider call failed; no task success inferred.',
                          session_id=session_id, success=False, evidence={'agent': scope, 'errorType': type(exc).__name__, 'memoryTrace':trace})
@@ -524,12 +532,15 @@ def generate_text(prompt, provider=None, model_override=None, agent_slot=None, t
 @metered
 def generate_json(prompt, provider=None, observer=None, images=None, model_override=None, response_schema=None, audit_directory=None, reasoning_effort=None, agent_slot=None, timeout_seconds=None, allow_provider_recovery=True):
     config = settings.load()
+    from common.naver_ab import reserve_call
+    experiment = reserve_call(agent_slot or 'unspecified')
+    if experiment:
+        provider, model_override = experiment['provider'], experiment['model']
+        allow_provider_recovery = False
     is_writer = is_article_writer_call(agent_slot, response_schema, prompt)
-    if is_writer and not provider and not model_override:
-        provider, model_override, _ = select_ab_writer_route(
-            agent_slot, audit_directory=audit_directory, prompt=prompt, config=config
-        )
-    elif agent_slot and not provider and not model_override:
+    # Only a bound experiment may override the staff route. Ordinary writing
+    # follows the configured brain just like every other staff decision.
+    if agent_slot and not provider and not model_override:
         brain = settings.get_agent_brain(agent_slot, config)
         provider = brain.get('provider') or config['active']
         model_override = brain.get('model') or None
@@ -562,7 +573,7 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
             raise
         previous_provider,previous_model=provider,model
         if is_codex_timeout:
-            provider='agy';model=(AB_CLAUDE_MODEL if is_writer else 'gemini-2.5-pro');effort=None
+            provider='agy';model=(AB_CLAUDE_MODEL if is_writer else 'gemini-3.8-flash-medium');effort=None
         else:
             provider='codex';model=config['providers'].get('codex',{}).get('model') or AB_CODEX_MODEL
             effort=settings.reasoning_effort_for_call(provider,model,slot=agent_slot,data=config)
@@ -585,7 +596,8 @@ def generate_json(prompt, provider=None, observer=None, images=None, model_overr
             if observer:observer(provider,model,'failed',reason=str(failure)[:400])
             raise
     if is_writer:
-        persist_writer_meta(audit_directory, provider, actual_model or model, deconstrained=True)
+        persist_writer_meta(audit_directory, provider, actual_model or model,
+                            deconstrained=not experiment or experiment.get('arm') == 'A')
     actual_effort=(_CURRENT.get() or {}).get('reasoningEffort',reasoning_effort)
     record_model_route(provider,actual_model,actual_effort)
     if observer:

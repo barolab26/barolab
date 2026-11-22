@@ -2,6 +2,7 @@
 import argparse,os,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+_CFLAGS=getattr(subprocess,'CREATE_NO_WINDOW',0) if os.name=='nt' else 0
 
 
 def main():
@@ -12,9 +13,9 @@ def main():
     if args.naver_catch_up or args.cf_catch_up:
         channel='naver_blog_posting' if args.naver_catch_up else 'cf_posting'
         flag='--catch-up' if args.naver_catch_up else '--catch-up-today-once'
-        return subprocess.run([sys.executable,'-B',str(ROOT/channel/'posting.py'),flag,'--limit','1'],cwd=ROOT).returncode
+        return subprocess.run([sys.executable,'-B',str(ROOT/channel/'posting.py'),flag,'--limit','1'],cwd=ROOT,creationflags=_CFLAGS).returncode
     if os.name == 'nt':
-        return subprocess.run([sys.executable, '-u', '-B', '-m', 'dashboard.server.memory_worker'], cwd=ROOT, timeout=60).returncode
+        return subprocess.run([sys.executable, '-u', '-B', '-m', 'dashboard.server.memory_worker'], cwd=ROOT, timeout=60, creationflags=_CFLAGS).returncode
     return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
 
 

@@ -32,7 +32,7 @@ class CollectionRuntime(unittest.TestCase):
 
     def test_ego_adpost_uses_bounded_cli_and_existing_space(self):
         payload = {'ok': True, 'account': 'soul5373', 'publisher': '1224849',
-                   'blogs': [{'publisherId': '1224849'}], 'medias': [], 'rows': [], 'spaceId': 61}
+                   'blogs': [{'publisherId': '1224849'}], 'medias': [], 'rows': [], 'spaceId': 61, 'taskFinished': True}
         with tempfile.TemporaryDirectory() as folder, patch.object(revenue, 'DATA', Path(folder)), \
              patch('shutil.which', return_value='ego-browser.cmd'), \
              patch('subprocess.run', return_value=SimpleNamespace(stdout='CLI preamble\nBAROLAB_ADPOST_RESULT='+json.dumps(payload))) as run:
@@ -58,7 +58,7 @@ class CollectionRuntime(unittest.TestCase):
 
     def test_ego_console_envelope_on_stderr_is_accepted_without_logging_it(self):
         payload = {'ok': True, 'account': 'soul5373', 'publisher': '1224849',
-                   'blogs': [{'publisherId': '1224849'}], 'medias': [], 'rows': [], 'spaceId': 61}
+                   'blogs': [{'publisherId': '1224849'}], 'medias': [], 'rows': [], 'spaceId': 61, 'taskFinished': True}
         captured = SimpleNamespace(stdout='', stderr='CLI notice\nBAROLAB_ADPOST_RESULT='+json.dumps(payload)+'\n\n')
         with tempfile.TemporaryDirectory() as folder, patch.object(revenue, 'DATA', Path(folder)), \
              patch('shutil.which', return_value='ego-browser.exe'), \
@@ -88,6 +88,39 @@ class CollectionRuntime(unittest.TestCase):
             with self.assertRaises(revenue.RevenueSourceError) as failure:
                 revenue._adpost_ego_report(dt.date(2026, 10, 1), dt.date(2026, 10, 30), space_id=61)
         self.assertEqual(failure.exception.status, 'auth_required')
+
+    def test_ego_success_requires_verified_task_cleanup(self):
+        payload = {'ok': True, 'account': 'soul5373', 'publisher': '1224849',
+                   'blogs': [], 'medias': [], 'rows': [], 'spaceId': 61}
+        with tempfile.TemporaryDirectory() as folder, patch.object(revenue, 'DATA', Path(folder)), \
+             patch('shutil.which', return_value='ego-browser.cmd'), \
+             patch('subprocess.run', return_value=SimpleNamespace(stdout='BAROLAB_ADPOST_RESULT='+json.dumps(payload))):
+            with self.assertRaises(revenue.RevenueSourceError):
+                revenue._adpost_ego_report(dt.date(2026, 11, 1), dt.date(2026, 11, 8), space_id=61)
+            state = json.loads((Path(folder)/'secure/adpost-ego-state.json').read_text())
+        self.assertEqual(state['status'], 'held')
+        self.assertEqual(state['spaceId'], 61)
+
+    def test_ego_profile_authorization_survives_success_and_failure_without_rearming_hold(self):
+        payload = {'ok': True, 'account': 'soul5373', 'publisher': '1224849',
+                   'blogs': [], 'medias': [], 'rows': [], 'spaceId': 61, 'taskFinished': True}
+        with tempfile.TemporaryDirectory() as folder, patch.object(revenue, 'DATA', Path(folder)), \
+             patch('shutil.which', return_value='ego-browser.cmd'):
+            path = Path(folder)/'secure/adpost-ego-state.json'
+            path.parent.mkdir()
+            authorization = {'authorizedProfileId': 'Profile 4', 'profileAuthorization': 'explicit-user-selection'}
+            path.write_text(json.dumps({'status': 'completed', **authorization}))
+            with patch('subprocess.run', return_value=SimpleNamespace(stdout='BAROLAB_ADPOST_RESULT='+json.dumps(payload))):
+                revenue._adpost_ego_report(dt.date(2026, 11, 1), dt.date(2026, 11, 8))
+            self.assertEqual(json.loads(path.read_text())['authorizedProfileId'], 'Profile 4')
+            with patch('subprocess.run', side_effect=subprocess.TimeoutExpired('ego', 120)) as run:
+                for _ in range(2):
+                    with self.assertRaises(revenue.RevenueSourceError):
+                        revenue._adpost_ego_report(dt.date(2026, 11, 1), dt.date(2026, 11, 8))
+            state = json.loads(path.read_text())
+        run.assert_called_once()
+        self.assertEqual(state['status'], 'held')
+        self.assertEqual(state['authorizedProfileId'], 'Profile 4')
 
     def test_failed_unified_adpost_read_preserves_all_three_account_amounts(self):
         old = {}

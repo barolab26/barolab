@@ -86,6 +86,7 @@ def receipt_publication_day(entry):
     return actual or explicit
 
 BASE = Path(__file__).resolve().parent
+from common.naver_ownership import legacy_naver_submission_allowed, require_legacy_naver_submission_allowed
 
 def now_kst():
     return datetime.now(KST)
@@ -734,7 +735,7 @@ def _validate_plan(plan):
     kw, so, rf, asts = (plan.get('main_keyword'), plan.get('signoff', ''), plan.get('representative_file'), plan.get('assets'))
     if not (isinstance(kw, str) and kw.strip() and isinstance(so, str)):
         return None
-    if not isinstance(rf, str) or not isinstance(asts, list) or (not asts):
+    if not isinstance(rf, str) or not isinstance(asts, list) or (not asts and rf != ''):
         return None
     ids, files = (set(), set())
     for a in asts:
@@ -753,7 +754,7 @@ def _validate_plan(plan):
             return None
         ids.add(aid)
         files.add(f)
-    if rf not in files:
+    if asts and rf not in files:
         return None
     return {'kw': kw, 'signoff': so, 'assets': asts}
 
@@ -914,7 +915,7 @@ def validate_editor(obs, doc, plan):
         add('OBSERVATION', 'doc/plan', 'Invalid document or approved plan')
         return rep
     rf = plan.get('representative_file')
-    if not isinstance(rf, str) or not rf:
+    if not isinstance(rf, str) or (not rf and plan.get('assets')):
         add('OBSERVATION', 'plan.representative_file', 'Missing or invalid representative_file')
         return rep
     blocks, assets = (doc.get('blocks'), plan.get('assets'))
@@ -1030,7 +1031,7 @@ def validate_editor(obs, doc, plan):
             rep_count += 1
             if img.get('file') != rf:
                 add('REPRESENTATIVE', f'obs.images[{i}].representative', 'Representative file does not match plan')
-    if rep_count != 1:
+    if rep_count != (1 if d_imgs else 0):
         add('REPRESENTATIVE', 'obs.images', 'Exactly one representative image required')
     rep['ok'] = len(errs) == 0
     return rep
@@ -1141,7 +1142,7 @@ def document_fingerprint(doc):
 
 def naver_image_sections(document):
     sections = [{'id': 'intro', 'index': 0, 'heading': document['title'], 'body': '',
-                 'purpose': 'context', 'image_optional': any(b.get('type') == 'heading' for b in document['blocks'])}]
+                 'purpose': 'context', 'image_optional': True}]
     options = document.get('editorialSectionOptions') or {}
     for block in document['blocks']:
         kind = block.get('type')
@@ -1149,16 +1150,10 @@ def naver_image_sections(document):
             index = len(sections)
             sid = f'section-{index}'
             sections.append({'id': sid, 'index': index, 'heading': block['text'], 'body': '',
-                             'purpose': 'evidence', 'image_optional': options.get(sid) is True})
+                             'purpose': 'evidence', 'image_optional': options.get(sid, True) is True})
         elif kind in ('text', 'quotation', 'table'):
             text = block.get('text') if kind != 'table' else '\n'.join(' | '.join(row) for row in block['rows'])
             sections[-1]['body'] += ('\n' if sections[-1]['body'] else '') + (text or '')
-    req_cnt = 0
-    for sec in sections:
-        if not sec['image_optional']:
-            req_cnt += 1
-            if req_cnt > 3:
-                sec['image_optional'] = True
     return sections
 
 
@@ -1502,6 +1497,29 @@ def _upgrade_existing_blocks(document):
         document['blocks'] = new_blocks
     return changed
 
+def basic_writer_document(article):
+    from common.naver_ab import normalize_article_tags
+    article = normalize_article_tags(article)
+    blocks = [{'type': 'text', 'text': article['intro']}]
+    sections = article.get('sections') or []
+    for section in sections:
+        blocks.append({'type': 'heading', 'text': section['heading'].strip()})
+        q_txt = (section.get('quote') or '').replace('\n\n', '\n').strip()
+        if q_txt:
+            blocks.append({'type': 'quotation', 'text': q_txt})
+        blocks.append({'type': 'text', 'text': section['text']})
+        if section.get('table'):
+            blocks.append({'type': 'table', 'rows': section['table']})
+    blocks.append({'type': 'text', 'text': article['closing']})
+    if isinstance(article.get('signoff'), str) and article['signoff'].strip():
+        blocks.append({'type': 'signoff', 'text': article['signoff'].strip()})
+    blocks.append({'type': 'tags', 'text': ' '.join(article['tags'])})
+    document = {'title': article['title'], 'published': False, 'blocks': blocks,
+                'editorialSectionOptions': {f'section-{i + 1}': section.get('image_optional') is True
+                                            for i, section in enumerate(sections)}}
+    return document
+
+
 def prepare_basic_content(account_key, folder=None, topic=None):
     from common.content_quality import CONTENT_QUALITY_POLICY, ensure_publication_review
     from common.llm_client import generate_json
@@ -1568,59 +1586,32 @@ def prepare_basic_content(account_key, folder=None, topic=None):
             sources = basic_research(keyword, folder)
             guide = (BASE_DIR.parent / 'AGENTS.md').read_text(encoding='utf-8') if (BASE_DIR.parent / 'AGENTS.md').exists() else '독자 통증 출발, 3초 자가진단, 모바일 호흡'
             schema = {'type': 'object', 'properties': {'title': {'type': 'string'}, 'mainKeyword': {'type': 'string'}, 'intro': {'type': 'string'}, 'closing': {'type': 'string'}, 'signoff': {'type': 'string'}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'tags': {'type': 'array', 'items': {'type': 'string'}, 'minItems': 1}, 'sections': {'type': 'array', 'minItems': 1, 'items': {'type': 'object', 'properties': {'heading': {'type': 'string'}, 'quote': {'type': 'string'}, 'text': {'type': 'string'}, 'table': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'string'}}}, 'imagePrompt': {'type': 'string'}, 'imageCaption': {'type': 'string'}, 'image_optional': {'type': 'boolean'}}, 'required': ['heading', 'quote', 'text', 'table', 'imagePrompt', 'imageCaption', 'image_optional'], 'additionalProperties': False}}}, 'required': ['title', 'mainKeyword', 'intro', 'closing', 'signoff', 'imagePrompt', 'imageCaption', 'tags', 'sections'], 'additionalProperties': False}
-            prompt = CONTENT_QUALITY_POLICY + '\n' + (
-                '네이버 통합검색 1페이지 최상단에 노출되는 「포스트인컴(다마고치) 상위노출 표준 포맷」의 고품격 인터넷 미디어·생활경제 블로그 원고를 작성한다. 최우선 목표는 [하루 수익 $100 달성]을 위한 네이버 DIA+ 상위노출·모바일 완독률(체류시간) 극대화이다.\n'
-                '[포스트인컴(다마고치) 5대 상위노출 공식 (필수 준수)]\n'
-                f'1. 제목(title — 검색어 선두 배치 + 호기심 유발 뉴스데스크형): 반드시 앞 15자 이내에 핵심 검색 키워드("{keyword}") 원형을 조사 변형 없이 정확히 고정 배치하고, 말줄임표("...") 또는 쉼표(",") 뒤에 독자가 궁금해할 실제 조건·보상·핵심 차이를 요약한 부제를 붙여라. (예: "{keyword}, 실제 신청 조건과 놓치기 쉬운 핵심 기준 정리")\n'
-                f'2. 도입부(intro — 모바일 2줄 호흡 + 핵심 쟁점 제시): 첫 문장에서 독자가 왜 "{keyword}"를 검색하는지 핵심 상황이나 화두를 담백하게 던지고, 각 줄(문단)을 모바일 화면에서 2줄 이내로 깔끔하게 떨어지는 32~48자 단문으로 작성하며 줄바꿈(\\n)으로 5~6개 문단으로 분리하라. ("이 글은 제공된 자료를 정리했습니다" 같은 메타 브리핑 절대 금지)\n'
-                '3. 본문(sections — 문맥별 소제목과 짧은 본문, 실제 자료 이미지는 해당 설명 가까이 배치):\n'
-                '   - 주제에 필요한 수의 섹션(sections)으로 구성하고, 각 섹션의 heading은 "01. 핵심 소제목", "02. 핵심 소제목" 형태로 번호와 명확한 주제를 적어라.\n'
-                '   - 모바일 가독성을 해치는 무거운 표(table)는 사용하지 말고 빈 배열([])로 두어라(Tables: 0 공식). 대신 수치·비교·조건은 본문에서 짧은 호흡으로 술술 읽히게 풀어 써라.\n'
-                '   - quote 역시 빈 문자열("")로 두고(heading 자체가 밑줄 인용구 소제목으로 렌더링됨), 본문(text)에만 집중하라.\n'
-                '   - [모바일 가독성 최우선 원칙]: 모바일 네이버 블로그는 한 줄에 약 20~22자가 들어간다. 문장이 55자를 넘어가면 3번째 줄 끝에 "니다.", "다." 두세 글자만 덜렁 남아 가독성이 무너지므로, 각 줄(\\n 단위 문단)은 반드시 공백 포함 32~48자(모바일 1.5~2줄 완결 호흡)로 끊어 작성하라. 섹션당 6~9개 짧은 문단(전체 원고 공백 포함 3,200~3,800자)으로 구성하라.\n'
-                '4. 마무리(closing & signoff): 관료적 면책 문구("공식 공고를 참고하세요", "개인별 조회 서비스가 아닙니다")를 절대 넣지 말고, 독자가 오늘 바로 확인해야 할 핵심 체크 포인트 2~3가지를 각 32~48자 짧은 문단(\\n 분리)으로 깔끔하게 정리하며 닫아라.\n'
-                '[실제 시각 자료 선택]\n'
-                '- imagePrompt는 실제 웹 자료를 찾을 검색 의도로 적는다. 정보성·사건·이슈 글 모두 해당 문단의 인물·사건·장소·시점·기관에 맞는 실제 자료만 사용하며 생성 사진이나 모사 화면을 요청하지 않는다. 이미지 수는 관련 자료와 문맥에 따라 정하고 대표 이미지는 검토된 본문 자료에서 선택한다. 실제 화면·사건·인물·장소를 보여주어야 하는 섹션은 image_optional=false로, 이미지가 사실 확인에 필요 없는 정리·설명은 image_optional=true로 적는다.\n'
-                '- tags는 중복 없는 #한글태그 6~10개 배열로 작성한다.\n'
-                '[절대 금지 가드레일]\n'
-                '- 수집 자료(research)에 없는 허위 사실·수치 날조 금지 및 리서치 메타 발언 노출 금지.\n'
-                '- 정부기관/타사 외부 URL(gov.kr, nts.go.kr 등)은 네이버 검색 노출 감점 요인이므로 본문에 절대 포함하지 마라.\n'
-                + (
-                    '- [주력 계정 무링크 원칙 (필수)]: 이 계정은 순수 상위노출 계정이므로 본문이나 closing에 외부 URL(https://...)이나 링크 유도 문구를 단 1개도 넣지 마라.\n'
-                    if not account.get('bridge_domains')
-                    else '- [브릿지 계정 단일 수익 링크 원칙]: 본문 중간에는 외부 링크를 절대 넣지 말고, 오직 closing 맨 마지막 줄에 딱 1번만 독자가 바로 대조해 볼 수 있는 구체적 확인표 안내 문구를 적어라(시스템이 자동으로 당일 CF 수익 도메인 단일 링크를 연결한다).\n'
-                )
-                + json.dumps({'account': account_key, 'blogId': account['blog_id'], 'topic': keyword, 'research': sources, 'guide': guide}, ensure_ascii=False)
-            )
+            from common.naver_reader import POLICY
+            from dashboard.agents.style_strategy import search_writing_context
+            from common.asset_map import shopping_link_context
+            commerce=shopping_link_context(account_key) if __import__('common.operating_plan',fromlist=['enabled']).enabled() else {}
+            prompt = CONTENT_QUALITY_POLICY + '\n' + POLICY + '\n' + json.dumps({
+                'account': account_key, 'blogId': account['blog_id'], 'topic': keyword,
+                'research': sources, 'searchStrategy': search_writing_context(folder),
+                'commerce':commerce,
+                'output': 'Use the supplied schema. Keep source URLs in research metadata; do not insert external links in the article by default. imagePrompt describes a real source search, not a generated image.',
+            }, ensure_ascii=False)
             update_pipeline_status(account, 4, '원고 작성', 50, keyword)
             article = generate_json(prompt, agent_slot='publi', response_schema=schema, audit_directory=folder / 'model-audit', timeout_seconds=600)
             clean_kw = clean_naver_search_keyword(keyword)
             if clean_kw:
                 article['mainKeyword'] = clean_kw
-                article['title'] = enforce_naver_seo_title(article.get('title', ''), clean_kw)
+                article['title'] = re.sub(r'\s+', ' ', str(article.get('title', '')).strip())
             atomic_json(writer_path, article)
         update_pipeline_status(account, 5, '실제 자료 이미지 검색·검토', 75, article.get('title', account_key))
-        blocks = [{'type': 'text', 'text': article['intro']}]
-        sections = article.get('sections') or []
-        for section in sections:
-            blocks.append({'type': 'heading', 'text': section['heading'].strip()})
-            q_txt = (section.get('quote') or '').replace('\n\n', '\n').strip()
-            if q_txt:
-                blocks.append({'type': 'quotation', 'text': q_txt})
-            blocks.append({'type': 'text', 'text': section['text']})
-        blocks.append({'type': 'text', 'text': article['closing']})
-        if isinstance(article.get('signoff'), str) and article['signoff'].strip():
-            blocks.append({'type': 'signoff', 'text': article['signoff'].strip()})
-        blocks.append({'type': 'tags', 'text': ' '.join(article['tags'])})
-        document = {'title': article['title'], 'published': False, 'blocks': blocks,
-                    'editorialSectionOptions': {f'section-{i + 1}': section.get('image_optional') is True
-                                                for i, section in enumerate(sections)}}
+        document = basic_writer_document(article)
         atomic_json(folder / 'identity.json', {'account': account_key, 'blogId': account['blog_id']})
     identity = json.loads((folder / 'identity.json').read_text(encoding='utf-8'))
     if identity != {'account': account_key, 'blogId': account['blog_id']}:
         raise ValueError('Prepared document account mismatch')
     if plan is None:
-        normalize_naver_document_links(document, account)
+        from common.naver_reader import normalize_links, ensure_reader_review
+        normalize_links(document, json.loads((folder / 'research.json').read_text(encoding='utf-8')).get('sources', []),commerce_account=account_key)
         for blk in document.get('blocks', []):
             if isinstance(blk, dict) and isinstance(blk.get('text'), str):
                 cleaned_txt = re.sub(r'<[^>]+>', '', blk['text'])
@@ -1628,7 +1619,12 @@ def prepare_basic_content(account_key, folder=None, topic=None):
                 cleaned_txt = re.sub(r'\n\s*\n+', '\n', cleaned_txt).strip()
                 if cleaned_txt != blk['text']:
                     blk['text'] = cleaned_txt
+        from common.editorial_recovery import review_and_repair
+        review_and_repair(document,folder,[lambda d:ensure_reader_review(d,folder),
+            lambda d:ensure_publication_review(d,folder,generate=generate_json)])
         plan = prepare_document_images(document, folder, article['mainKeyword'], article.get('signoff', ''))
+        from common.editorial_images import append_observed_image_sources
+        append_observed_image_sources(folder, plan['editorialImages'])
         atomic_json(plan_path, plan)
         atomic_json(doc_path, document)
     else:
@@ -1640,7 +1636,12 @@ def prepare_basic_content(account_key, folder=None, topic=None):
     receipt = folder / 'reservation-evidence.json'
     submitted = json.loads(receipt.read_text(encoding='utf-8')).get('submissionStatus') if receipt.is_file() else None
     if submitted not in ('submitting', 'submission_unknown', 'verified_reserved'):
-        ensure_publication_review(document, folder)
+        from common.naver_reader import ensure_reader_review
+        from common.editorial_recovery import review_and_repair
+        review_and_repair(document,folder,[lambda d:ensure_reader_review(d,folder),
+            lambda d:ensure_publication_review(d,folder,generate=generate_json)])
+        verify_document_images(document,plan,folder)
+        atomic_json(doc_path,document)
     (folder / 'preview.html').write_text(render_document(document, plan, folder / 'images'), encoding='utf-8')
     return (account, folder, document, plan)
 
@@ -1832,6 +1833,7 @@ def bind_basic_editor(page, frame, document, plan, folder):
     return actual
 
 def revise_existing_reservation(context, account_key, account, document, plan, when, folder, prior):
+    require_legacy_naver_submission_allowed(BASE.parent)
     verify_document_images(document, plan, folder)
     page = context.pages[0] if context.pages else context.new_page()
     page.goto('https://blog.naver.com/' + account['blog_id'] + '?Redirect=Write&', wait_until='domcontentloaded', timeout=25000)
@@ -1868,6 +1870,7 @@ def revise_existing_reservation(context, account_key, account, document, plan, w
     tags = document['blocks'][-1]['text'].split()
     options = configure_reservation(page, frame, when, tags, folder=folder)
     verify_document_images(document, plan, folder)
+    require_legacy_naver_submission_allowed(BASE.parent)
     frame.locator('button[class*="confirm_btn"]').click(timeout=10000)
     page.wait_for_timeout(4000)
     verification = verify_reservation(context, account, document['title'], when, expected_document=actual, folder=folder)
@@ -1879,6 +1882,8 @@ def revise_existing_reservation(context, account_key, account, document, plan, w
     return evidence
 
 def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, prepare_only=False):
+    if not prepare_only:
+        require_legacy_naver_submission_allowed(BASE.parent)
     if not prepare_only and (Path.home() / 'EGO_EXEC_DISABLED').exists():
         raise RuntimeError('Execution paused by EGO_EXEC_DISABLED')
     from common.browser_session import PageScope
@@ -1908,7 +1913,10 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
             if prior.get('submissionStatus') in ('submitting', 'submission_unknown'):
                 return reconcile_basic_submission(account_key, account, folder, prior)
             from common.content_quality import ensure_publication_review
-            ensure_publication_review(document, folder)
+            from common.naver_reader import ensure_reader_review
+            from common.llm_client import generate_json
+            ensure_reader_review(document, folder)
+            ensure_publication_review(document, folder, generate=generate_json)
             target = datetime.strptime(reserve_time, '%Y-%m-%d %H:%M').replace(tzinfo=KST) if reserve_time else (now_kst() + timedelta(minutes=45)).replace(second=0, microsecond=0)
             if not reserve_time:
                 target += timedelta(minutes=-target.minute % 10)
@@ -1931,11 +1939,13 @@ def run_basic_pipeline(account_key, folder=None, reserve_time=None, topic=None, 
                 options = configure_reservation(page, frame, when, tags, folder=folder)
                 check_existing_reservations(context, account, title=document['title'], reserve_time=when, folder=folder)
                 verify_document_images(document, plan, folder)
+                require_legacy_naver_submission_allowed(BASE.parent)
                 evidence = {**options, 'account': account_key, 'blogId': account['blog_id'], 'title': document['title'], 'reserveTime': when, 'documentSha256': editor_review_hash(actual), 'submissionStatus': 'submitting', 'publicPublicationVerified': False}
                 atomic_json(receipt_path, evidence)
                 write_attempt(account_key, 'submitting', start_new=False, submissionStarted=True, artifactFolder=str(folder))
                 pages.retain(page, 'Submission pending reconciliation: ' + str(folder))
                 with page.expect_response(lambda r: urlparse(r.url).hostname == 'blog.naver.com' and urlparse(r.url).path == '/RabbitWrite.naver', timeout=30000) as sent:
+                    require_legacy_naver_submission_allowed(BASE.parent)
                     frame.locator('button[class*="confirm_btn"]').click(timeout=10000)
                 response = sent.value
                 try:
@@ -2024,6 +2034,7 @@ def monitor(base=BASE, now=None):
     return result
 
 def basic_daily(limit=None):
+    require_legacy_naver_submission_allowed(BASE.parent)
     journal = read_journal()
     day = now_kst().date().isoformat()
     results = []

@@ -140,13 +140,16 @@ def _publication_quota(key, doc, now, fresh):
         if not 0 <= age <= 7200 or not isinstance(evidence.get('evidence'), list):
             return unknown
         used_urls = set()
+        from common.naver_ab import publication_identity
+        attempts = load_json(DATA_DIR / 'naver/automation-journal.json').get('attempts', [])
+        public_rows = [publication_identity(row, attempts) for row in evidence['evidence'] if isinstance(row, dict)]
         for account, slots in DAILY_SLOTS.items():
             for slot in slots:
                 if not due(slot):
                     continue
                 identity = account + ':' + slot
                 expected.add(identity)
-                for row in evidence['evidence']:
+                for row in public_rows:
                     if not isinstance(row, dict):
                         continue
                     publication_day = row.get('publicationDate') or str(row.get('reserveTime') or '')[:10]
@@ -274,6 +277,9 @@ def _kin_activity(doc, now):
 def observed_projects():
     now = now_kst()
     result = []
+    worker_path=Path.home()/'.barolab/project-monitor/worker-health.json'
+    worker=load_json(worker_path,{})
+    worker_actions={'brunch':'brunch-autonomy','naver_cafe':'cafe-autonomy','youtube':'youtube-autonomy'}
     autonomy = load_json(ROOT / 'dashboard/data/project-autonomy-state.json', {})
     work_rows = autonomy.get('projects', {}) if isinstance(autonomy.get('projects'),dict) else {}
     for key, title, relative, owner, link in SOURCES:
@@ -331,6 +337,11 @@ def observed_projects():
         )
         if not isinstance(rows, list):
             rows = []
+        if key=='cf_blog':
+            rows=[r for current in rows if isinstance(current,dict) for r in [*current.get('publicationHistory',[]),current]]
+        if key == 'naver_blog':
+            rows = [slot for account in rows if isinstance(account, dict)
+                    for slot in account.get('slots', []) if isinstance(slot, dict)]
         counts = {}
         for row in rows:
             if isinstance(row, dict):
@@ -354,8 +365,11 @@ def observed_projects():
                         and (r.get('status') == 'published' if key == 'cf_blog' else
                              r.get('status') == 'done' and r.get('publicPublicationVerified') is True
                              and r.get('publicationDate') == now.date().isoformat())]
-            public_count = len({r.get('domain') if key == 'cf_blog' else r['publicUrl'] for r in verified}) if key == 'cf_blog' else None
+            public_count = len({r['publicUrl'] for r in verified}) if key == 'cf_blog' else None
             reserved_count = sum(1 for r in rows if isinstance(r, dict) and r.get('status') in ('reserved', 'scheduled'))
+            if key == 'naver_blog':
+                public_count = sum(r.get('publicPublicationVerified') is True for r in rows)
+                reserved_count = sum(r.get('publicationStatus') == 'reserved' for r in rows)
         state = str(
             doc.get('processStatus') if key == 'collections' and doc.get('processStatus') == 'success'
             else doc.get('collectionStatus') if key == 'collections'
@@ -389,6 +403,17 @@ def observed_projects():
             'source': {'errorType': error_type, 'supportingManifests': supporting, 'path': relative, 'sha256': hashlib.sha256(raw).hexdigest() if raw else None,
                        'observedAt': now.isoformat(), 'sourceCheckedAt': stamp, 'sourceDate': source_date,
                        'fresh': fresh, 'ageSeconds': round(age) if age is not None else None}})
+        runtime_outcome=(worker.get('outcomes') or {}).get(worker_actions.get(key)) or {}
+        if runtime_outcome and 0 <= now.timestamp()-runtime_outcome.get('checkedAt',0) <= 1800:
+            result[-1]['runtimeOutcome']=runtime_outcome
+            if runtime_outcome.get('requiresRepair') is True:
+                result[-1].update(status='attention',statusBadge='attention',
+                    blocker=runtime_outcome.get('reason') or runtime_outcome.get('errorType') or runtime_outcome['status'],
+                    nextAction='Resolve the recorded worker action cause; verify its next normal run',
+                    actionType='repair_worker_action')
+                result[-1]['failures'].append({'identity':runtime_outcome['actionName'],
+                    'status':runtime_outcome['status'],'reasonCode':runtime_outcome.get('reason') or runtime_outcome.get('errorType'),
+                    'sourceLocation':runtime_outcome.get('sourceLocation'),'failureAt':runtime_outcome['checkedAt']})
         active = work_rows.get(key, {}).get('failureWork') if isinstance(work_rows.get(key),dict) else None
         if isinstance(active,dict) and active.get('status') != 'public_verified':
             row = result[-1]

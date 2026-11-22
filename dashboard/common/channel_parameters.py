@@ -115,26 +115,31 @@ def planning_or_memory(identity, topic, folder, params, channel='naver'):
     try:
         return plan_post(identity, topic, folder, params, channel)
     except Exception as exc:
+        if any(token in str(exc).lower() for token in ('user_takeover', 'ego_task_space', 'user control', 'user-owned', 'unassigned', 'inactive', 'ownership')):
+            raise
         from common.asset_map import collect_used_naver_topics, select_verified_naver_keyword
         if channel == 'naver':
             used = collect_used_naver_topics(identity, days=14, current_folder=folder)
             topic = select_verified_naver_keyword(identity, topic, None, used, max_docs=5000)
-        result={'status':'fallback','keyword':topic,'writingGuide':f'공고문 요약 매크로 말투를 버리고 독자의 진짜 통증(Pain Point)에서 출발한다. 제목은 반드시 "{topic}, [독자 통증·반려 함정·3분 자가진단 후킹 부제]" 구조로 앞 15자 이내에 검색 명사 키워드를 정확히 고정 배치하고, 본문에는 한 끗 차이 실전 사례(탈락 vs 통과)와 3초 판독기 표, 2~3줄 짧은 문단 호흡을 적용하며, 마지막은 오늘 당장 실행할 Action Item으로 끝낸다.','errorType':type(exc).__name__}
+        from common.naver_reader import POLICY
+        result={'status':'fallback','keyword':topic,'writingGuide':POLICY,'errorType':type(exc).__name__}
         Path(folder).mkdir(parents=True,exist_ok=True)
         write(Path(folder)/'strategy-status.json',result)
         return result
 
 
 def naver_slots_for_date(plan, day):
+    from common.operating_plan import naver_slots
     naver_eff = plan.get('naverEffectiveDate')
     if naver_eff and day < naver_eff and plan.get('naverPrior'):
         return plan['naverPrior']
-    return plan['naver']
+    return naver_slots(plan['naver'],day)
 
 
 def configure_naver(day):
     import naver_blog_posting.posting as engine
     plan = policy()
+    engine.RUN_OPTIONS['workflow_day'] = day
     if not hasattr(engine, '_parameter_original_slots'):
         engine._parameter_original_slots = engine.DAILY_SLOTS.copy()
     if day < plan['effectiveDate']:
@@ -146,6 +151,17 @@ def configure_naver(day):
         return engine
     prepare, builder, summary, attempt = engine.prepare_basic_content, engine.basic_native_document, getattr(engine, 'basic_summary_image', summary_table), engine.write_attempt
     acquire_editor = engine.acquire_naver_editor
+    show_reservations = engine.show_reservation_popup
+
+    def preserve_tabs_after_reservation(*args, **kwargs):
+        from common.naver_ab import CURRENT
+        if CURRENT.get() is not None:
+            # Verification already finished; displaying its result must not
+            # navigate the account's first tab (which can contain a Kin draft).
+            return {'status': 'preserved_existing_tabs'}
+        return show_reservations(*args, **kwargs)
+
+    engine.show_reservation_popup = preserve_tabs_after_reservation
 
     def preserved_editor(context, pages, blog_id):
         screen_folder = engine.RUN_OPTIONS.get('screen_folder')
@@ -181,34 +197,60 @@ def configure_naver(day):
             when = engine.RUN_OPTIONS.get('reserve_time') or day+' '+engine.RUN_OPTIONS.get('slot', engine.DAILY_SLOTS[account][0])
             folder = folder_for('naver_blog_posting', when[:10], account+'-'+when[-5:].replace(':',''))
             folder.mkdir(parents=True, exist_ok=True)
-        params = styles(account, engine.RUN_OPTIONS.get('reserve_time', '')[:10] or day)
+        workflow_day = engine.RUN_OPTIONS.get('workflow_day') or day
+        params = styles(account, workflow_day)
         # Existing approved artifacts remain byte-identical.
         existing = folder and (Path(folder) / 'editor-content.json').exists()
         incomplete_media = existing and not load(Path(folder) / 'editor-content.json').get('presentation') and not load(Path(folder) / 'reservation-evidence.json')
         engine.basic_summary_image = lambda article, output: summary_table(article, output, params) if params['summaryTable'] else summary(article, output)
-        planning = {}
-        planning = planning_or_memory(account, topic or engine.ACCOUNT_MAP[account]['topic'], folder, params)
+        from common.naver_ab import normalize_saved_tags
+        normalize_saved_tags(folder)
+        writer = load(Path(folder) / 'writer.json')
+        from common.naver_ab import plan as experiment_plan
+        exp_day = workflow_day
+        exp_slot = engine.RUN_OPTIONS.get('slot') or Path(folder).name[-4:-2]+':'+Path(folder).name[-2:]
+        trial_plan = experiment_plan(account, topic, folder, exp_day, exp_slot) if not writer and not existing else None
+        if writer:
+            # A prepared article (including a maintenance revision) keeps its
+            # topic; image recovery must not launch another keyword campaign.
+            from common.naver_reader import POLICY
+            planning = {**load(Path(folder) / 'planning.json'),
+                        'keyword':writer.get('mainKeyword') or writer.get('title'),
+                        'writingGuide':POLICY,'bridgeTarget':None}
+        elif load(Path(folder) / 'workflow-assignment.json').get('workflowProtocol') == 'moneyhomepan-search-download-v2' and (Path(folder) / 'b-slotted-post.json').is_file():
+            # A prepared B manuscript keeps its original topic and workflow;
+            # do not send it through A's planning/style authoring on resumption.
+            planning = load(Path(folder) / 'planning.json')
+            if not planning.get('keyword'):
+                raise ValueError('Prepared B manuscript is missing its original keyword')
+        elif trial_plan:
+            planning = trial_plan
+        else:
+            planning = planning_or_memory(account, topic or engine.ACCOUNT_MAP[account]['topic'], folder, params)
         params.update(planning.get('presentation', {}))
         if not existing:
             topic = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
-        writing_rule = (
-            '\n[네이버 1페이지 상위노출 공식 & 4대 집필 원칙]\n'
-            '- 공무원 공고문 요약 매크로 말투 금지: 독자의 진짜 통증(Pain Point)과 막막함에 공감하는 도입부로 시작하라.\n'
-            f'- [가장 중요] 제목(title)은 반드시 "{topic}, [독자 통증·반려 함정·3분 자가진단 후킹 부제]" 구조로 작성하라. 앞 15자 이내에 검색 명사 키워드("{topic}") 원형을 조사 변형 없이 정확히 고정 배치하고, 쉼표(,) 뒤에 후킹 부제를 결합하라.\n'
-            '- 본문에는 스마트폰으로 바로 대입 가능한 한 끗 차이 실전 사례(A는 탈락 vs B는 통과), 3초 자가진단 판독기 표, 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 당장 실행할 Action Item으로 끝내라.\n'
-            '- 허위 사실·근거 없는 수치 날조 금지 (단, "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 쓰지 마라).\n'
-            '- "AI 생성", "참고사진", "자료 부족으로 비교 불가" 같은 메타/면피 문구 절대 금지.\n'
-        )
-        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt + (('\n[이번 발행의 지식그래프 스타일 설정 · 크루 회의 합의안]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule) if not kwargs.get('_skip_memory') else ''), *args, **kwargs)
+        from common.naver_reader import POLICY
+        writing_rule = '\n' + POLICY
+        llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt + (('\n[이번 발행의 지식그래프 스타일 설정 · 크루 회의 합의안]\n'+json.dumps({'parameters':params,'agreedWritingGuide':planning.get('writingGuide',''),'scope':'벤치마킹은 서식 참고이며 사실 근거는 research만 사용한다.'},ensure_ascii=False)+writing_rule) if kwargs.get('agent_slot') == 'publi' and not kwargs.get('_skip_memory') else ''), *args, **kwargs)
         try:
             if folder and not existing and load(Path(folder) / 'reservation-evidence.json').get('submissionStatus') not in ('submitting', 'submission_unknown', 'verified_reserved'):
                 ed_manifest = Path(folder) / 'editorial-images.json'
                 if ed_manifest.is_file() and load(ed_manifest).get('status') != 'ready':
                     ed_manifest.unlink(missing_ok=True)
                     (Path(folder) / 'image-preparation-status.json').unlink(missing_ok=True)
-            result = prepare(account, folder, topic)
+            from common.naver_ab import assignment, scope
+            exp_day = workflow_day
+            exp_slot = engine.RUN_OPTIONS.get('slot') or Path(folder).name[-4:-2]+':'+Path(folder).name[-2:]
+            experiment = assignment(account, folder, exp_day, exp_slot, create=True)
+            with scope(experiment, folder):
+                if experiment and experiment.get('workflowProtocol') == 'moneyhomepan-search-download-v2':
+                    from common.naver_download_workflow import prepare as prepare_download
+                    result = prepare_download(engine, account, folder, planning['keyword'])
+                else:
+                    result = prepare(account, folder, topic)
         finally:
             engine.basic_summary_image = summary
             llm_client.generate_json = generate
@@ -231,6 +273,12 @@ def configure_naver(day):
         if phase == 'started' and kwargs.get('start_new', True) and engine.RUN_OPTIONS.get('reserve_time'):
             kwargs.setdefault('reserveTime', engine.RUN_OPTIONS['reserve_time'])
             kwargs.setdefault('publicationDate', engine.RUN_OPTIONS['reserve_time'][:10])
+        from common.naver_ab import journal_row
+        identity=journal_row({'account':account,'artifactFolder':kwargs.get('artifactFolder') or engine.RUN_OPTIONS.get('screen_folder'),
+                              'reserveTime':kwargs.get('reserveTime') or engine.RUN_OPTIONS.get('reserve_time'),
+                              'phase':'metadata'})
+        if identity.get('workflowSlotSource'):
+            kwargs['scheduledSlot']=identity['scheduledSlot']
         return attempt(account, phase, *args, **kwargs)
 
     engine.prepare_basic_content = prepare_with_style
@@ -241,6 +289,8 @@ def configure_naver(day):
     engine.basic_editor_content = lambda value: editor_content(value, reader=content_reader)
     engine.bind_basic_editor = bind
     engine.write_attempt = dated_attempt
+    from common.naver_ab import install_image_slots
+    install_image_slots(engine)
     engine._parameter_wiring = True
     return engine
 
@@ -255,12 +305,53 @@ def monitor(base=None, now=None):
     journal = original(base or engine.BASE)
     records = []
     for row in journal['attempts']:
+        from common.naver_ab import journal_row
+        row=journal_row(row)
         planned = str(row.get('reserveTime') or row.get('publicationDate') or row.get('workDate') or '')[:10]
         if planned == day:
             records.append({**row, 'workDate': day})
     engine.read_journal = lambda *args, **kwargs: {**journal, 'attempts': records}
     try:
         result = engine.monitor(base or engine.BASE, now)
+        # Match failures to their exact planned slot, including before the editor
+        # records scheduledSlot. The engine's account-level last row loses this.
+        for account in result.get('accounts', []):
+            for slot in account['slots']:
+                slot['scheduledTime'] = day + ' ' + slot['slot']
+                if slot['status'] == 'verified':
+                    continue
+                matches = [r for r in records if r.get('account') == account['account']
+                           and engine._infer_scheduled_slot(r.get('artifactFolder'), r.get('scheduledSlot')) == slot['slot']]
+                if matches and matches[-1].get('phase') == 'failed':
+                    last = matches[-1]
+                    slot.update(status='failed', publicationStatus='failed',
+                                failureReason=last.get('failureReason'),
+                                submissionStarted=last.get('submissionStarted'),
+                                lastAttemptAt=last.get('updatedAt'))
+                elif matches and matches[-1] is records[-1] and matches[-1].get('phase') == 'started' and engine.pipeline_busy(base or engine.BASE):
+                    slot.update(status='running', publicationStatus='running',
+                                submissionStarted=matches[-1].get('submissionStarted'))
+            account['counts'] = {k: sum(s['status'] == k for s in account['slots']) for k in result['counts']}
+            account['status'] = next((s['status'] for s in account['slots'] if s['status'] != 'verified'), 'verified')
+        result['counts'] = {k: sum(a['counts'][k] for a in result['accounts']) for k in result['counts']}
+        if os.name == 'nt':
+            import subprocess
+            try:
+                observed = subprocess.run(['powershell', '-NoProfile', '-Command',
+                    "$t=Get-ScheduledTask -TaskName 'BaroLab-Naver-Daily' -ErrorAction Stop; "
+                    "$i=$t | Get-ScheduledTaskInfo; "
+                    "@{registered=$true;enabled=($t.State.ToString() -ne 'Disabled');state=$t.State.ToString();"
+                    "lastResult=$i.LastTaskResult;lastRunAt=$i.LastRunTime.ToString('o');nextRunAt=$i.NextRunTime.ToString('o')} | ConvertTo-Json -Compress"],
+                    capture_output=True, text=True, timeout=10,
+                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                current = json.loads(observed.stdout) if observed.returncode == 0 else {}
+                if current.get('registered'):
+                    result['scheduler'] = {**current, 'taskName': 'BaroLab-Naver-Daily',
+                        'source': 'Windows Scheduled Tasks read-only', 'checkedAt': now.isoformat()}
+                    result['registration'] = 'registered' if current['enabled'] else 'disabled'
+            except (OSError, ValueError, subprocess.TimeoutExpired):
+                result['scheduler'] = {'status': 'unknown', 'checkedAt': now.isoformat(), 'source': 'Windows Scheduled Tasks'}
+                result['registration'] = 'unknown'
         plan = policy()
         result['schedulePolicy'] = {
             'effectiveDate': plan['effectiveDate'],
@@ -268,6 +359,11 @@ def monitor(base=None, now=None):
             'naverPrior': plan.get('naverPrior'),
             'naver': plan['naver'],
         }
+        from common.naver_reader import observe_outcomes
+        result['readerOutcomes'] = observe_outcomes(ROOT)
+        from common.naver_ab import observe as observe_workflow_experiment
+        if (DATA/'naver/workflow-experiment.json').is_file():
+            result['workflowExperiment'] = observe_workflow_experiment()
         write(DATA / 'naver/automation-status.json', result)
         return result
     finally:
@@ -279,6 +375,12 @@ def folder_for(channel, day, identity):
 
 
 def run_naver(day, account, clock):
+    from common.naver_ownership import require_legacy_naver_submission_allowed
+    require_legacy_naver_submission_allowed(ROOT)
+    from common.naver_ab import protected_slot
+    protected = protected_slot(account, day, clock)
+    if protected:
+        return {**protected, 'executionStatus': 'preserved_existing_slot'}
     from common import work_agenda as agendas
     if agendas.enabled():
         agendas.require(project='naver_blog')
@@ -288,6 +390,8 @@ def run_naver(day, account, clock):
         raise ValueError('Expected exact reservation date and clock')
     engine = configure_naver(day)
     folder = folder_for('naver_blog_posting', day, account + '-' + clock.replace(':', ''))
+    from common.naver_ab import experiment_folder
+    folder = experiment_folder(folder, account, day, clock)
     if clock not in engine.DAILY_SLOTS[account]:
         contract = load(folder / 'style-reproduction-contract.json')
         directive = load(DATA / 'memory_graph.json').get('nodes', {}).get(contract.get('sourceDirectiveId'), {})
@@ -305,14 +409,28 @@ def run_naver(day, account, clock):
         reserve_dt = (datetime.now(KST) + timedelta(minutes=65)).replace(second=0, microsecond=0)
         reserve_dt += timedelta(minutes=-reserve_dt.minute % 10)
     reserve_target = reserve_dt.strftime('%Y-%m-%d %H:%M')
-    planning_or_memory(account, engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
+    from common.operating_plan import topic as allocated_topic
+    planning_or_memory(account, allocated_topic('naver_blog',account,day,clock) or engine.ACCOUNT_MAP[account]['topic'], folder, styles(account, day))
     engine.RUN_OPTIONS.update(slot=original_slot, reserve_time=reserve_target, screen_folder=str(folder))
-    result = engine.run_basic_pipeline(account, folder=folder, reserve_time=reserve_target)
+    from common.naver_ab import assignment, scope
+    experiment=assignment(account,folder,day,clock,create=True)
+    with scope(experiment,folder):
+        result = engine.run_basic_pipeline(account, folder=folder, reserve_time=reserve_target)
     saved = load(folder / 'reserved-server-document.json')
     sizes = sorted({node.get('style', {}).get('fontSizeCode', '') for component in saved.get('document', {}).get('components', []) for paragraph in (component.get('value') or []) for node in paragraph.get('nodes', [])})
     write(folder / 'presentation-receipt.json', {'account': account, 'reserveTime': day + ' ' + clock, 'savedFontSizes': sizes, 'stylesVerified': bool(sizes) and {'fs'+str(styles(account)['bodyFontSize']), 'fs'+str(styles(account)['headingFontSize'])}.issubset(set(sizes)), 'parameters': load(folder / 'editor-content.json').get('presentation', {}), 'verifiedAt': datetime.now(KST).isoformat()})
     monitor()
     return result
+
+
+def cf_prepared_images_verified(article, folder):
+    """Readiness follows source evidence, including an explicit text-only decision."""
+    from cf_posting.posting import verify_article_images
+    try:
+        verify_article_images(article, folder)
+    except (ValueError, OSError, KeyError, TypeError):
+        return False
+    return True
 
 
 def prepare_cf(day, domain, *, publish_if_due=True):
@@ -322,9 +440,10 @@ def prepare_cf(day, domain, *, publish_if_due=True):
     plan=policy()
     if domain not in plan['cf'] or day<plan['effectiveDate']:raise ValueError('Unapproved CF preparation')
     prior=cf.load_current_schedule() if day == datetime.now(KST).date().isoformat() else load(cf.SCHEDULE_JSON)
-    folder = folder_for('cf_posting', day, domain)
-    folder.mkdir(parents=True, exist_ok=True)
     item = next((r for r in prior.get('items', []) if r.get('domain') == domain), {'domain': domain})
+    from common.operating_plan import cf_folder
+    folder = cf_folder(item,day,folder_for('cf_posting',day,domain))
+    folder.mkdir(parents=True, exist_ok=True)
     if day == datetime.now(KST).date().isoformat() and item.get('status') == 'published' and item.get('publicUrl'):
         return {'state': 'published', 'preparationVerified': True, 'publicPublicationVerified': True,
                 'publicUrl': item['publicUrl'], 'account': domain, 'date': day, 'folder': str(folder)}
@@ -349,7 +468,7 @@ def prepare_cf(day, domain, *, publish_if_due=True):
                         if pdata.get(fk) and pdata.get(fk) not in used_today:
                             used_today.append(str(pdata.get(fk)))
         scheduled = {k: v for k, v in item.items() if k in ('domain', 'category')}
-        domain_topic = f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else str(scheduled.get('category') or domain)
+        domain_topic = item.get('mainKeyword') or (f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else str(scheduled.get('category') or domain))
         planning = load(folder / 'planning.json') if (folder / 'planning.json').is_file() else {}
         if not (folder / 'article.json').exists():
             planning = planning_or_memory(domain, domain_topic, folder, {'usedKeywordsToday': used_today}, channel='cf')
@@ -358,20 +477,18 @@ def prepare_cf(day, domain, *, publish_if_due=True):
             scheduled['mainKeyword'] = planning['keyword']
         from common import llm_client
         generate = llm_client.generate_json
-        cf_writing_rule = (
-            f'\n[도메인({domain}) 맞춤형 집필 원칙 & 절대 금지 가드레일]\n'
-            f'- [도메인 고유 페르소나 & 전문 분야 엄수]: 이 블로그({domain})의 전문 분야는 [{domain_topic}]이며, 필진 페르소나는 "{cf_info.get("persona", "전문 에디터")}"이다. 문체는 [{cf_info.get("writingTone", "")}]를 따르고, 오늘 다른 도메인에서 이미 사용한 키워드/제목({json.dumps(used_today[:15], ensure_ascii=False)})과 겹치는 주제는 절대 쓰지 마라.\n'
-            f'- 제목은 앞머리에 핵심 검색 명사구를 배치하되, 이 도메인의 제목 스타일({cf_info.get("titleStyle", "")})에 맞게 자연스럽게 작성하라.\n'
-            '- 공무원 공고문 요약 매크로 말투 금지: 독자의 현실적인 고민과 궁금증에 공감하는 도입부로 시작하라.\n'
-            '- 본문에는 스마트폰으로 바로 대입 가능한 구체적 사례, 주제 성격에 맞는 실용 비교/정리 표(<table>), 2~3줄 짧은 문단 호흡을 적용하고, 마지막은 지금 바로 실천할 수 있는 구체적 팁으로 마무리하라.\n'
-            '- "이 글은 제공된 자료를 정리했습니다", "개인별 조회 서비스가 아닙니다", "공식 공고를 참고하세요" 같은 리서치 메타 발언·면책 문구는 본문에 절대 노출 금지.\n'
-        )
+        cf_writing_rule = '\n'+json.dumps({
+            'domain':domain,'readerTopic':domain_topic,'persona':cf_info.get('persona'),
+            'recentlyUsedTopics':used_today,
+            'editorialAuthority':'Choose structure, length, tone and visuals to solve the reader task and test the business hypothesis; no fixed table, paragraph or image count.'},ensure_ascii=False)
         llm_client.generate_json = lambda prompt, *args, **kwargs: generate(prompt + (('\n[크루 회의 합의 작성 방식]\n'+planning.get('writingGuide','')+cf_writing_rule) if kwargs.get('agent_slot') == 'cf_pipeline' else ''), *args, **kwargs)
         try:
             article = cf.basic_article(domain, scheduled, folder)
         finally:
             llm_client.generate_json = generate
         article = cf.ensure_article_images(article, folder, domain=domain)
+        from common.content_quality import ensure_publication_review
+        ensure_publication_review(article, folder, generate=generate)
         if planning and not article.get('planningId'):
             article['planningId'] = planning.get('planningId')
             write(folder / 'article.json', article)
@@ -380,7 +497,7 @@ def prepare_cf(day, domain, *, publish_if_due=True):
         cf.basic_progress = progress
     article=load(folder/'article.json')
     assets=[(folder/'images'/p['filename'] if (folder/'images'/p['filename']).is_file() else folder/p['filename']) for p in article.get('imagePlans',[]) if isinstance(p,dict) and p.get('filename')]
-    valid=bool(assets) and all(p.is_file() and p.stat().st_size>0 for p in assets)
+    valid=cf_prepared_images_verified(article, folder)
     result = {'state':'prepared' if valid else 'preparation_unverified','preparationVerified':valid,
               'account':domain,'date':day,'folder':str(folder),
               'articleSha256':hashlib.sha256((folder/'article.json').read_bytes()).hexdigest(),
@@ -406,15 +523,17 @@ def _prepare_all(day):
     state = {'date': day, 'startedAt': datetime.now(KST).isoformat(), 'naver': {}, 'cf': {}, 'errors': {}}
     status_path = DATA / 'parameter-runtime.json'
     prior = load(cf.SCHEDULE_JSON)
-    for account, row in plan['naver'].items():
-        for clock in row['slots']:
-            key = account + ' ' + clock
-            try:
-                run_naver(day, account, clock)
-                state['naver'][key] = {'status': 'reserved', 'reserveTime': day + ' ' + clock}
-            except Exception as exc:
-                state['errors'][key] = type(exc).__name__ + ': ' + str(exc)[:180]
-            write(status_path, state)
+    from common.naver_ownership import legacy_naver_submission_allowed
+    if legacy_naver_submission_allowed(ROOT):
+        for account, row in plan['naver'].items():
+            for clock in row['slots']:
+                key = account + ' ' + clock
+                try:
+                    run_naver(day, account, clock)
+                    state['naver'][key] = {'status': 'reserved', 'reserveTime': day + ' ' + clock}
+                except Exception as exc:
+                    state['errors'][key] = type(exc).__name__ + ': ' + str(exc)[:180]
+                write(status_path, state)
     for domain, clock in plan['cf'].items():
         try:
             result = prepare_cf(day, domain)
@@ -456,13 +575,14 @@ def dispatch_cf():
             return {'status': 'busy'}
         schedule = cf.load_current_schedule()
         for item in schedule['items']:
-            if item['domain'] in plan['cf'] and item.get('status') in ('waiting', 'pending', 'prepared'):
+            if item['domain'] in plan['cf'] and not item.get('allocationId') and item.get('status') in ('waiting', 'pending', 'prepared'):
                 item['scheduledTime'] = plan['cf'][item['domain']]
         cf.save_schedule_file(cf.SCHEDULE_JSON, schedule)
         for item in sorted(schedule['items'], key=lambda r: r['scheduledTime']):
             if item.get('status') == 'published' or item['scheduledTime'] > now.strftime('%H:%M'):
                 continue
-            folder = folder_for('cf_posting', day, item['domain'])
+            from common.operating_plan import cf_folder
+            folder = cf_folder(item,day,folder_for('cf_posting',day,item['domain']))
             prior = Path(item.get('artifactFolder') or '')
             if item.get('artifactFolder'):
                 prior = prior if prior.is_absolute() else cf.BASE_DIR / prior
@@ -482,6 +602,15 @@ def main(argv=None, *, conference_worker=False):
     parser.add_argument('--account')
     parser.add_argument('--slot')
     args = parser.parse_args(argv)
+    if args.action in ('naver', 'naver-cycle', 'conference'):
+        from common.naver_ownership import require_legacy_naver_submission_allowed
+        require_legacy_naver_submission_allowed(ROOT)
+    if not conference_worker and args.action == 'naver-cycle':
+        from common.naver_ab import cycle as workflow_cycle
+        result = workflow_cycle()
+        if result is not None:
+            print(json.dumps(result, ensure_ascii=False), flush=True)
+            return result
     if not conference_worker and args.action != 'monitor':
         from common.conference_dispatch import request
         result = request('parameters', vars(args))
@@ -491,7 +620,7 @@ def main(argv=None, *, conference_worker=False):
     if agendas.enabled() and args.action!='monitor':
         row=agendas.require()
         target=(row.get('workTarget') or row.get('source') or {}).get('arguments',{})
-        if target and any(target.get(k)!=vars(args).get(k) for k in ('action','date','account','slot')):
+        if target and args.action not in ('cf-cycle', 'naver-cycle') and any(target.get(k)!=vars(args).get(k) for k in ('action','date','account','slot')):
             raise agendas.AgendaWaiting('현재 안건의 날짜·계정·슬롯과 다른 실행입니다.')
     today = datetime.now(KST).date().isoformat()
     if (Path.home() / 'EGO_EXEC_DISABLED').exists() and args.action != 'monitor':
@@ -503,6 +632,10 @@ def main(argv=None, *, conference_worker=False):
         folder = folder_for('naver_blog_posting', day, account+'-'+clock.replace(':',''))
         result = planning_or_memory(account, '다음 발행의 키워드·독자·서식 결정', folder, styles(account, day))
     elif args.action == 'cf-prepare':
+        current=load(DATA/'cf/daily_schedule.json')
+        item=next((r for r in current.get('items',[]) if r.get('domain')==args.account),{})
+        if item.get('allocationId') and args.slot!=item.get('scheduledTime'):
+            raise ValueError('CF allocation changed; preserve original request for reconciliation')
         result=prepare_cf(args.date or today,args.account,publish_if_due=False)
     elif args.action == 'prepare':
         now = datetime.now(KST)
@@ -528,18 +661,22 @@ def main(argv=None, *, conference_worker=False):
         if item is None:
             result = {'status':'waiting'}
         else:
+            if args.action=='cf' and args.slot and args.slot!=item.get('scheduledTime'):
+                raise ValueError('CF slot identity changed; no publication attempted')
             from common.asset_map import CF_DOMAINS
             cf_info = CF_DOMAINS.get(item['domain'], {})
             used_today = [str(r.get(k)) for r in schedule.get('items', []) if r.get('domain') != item['domain'] for k in ('title', 'mainKeyword', 'slug') if r.get(k)]
-            folder = folder_for('cf_posting', today, item['domain'])
-            topic = load(folder / 'article.json').get('title') or (f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else item.get('mainKeyword') or item['domain'])
+            from common.operating_plan import cf_folder
+            folder = cf_folder(item,today,folder_for('cf_posting',today,item['domain']))
+            topic = load(folder / 'article.json').get('title') or item.get('mainKeyword') or (f"{cf_info['niche']} ({cf_info['desc']})" if cf_info else item['domain'])
             planning = planning_or_memory(item['domain'], topic, folder, {'usedKeywordsToday': used_today}, channel='cf')
             with cf.cleaner_lock(wait_seconds=120, poll_interval=1) as acquired:
                 if acquired:
                     from common import llm_client
                     generate = llm_client.generate_json
                     article_builder = cf.basic_article
-                    llm_client.generate_json = lambda prompt, *a, **kw: generate(prompt+'\n[팀장 회의 실행안]\n'+planning['writingGuide'], *a, **kw)
+                    llm_client.generate_json = lambda prompt, *a, **kw: generate(
+                        prompt+('\n[팀장 회의 실행안]\n'+planning['writingGuide'] if kw.get('agent_slot')=='cf_pipeline' else ''), *a, **kw)
                     cf.basic_article = lambda domain, item, folder: article_builder(domain, {**item, 'mainKeyword': planning['keyword']}, folder)
                     try:
                         result = cf.run_basic_posting(item['domain'], folder)

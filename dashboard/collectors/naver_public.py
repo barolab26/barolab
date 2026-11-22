@@ -249,6 +249,10 @@ def reconcile(base=None, account_map=None, now=None, force=False):
                 and _titles_match(a.get('topic') or a.get('title'), rss_item.get('title'))
                 and a.get('publicationDate') == rss_item.get('publicationDate')), None)
             prior = evidence_by_url.get(url) or {}
+            from common.naver_ab import publication_identity
+            resolved = publication_identity({'account':expected_account,'title':rss_item.get('title'),
+                'reserveTime':rss_item.get('reserveTime')}, attempts)
+            folder = resolved.get('artifactFolder') or folder
             try:
                 checked = datetime.fromisoformat(str(prior.get('checkedAt')).replace('Z', '+00:00'))
                 age = (now_dt - checked).total_seconds()
@@ -258,7 +262,8 @@ def reconcile(base=None, account_map=None, now=None, force=False):
             historical = str(rss_item.get('publicationDate') or '') < now_dt.date().isoformat()
             recent_failed_attempt = prior.get('bodyVerificationStatus') in ('unknown','mismatch') and prior.get('bodyVerificationReason') != 'cycle_budget_exhausted' and 0 <= age < 120
             max_net_checks = 15 if force else 8
-            if recent_failed_attempt or already_public and (historical or 0 <= age < 3600):
+            if (recent_failed_attempt and not force or already_public and prior.get('publicBodyMatched') is True
+                    and (historical or 0 <= age < 3600)):
                 body_evidence[url] = dict(prior)
             elif len([v for v in body_evidence.values() if v.get('_networkChecked')]) >= max_net_checks or time.monotonic() >= deadline:
                 body_evidence[url] = dict(prior) if already_public else {'bodyVerificationStatus':'deferred', 'bodyVerificationReason':'cycle_budget_exhausted'}
@@ -293,7 +298,8 @@ def reconcile(base=None, account_map=None, now=None, force=False):
         }
         if scheduled_slot:
             row["scheduledSlot"] = scheduled_slot
-        return row
+        from common.naver_ab import publication_identity
+        return publication_identity(row, attempts)
 
     def _promote_slot_dict(slot_obj, rss_item, eff_reserve):
         if body_for(rss_item).get("publicHttpStatus") != 200:
@@ -534,11 +540,6 @@ def record_check(base=None, result=None):
     return True
 
 
-if __name__ == "__main__":
-    res = reconcile(force=True)
-    print(json.dumps(res, ensure_ascii=False, indent=2))
-
-
 """Read relocated evidence only for explicitly known project output roots."""
 from pathlib import Path, PureWindowsPath
 import hashlib
@@ -554,6 +555,30 @@ def resolve_artifact_folder(value, account, base):
     scheduled_output = (Path(base) / 'output' / 'scheduled').resolve()
     candidate = Path(value)
     native = candidate.resolve()
+    def recovery_folder(folder):
+        try:
+            parts = folder.relative_to((Path(base) / 'output').resolve()).parts
+            if (len(parts) != 2 or not re.fullmatch(r'recovery-\d{8}', parts[0])
+                    or not re.fullmatch(re.escape(account)+r'-\d{4}', parts[1])):
+                return None
+            identity = json.loads((folder / 'identity.json').read_text(encoding='utf-8'))
+            receipt = json.loads((folder / 'reservation-evidence.json').read_text(encoding='utf-8'))
+            saved = json.loads((folder / 'reserved-server-document.json').read_text(encoding='utf-8'))
+            if (identity != {'account': account, 'blogId': DEFAULT_ACCOUNTS[account]['blog_id']}
+                    or receipt.get('account') != account or receipt.get('blogId') != identity['blogId']
+                    or receipt.get('submissionStatus') != 'verified_reserved'):
+                return None
+            def clean(v):
+                if isinstance(v, dict):
+                    return {k: clean(x) for k, x in v.items() if k not in ('id', 'documentId', 'imageLoaded')}
+                return [clean(x) for x in v] if isinstance(v, list) else v
+            digest = hashlib.sha256(json.dumps(clean(saved['document']['components']), sort_keys=True, ensure_ascii=False).encode('utf-8')).hexdigest()
+            return folder if digest == receipt.get('documentSha256') else None
+        except (OSError, ValueError, KeyError, TypeError):
+            return None
+    recovered = recovery_folder(native)
+    if recovered:
+        return recovered
     if ((native.is_relative_to(output) and native != output) or (native.is_relative_to(scheduled_output) and native != scheduled_output)) and native.is_dir():
         return native
     windows = PureWindowsPath(value)
@@ -568,6 +593,10 @@ def resolve_artifact_folder(value, account, base):
                 suffix = windows.relative_to(prefix)
             except ValueError:
                 continue
+            if windows.drive.lower() == 'c:' and len(suffix.parts) == 2 and '..' not in suffix.parts:
+                recovered = recovery_folder((Path(base) / 'output' / Path(*suffix.parts)).resolve())
+                if recovered:
+                    return recovered
             if len(suffix.parts) < 2 or suffix.parts[0] != account or '..' in suffix.parts:
                 return None
             candidate = Path(base) / 'output' / Path(*suffix.parts)
@@ -597,3 +626,8 @@ def resolve_artifact_folder(value, account, base):
                 return None
         return candidate
     return None
+
+
+if __name__ == "__main__":
+    res = reconcile(force=True)
+    print(json.dumps(res, ensure_ascii=False, indent=2))

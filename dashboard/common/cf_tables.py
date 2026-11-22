@@ -38,28 +38,6 @@ def _domain_theme(domain=''):
     }
 
 
-def _same_domain_internal_links(domain='', exclude_title=''):
-    if not domain:
-        return []
-    links = []
-    try:
-        from cf_posting import posting
-        inv = posting.published_inventory('https://www.' + domain)
-        for p in inv:
-            if p.get('status') not in ('published', None):
-                continue
-            slug = str(p.get('slug') or '').strip()
-            t = str(p.get('title') or '').strip()
-            if not slug or not t or t.casefold() == str(exclude_title or '').casefold():
-                continue
-            links.append({'url': f'https://www.{domain}/{slug}', 'title': t})
-            if len(links) >= 2:
-                break
-    except Exception:
-        pass
-    return links
-
-
 def inject_interactive_widget(html, title='', domain=''):
     from html import escape
     if not html or 'data-cf-interactive-widget=' in html or '<!-- editorial-summary -->' in html:
@@ -100,29 +78,9 @@ def inject_interactive_widget(html, title='', domain=''):
     wstyle = th['widgetStyle']
 
     short_title = (title or (h2s[0].get_text(' ', strip=True) if h2s else '핵심 정리')).split(',')[0].split(':')[0].strip()
+    # Formatting must not choose destinations or turn newest posts into related
+    # content. Keep only the links authored and reviewed with the article.
     cta_footer_html = ''
-    try:
-        from common.asset_map import match_monetization_options
-        mon = match_monetization_options(title, channel='cf')
-        aff_links = []
-        for opt in mon.get('affiliateOptions') or []:
-            if opt.get('link'):
-                aff_links.append(
-                    f'<a href="{escape(opt["link"])}" target="_blank" rel="noopener noreferrer" '
-                    f'style="display:block;margin-top:8px;padding:11px 14px;background:{accent};color:#ffffff;font-weight:700;font-size:14px;border-radius:8px;text-decoration:none;text-align:center;">'
-                    f'관련 혜택·예약 조건 바로 확인하기 →</a>'
-                )
-        # Strictly SAME-DOMAIN internal links only (Never cross-link PBN domains)
-        internal_posts = _same_domain_internal_links(domain, exclude_title=title)[:2]
-        internal_items = ''.join(
-            f'<a href="{escape(b["url"])}" style="display:block;padding:8px 11px;margin-top:6px;background:#ffffff;border:1px solid {border};border-radius:8px;color:{text_col};font-size:13.5px;font-weight:600;text-decoration:none;">'
-            f'함께 읽으면 좋은 글: {escape(b["title"][:50])} →</a>'
-            for b in internal_posts
-        )
-        if aff_links or internal_items:
-            cta_footer_html = f'<div style="margin-top:12px;padding-top:10px;border-top:1px solid {border};">{"".join(aff_links)}{internal_items}</div>'
-    except Exception:
-        cta_footer_html = ''
 
     if wstyle in ('field_tip', 'outing_route', 'travel_memo', 'living_recipe', 'pet_care'):
         heading_map = {
@@ -221,6 +179,10 @@ def style_tables(html, domain=''):
     cell_style = f"padding:12px 16px;border:1px solid {th['border']};border-bottom:1px solid {th['border']};vertical-align:top;overflow-wrap:anywhere;word-break:normal;white-space:normal"
     cap_style = f"caption-side:top;text-align:left;font-weight:700;color:{th['text']};padding:0 0 10px;line-height:1.6"
     soup = BeautifulSoup(html, 'html.parser')
+    for code in soup.find_all('code'):
+        style(code, 'white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word')
+    for pre in soup.find_all('pre'):
+        style(pre, 'max-width:100%;min-width:0;overflow-x:auto')
     for table in list(soup.find_all('table')):
         parent = table.parent
         if parent.name == 'div' and (str(parent.get('data-cf-table-style', '')).startswith('cf-responsive-table-v') or

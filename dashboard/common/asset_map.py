@@ -147,11 +147,11 @@ CF_DOMAINS = {
 
 # 2. Naver Blogs (Frontline Search SEO Bridges)
 NAVER_ACCOUNTS = {
-    'soultin': {'status': 'active', 'type': '비실명 성장형', 'focus': '금융·연금·경제 실무'},
-    'adinfo0905': {'status': 'active', 'type': '비실명 안정형', 'focus': '정책자금·소상공인·지원금'},
-    'soul5373': {'status': 'active', 'type': '비실명 안정형', 'focus': '복지·건강·생활 가이드'},
-    'yoon_master': {'status': 'active', 'type': '비실명 성장형', 'focus': '재테크·부동산·주거지원'},
-    'stone0747': {'status': 'active', 'type': '비실명 안정형', 'focus': '세무·민원·정부 혜택'},
+    'soultin': {'status': 'active', 'focus': '연금·복지·노후정보', 'monetization':['adpost']},
+    'adinfo0905': {'status': 'active', 'focus': '직장인 루틴·절세·생활 실무', 'monetization':['cf_bridge']},
+    'soul5373': {'status': 'active', 'focus': '건강·영양 팩트체크', 'monetization':['adpost']},
+    'yoon_master': {'status': 'active', 'focus': '가전·리빙·구매 판단', 'monetization':['adpost','shopping_connect']},
+    'stone0747': {'status': 'active', 'focus': '지원금·세무·민원 실무', 'monetization':['cf_bridge']},
 }
 
 # 3. Threads Channel (Viral Feed Hooking Bridge)
@@ -194,6 +194,11 @@ INFRASTRUCTURE = {
 
 # 6. Affiliate Marketing Weapons (CPA / CPC / CPS Multi-Monetization)
 AFFILIATE_PROGRAMS = {
+    'shopping_connect': {
+        'name':'네이버 쇼핑커넥트','options':['CPS 상품 판매 수수료'],
+        'target_channels':['yoon_master'],'portal':'https://brandconnect.naver.com/',
+        'strategy':'윤뷰스 구매 의도와 실제 제휴 상품을 연결하고 발급 링크·조건·판매 실적을 확인한다. 미발급 링크나 미확인 수수료율을 만들지 않는다.',
+    },
     'replyalba': {
         'name': '리플알바 (ReplyAlba)',
         'credentials': {'id_set': True, 'url': 'https://replyalba.co.kr/'},
@@ -232,6 +237,9 @@ def match_monetization_options(topic_or_keyword, channel='cf'):
     """Determine optimal affiliate and revenue options alongside AdSense."""
     kw = (topic_or_keyword or '').lower()
     options = []
+    if channel=='yoon_master':
+        options.append({'program':'shopping_connect','type':'CPS 제휴','name':'네이버 쇼핑커넥트',
+            'portal':'https://brandconnect.naver.com/','action':'계정에서 실제 상품·발급 링크·수수료 조건을 확인해 구매 판단 콘텐츠와 연결한다.'})
     
     # 1. Trip.com matching for travel/transport/places
     if any(k in kw for k in ('여행', '숙소', '호텔', '축제', 'k패스', 'k-패스', '교통', '관광', '명소', '비행기', '항공권')):
@@ -263,7 +271,9 @@ def match_monetization_options(topic_or_keyword, channel='cf'):
         })
 
     return {
-        'primaryEngine': 'Google AdSense (기본 캐시카우)',
+        'primaryEngine': 'Naver ShoppingConnect CPS + AdPost' if channel=='yoon_master' else
+            'Naver AdPost' if channel in ('soultin','soul5373') else
+            'CF referral and measured conversion' if channel in NAVER_ACCOUNTS else 'Google AdSense',
         'affiliateOptions': options,
         'hasAffiliateAngle': len(options) > 0,
         'advice': '애드센스 기본 노출 위에 고단가 제휴(리플알바 CPA 또는 트립닷컴)를 결합하여 페이지당 RPM 극대화'
@@ -395,6 +405,11 @@ def get_account_pacing_strategy(account, date_str=None):
     Rule: Never bridge in consecutive posts on the same account.
     Note: stone0747 is locked to pure_info_build (linkAllowed=False) for index recovery.
     """
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled():
+        return {'mode':'manager_owned','linkAllowed':account=='yoon_master','ratio':None,
+            'monetization':NAVER_ACCOUNTS.get(account,{}).get('monetization',[]),
+            'instruction':'계정의 실제 수익화 수단과 독자 과제에 맞게 주제·구성을 판단한다. 고정 발행량이나 링크 비율은 없다. 쇼핑커넥트는 실제 발급 링크와 조건을 확인하고 경제적 이해관계를 표시한다. 기발행 글과 기존 예약·원고는 보존한다.'}
     if account == 'stone0747':
         return {
             'mode': 'pure_info_build',
@@ -559,6 +574,9 @@ def is_duplicate_naver_topic(candidate_text, used_texts):
     cand_str = re.sub(r'\s+', '', str(candidate_text or '')).lower()
     if not cand_str:
         return True
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled():
+        return any(cand_str==re.sub(r'\s+','',str(u or '')).lower() for u in (used_texts or []))
     cand_nouns = extract_core_topic_nouns(candidate_text)
     for u in (used_texts or []):
         u_str = re.sub(r'\s+', '', str(u or '')).lower()
@@ -798,6 +816,9 @@ def collect_used_cf_topics(domain=None, days=14, current_folder=None):
 def select_verified_cf_keyword(domain, candidate_kw, verified_candidates=None, used_topics=None, max_docs=300):
     """Select a domain-consistent, non-duplicate CF search keyword verified to have <= max_docs competing posts."""
     used = list(used_topics or [])
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled() and candidate_kw and candidate_kw!=domain and not is_duplicate_naver_topic(candidate_kw,used):
+        return str(candidate_kw).strip()  # A planning hypothesis; no volume, competition or ranking claim.
     pool = []
     if candidate_kw and candidate_kw != domain and not candidate_kw.startswith(CF_DOMAINS.get(domain, {}).get('niche', '___')):
         pool.append(clean_naver_search_keyword(candidate_kw))
@@ -845,7 +866,14 @@ def clean_naver_search_keyword(raw_keyword):
 
 def select_verified_naver_keyword(account, candidate_kw, verified_candidates=None, used_topics=None, max_docs=500):
     """Select a non-duplicate Naver search keyword verified to have <= max_docs competing blog posts."""
+    from common.naver_ab import locked_keyword
+    experimental = locked_keyword(account, candidate_kw, used_topics or [])
+    if experimental is not None:
+        return experimental
     used = list(used_topics or [])
+    from common.operating_plan import enabled as adaptive_enabled
+    if adaptive_enabled() and candidate_kw and not is_duplicate_naver_topic(candidate_kw,used):
+        return str(candidate_kw).strip()  # Actual SERP/source research decides usefulness, not a document-count cutoff.
     pool = []
     if candidate_kw:
         pool.append(clean_naver_search_keyword(candidate_kw))
@@ -962,7 +990,7 @@ def _fit_brunch_text(text, limit):
     return cut if len(cut) >= limit - 7 else s[:limit].strip()
 
 
-def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450, edit_url=None):
+def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, auto_publish=True, cdp_port=9450, edit_url=None, staged_page=None):
     """Write or update a Brunch column via native EGO Lite TaskSpace (`barolab-soultin`, Profile 3) without spawning extra windows."""
     safe_title = _fit_brunch_text(title, 28)
     safe_subtitle = _fit_brunch_text(subtitle, 38)
@@ -979,11 +1007,13 @@ def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, aut
             edit_url=edit_url,
             uid=uid or '',
             upw=upw or '',
+            staged_page=staged_page,
         )
-        if isinstance(ego_res, dict) and ego_res.get('ok'):
+        if isinstance(ego_res, dict):
             return ego_res
-    except Exception:
-        pass
+        return {'ok':False,'mode':'unknown','error':'native_result_missing','autoRetry':False}
+    except Exception as exc:
+        return {'ok':False,'mode':'unknown','error':str(exc)[:600],'autoRetry':False}
 
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
@@ -1074,23 +1104,143 @@ def post_or_save_brunch_column(title, subtitle, paragraphs, bridge_url=None, aut
                     pass
 
 
+def refresh_shopping_connect(query=''):
+    """Read the account's existing issued links through its agent-owned EGO tab; no claims, tokens or URLs are invented."""
+    import subprocess
+    import time
+    from common.ego_taskspace import find_ego_cli
+    from common.collection_observability import load,write,locked
+    if not isinstance(query,str) or len(query)>200:raise ValueError('Product query must be bounded text')
+    cli=find_ego_cli()
+    if cli is None:raise RuntimeError('EGO browser unavailable')
+    folder=ROOT/'dashboard/data/monetization';folder.mkdir(parents=True,exist_ok=True)
+    with locked(folder/'shopping-connect-yoon_master'):
+        known_url=load(folder/'shopping-connect-yoon_master.json').get('sourceUrl')
+        from urllib.parse import urlsplit
+        parsed=urlsplit(str(known_url or ''))
+        if parsed.scheme!='https' or parsed.hostname!='brandconnect.naver.com' or not re.fullmatch(r'/\d+/affiliate/products-link',parsed.path):
+            raise ValueError('Observe and bind this account issued-link screen before collection')
+        script=folder/('observe-shopping-'+str(time.time_ns())+'.mjs')
+        script.write_text('const query='+json.dumps(query,ensure_ascii=False)+';\nconst knownLinksUrl='+json.dumps(known_url)+';\n'+r'''
+const spaces=(await listTaskSpaces()).filter(s=>s.name==='barolab-yoon_master'&&s.ownership==='agent');
+if(spaces.length!==1)throw Error('Existing agent-owned yoon_master space required; no claim or restart');
+const task=await taskSpace(spaces[0].id);
+const tabs=await task.tabs();
+const tab=tabs.find(t=>t.label&&t.openedBy==='agent'&&t.url?.startsWith('https://brandconnect.naver.com/'));
+const page=tab?task.page(tab.label):await task.newPage();
+await page.goto(knownLinksUrl);
+await page.click('button[aria-label="메뉴 더보기"]');
+const identity=await page.evaluate(()=>document.body.innerText);
+if(!identity.includes('yoon_master')||!identity.includes('윤뷰스 쇼핑가이드'))throw Error('ShoppingConnect account identity unverified');
+const linksUrl=await page.evaluate(()=>[...document.querySelectorAll('a[href]')].find(a=>a.getAttribute('href')?.endsWith('/affiliate/products-link'))?.href);
+if(!linksUrl)throw Error('Issued link management not observed');
+await page.click('button[aria-label="검색 조건 초기화"]');
+await page.cdp('Network.enable');
+async function collect(change){
+ await page.events();await change();
+ let response;const finished=new Set();const requested=new Set();const deadline=Date.now()+8000;
+ while((!response||!finished.has(response.requestId))&&Date.now()<deadline){
+  const events=await page.events();
+  for(const event of events){const params=event.params||event;if((event.method||event.type)==='Network.loadingFinished')finished.add(params.requestId);if((event.method||event.type)==='Network.requestWillBeSent')requested.add(params.requestId);}
+  response=response||events.filter(e=>(e.method||e.type)==='Network.responseReceived').map(e=>e.params||e).find(e=>requested.has(e.requestId)&&e.response?.url?.includes('/affiliate/query/affiliate-urls/search'));
+  if(!response||!finished.has(response.requestId))await page.waitForTimeout(100);
+ }
+ if(!response||response.response.status!==200)throw Error('Issued link response unavailable');
+ return JSON.parse((await page.cdp('Network.getResponseBody',{requestId:response.requestId})).body);
+}
+let body=await collect(()=>page.reload());
+if(query)body=await collect(async()=>{await page.fill('input[placeholder="상품명을 입력해 주세요."]',query);await page.press('input[placeholder="상품명을 입력해 주세요."]','Enter');});
+if(!Array.isArray(body.data))throw Error('Issued link schema changed');
+const products=body.data.map(r=>Object.fromEntries(['id','affiliateUrlId','enabled','deleted','productName','productUrl','shortenUrl','productStatus','storeName','commissionRate','salePrice','discountedSalePrice','urlCreatedAt'].filter(k=>k in r).map(k=>[k,r[k]])));
+console.log('BAROLAB_SHOPPING_JSON:'+JSON.stringify({account:'yoon_master',status:'observed_issued_links',sourceKind:'authenticated_browser_response',sourceUrl:linksUrl,checkedAt:new Date().toISOString(),query,total:body.paging?.total??null,observedCount:products.length,complete:body.paging?.total===products.length,products}));
+''',encoding='utf-8')
+        result=subprocess.run([str(cli),'nodejs','-e',"await import('"+script.resolve().as_uri()+"')"],
+            capture_output=True,text=True,encoding='utf-8',timeout=45,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        lines=[line.partition('BAROLAB_SHOPPING_JSON:')[2] for line in (result.stdout+'\n'+result.stderr).splitlines() if line.startswith('BAROLAB_SHOPPING_JSON:')]
+        if result.returncode or len(lines)!=1:
+            write(folder/'shopping-connect-observation-error.json',{'checkedAt':datetime.now(KST).isoformat(),
+                'query':query,'error':result.stderr[:2500],'autoRetry':False})
+            raise RuntimeError('ShoppingConnect observation failed; preserve user control and inspect existing tab: '+result.stderr[:600])
+        observed=json.loads(lines[0])
+        path=folder/'shopping-connect-yoon_master.json';record=load(path)
+        record.update(account='yoon_master',status='account_and_issued_link_management_observed',checkedAt=observed['checkedAt'])
+        if query:record.setdefault('issuedLinkQueries',{})[query]=observed
+        else:record['issuedLinks']=observed
+        write(path,record)
+        return observed
+
+
+def shopping_link_context(account):
+    from common.collection_observability import load
+    if account!='yoon_master':return {}
+    record=load(ROOT/'dashboard/data/monetization/shopping-connect-yoon_master.json')
+    observed=record.get('issuedLinks') or {}
+    if not observed or observed.get('query'):observed=refresh_shopping_connect()
+    selections=[observed,*record.get('issuedLinkQueries',{}).values()]
+    products={r['id']:r for selection in selections for r in selection.get('products',[])}
+    return {'program':'shopping_connect','account':account,'source':observed.get('sourceUrl'),
+        'checkedAt':observed.get('checkedAt'),'products':[r for r in products.values()
+            if r.get('enabled') is True and not r.get('deleted') and r.get('productStatus')=='SALE'],
+        'policy':'Use only a genuinely relevant observed issued link, never a constructed URL. Link metadata does not verify product specifications, experience, stock or current buyer pricing. Disclose the commission relationship.'}
+
+
+def corporate_assets(root=None):
+    """Canonical declared assets plus current evidence; capability is not measured income."""
+    from common.collection_observability import load
+    root=Path(root or ROOT);data=root/'dashboard/data'
+    policy=load(data/'daily_schedule.json');revenue=load(data/'revenue.json')
+    months=revenue.get('months',{});month=max(months) if months else None
+    sources=(months.get(month) or {}).get('sources',[]) if month else []
+    revenue_sources=[{k:r.get(k) for k in ('id','category','label','status','currency','scope','checkedAt')}
+                     for r in sources]
+    naver={}
+    for account,declared in NAVER_ACCOUNTS.items():
+        configured=policy.get('naver',{}).get(account,{})
+        naver[account]={**declared,'blogId':configured.get('blogId'),
+            'audience':configured.get('target'),'capabilityEvidence':configured.get('capabilityEvidence',{}),
+            'revenueSourceIds':[r['id'] for r in sources if r.get('id')=='adpost-'+account],
+            'revenueAttribution':'Account totals and affiliate sales are separate from post-attributed income.'}
+        if account=='yoon_master':
+            observed=load(data/'monetization/shopping-connect-yoon_master.json')
+            naver[account]['capabilityEvidence']={**naver[account]['capabilityEvidence'],
+                'shopping_connect':{k:observed.get(k) for k in ('status','checkedAt','sourceUrl','issuedLinkTotalObserved',
+                    'totalScope','salesVerified','settlementVerified')}}
+            naver[account]['shoppingConnectTools']={'observe':'browser_observe {port:9335}',
+                'operate':'Patch browser_ego_action on an observed authorized BrandConnect tab',
+                'readEvidence':'evidence {name:shopping_connect}','nativeLinkIssuance':'Use the actual account product/link screen; never construct a tracking URL'}
+            performance=observed.get('performanceEvidence') or {}
+            naver[account]['shoppingConnectPerformance']={k:v for k,v in performance.items() if k!='observedText'}
+    from common.staff_capabilities import capability_catalog
+    channels={}
+    for name,relative in [('brunch','brunch/status.json'),('naver_cafe','cafe/status.json'),
+                          ('youtube','youtube/status.json'),('naver_premium','premium/status.json')]:
+        observed=load(data/relative)
+        channels[name]={'source':'dashboard/data/'+relative,
+            **{k:observed.get(k) for k in ('account','channels','cafes','status','publicationHold','automation','measurement') if k in observed},
+            'checkedAt':observed.get('checkedAt') or observed.get('updatedAt') or observed.get('last_checked_at')}
+    apps=[]
+    console=load(data/'play-console-status.json')
+    for path in sorted((root/'apps').glob('*/project.json')):
+        project=load(path)
+        apps.append({'id':path.parent.name,**{k:project.get(k) for k in ('name','packageName','status') if k in project},
+            'consoleEvidence':(console.get('apps') or {}).get(path.parent.name),
+            'source':str(path.relative_to(root))})
+    compute={}
+    if root==ROOT:
+        from common.llm_settings import get_agent_brain
+        for role in ('jarvis','radar','publi','doctor','trace','patch'):
+            brain=get_agent_brain(role)
+            compute[role]={k:brain.get(k) for k in ('provider','model','reasoningEffort')}
+    return {'schema':'corporate-assets-v1','registeredAssetCoverage':{'cfDomains':len(CF_DOMAINS),'naverAccounts':len(naver),
+                'otherChannels':list(channels),'apps':len(apps),'unregisteredAssets':'unknown; registered inventory is not proof of all possible assets'},
+        'cfDomains':{d:{'url':'https://www.'+d,'niche':r['niche'],'persona':r.get('persona'),
+            'monetization':['adsense'],'activationEvidence':'dashboard/data/metrics.json'} for d,r in CF_DOMAINS.items()},
+        'naverAccounts':naver,'kinAccounts':KIN_ACCOUNTS,'threadsAccount':THREADS_ACCOUNT,
+        'channels':channels,'apps':apps,'affiliatePrograms':AFFILIATE_PROGRAMS,
+        'revenueSources':revenue_sources,'revenueSourceMonth':month,'compute':compute,
+        'tools':capability_catalog(),'capabilityCaveat':'Declared accounts/programs do not prove login, eligibility, link issuance, sales or settlement. Use the attached evidence and native tool receipts.'}
+
+
 def get_asset_map_summary():
-    """Generates an executive-level asset map summary for LLM context injection."""
-    cf_summary = ', '.join([f'{d}({info["niche"]})' for d, info in list(CF_DOMAINS.items())[:6]]) + f' 외 {len(CF_DOMAINS)-6}개'
-    naver_summary = ', '.join([f'{acc}({info["focus"]})' for acc, info in NAVER_ACCOUNTS.items()])
-    kin_summary = ', '.join(KIN_ACCOUNTS.keys())
-    return (
-        "=== [BaroLab 전사 가용 자산 지도 (Asset Map)] ===\n"
-        f"1. 캐시카우 (CF 블로그 16개): {cf_summary} (고단가 애드센스 수익화 종착지)\n"
-        f"2. 검색 유입 브릿지 (네이버 블로그 5개): {naver_summary} (7:3 배분 실험 · 수명 효과 미검증)\n"
-        f"3. 바이럴 숏테일 (스레드): @{THREADS_ACCOUNT['account_key']} (공식 Graph API + 크롬 9450)\n"
-        f"4. 신뢰 솔루션 (지식iN): {kin_summary}\n"
-        f"4-B. 고권위 칼럼 브릿지 (브런치): {BRUNCH_ACCOUNT['pen_name']} ({BRUNCH_ACCOUNT['url']} · CDP {BRUNCH_ACCOUNT['cdp_port']})\n"
-        "5. 제휴마케팅 무기 (수익 2차 엔진):\n"
-        "   - 리플알바 (CPA/CPC, ID: baro76650): 정책자금/대출/보험/렌탈 상담신청 · 실제 수수료는 해당 캠페인 조건 확인\n"
-        "   - 트립닷컴 (CPS, AID: 7143081, SID: 263330208): tripmarvel.com/여행/축제/K-패스 글에 숙소·교통 예약 링크\n"
-        "   - 쿠팡 파트너스 & 토스 쉐어링크: 생활/가전/금융 이벤트 직결 전환\n"
-        "6. 컴퓨팅 인프라: 제미나이 2개 풀(baro76650, barolab26) + Codex(gpt-6.1-sol/luna) + Google Flow 이미지(CDP 9440)\n"
-        "7. 운용 가설: 네이버 정보글 70%·CF 링크 30% 배분 및 애드센스·제휴 병행을 실험한다. 하루 $100는 목표이며 이 전략의 수익·계정 수명 효과는 미검증이다.\n"
-        "=================================================="
-    )
+    """Full registered assets and their monetization/evidence, shared by every planner."""
+    return json.dumps(corporate_assets(),ensure_ascii=False)

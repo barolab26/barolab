@@ -4,9 +4,18 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess as _sp
 import threading
 import uuid
 import time
+
+if os.name == 'nt' and not getattr(_sp.Popen, '_barolab_no_window', False):
+    _orig_popen_init = _sp.Popen.__init__
+    def _no_window_popen_init(self, *args, **kwargs):
+        kwargs['creationflags'] = int(kwargs.get('creationflags') or 0) | getattr(_sp, 'CREATE_NO_WINDOW', 0x08000000)
+        _orig_popen_init(self, *args, **kwargs)
+    _sp.Popen.__init__ = _no_window_popen_init
+    _sp.Popen._barolab_no_window = True
 
 ROOT = Path(__file__).resolve().parents[2]
 JOBS = ROOT / 'dashboard' / 'data' / 'control-jobs'

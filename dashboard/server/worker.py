@@ -168,6 +168,11 @@ def run_task(task):
                 )
             return 0
         return subprocess.run(['systemctl','--user','start','barolab-memory-review.service'],timeout=30).returncode
+    if task=='cleaner':
+        from common.cf_recovery import normalize
+        recovery = normalize(limit=1)
+        if recovery.get('workPerformed') or recovery.get('status') in ('busy','held'):
+            return 0
     if task=='metrics':
         return run_metrics(sys.executable,[('dashboard/revenue.py','--collect'),('dashboard/traffic.py','--collect'),
             ('dashboard/metrics.py',['--collect','--read-only']),('naver_kin.posting','--measure'),('threads_posting.posting','measure')])

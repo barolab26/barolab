@@ -329,7 +329,11 @@ def install(engine):
         return slot(config,now,used_slots)
     def scheduler_tick(config_path=engine._threads_config_CONFIG,db_path=engine._threads_config_DB,output=engine._threads_config_PUBLIC):
         active_path[0]=db_path
-        with engine._threads_scheduler_lock():
-            repair_claims(engine,engine._threads_config_load(config_path),db_path,datetime.now(timezone.utc))
-        return tick(config_path,db_path,output)
+        try:
+            with engine._threads_scheduler_lock():
+                repair_claims(engine,engine._threads_config_load(config_path),db_path,datetime.now(timezone.utc))
+            return tick(config_path,db_path,output)
+        except RuntimeError as exc:
+            if str(exc)=='worker_already_running':return {'state':'busy','status':'busy','reason':'worker_already_running'}
+            raise
     engine._threads_scheduler_current_slot=current_slot;engine._threads_scheduler_tick=scheduler_tick

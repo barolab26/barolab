@@ -238,15 +238,15 @@
     <header class="cafe-hero">
       <div>
         <div class="cafe-hero-title">
-          <span>☕ 네이버 카페 14,242명 2-Track 브릿지 &amp; 강퇴방어 관제실</span>
-          <span class="cafe-pill">🟢 soul5373 + yoon_master · Tier 2 무링크 워밍업 잠금 중</span>
+          <span>☕ 네이버 카페 포스팅 · 품질과 유입 확인</span>
+          <span class="cafe-pill">본문 품질 · 현재 게시 상태 · 유입을 구분합니다</span>
         </div>
         <p class="cafe-hero-sub">
-          현역 카페 2곳: <strong>고급지식의 모든 것 (1,739명 · Tier 1 브릿지 특화)</strong> + <strong>AI 커뮤니티 - 데키랩 (12,503명 · Tier 2 3:1 무링크 워밍업)</strong> · <span style="color:#fca5a5;">[금융꿀팁]은 초기 링크 강퇴로 송출 격리 완료</span>
+          관리 대상 카페: <strong>고급지식의 모든 것 (정보 포스팅)</strong> + <strong>AI 커뮤니티 - 데키랩 (AI/테크 주제)</strong> · <span style="color:#fca5a5;">[금융꿀팁]은 초기 링크 강퇴로 송출 격리 완료</span>
         </p>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="cafe-btn emerald" id="btn-publish-next-cafe" onclick="publishCafePart(6)">🚀 Part 6 (고급지식 브릿지 + 데키랩 무링크 워밍업) 발행</button>
+        <button class="cafe-btn emerald" id="btn-publish-next-cafe" onclick="publishCafePart(6)">검수된 Part 6 발행</button>
         <button class="cafe-btn blue" id="btn-sync-cafe" onclick="syncCafe(true)">🔄 카페 상태 동기화</button>
         <a class="cafe-btn" href="https://cafe.naver.com/boutiqueinfo" target="_blank" rel="noopener">☕ 고급지식(1.7천) 열기 ↗</a>
         <a class="cafe-btn" href="https://cafe.naver.com/dekilab" target="_blank" rel="noopener">☕ 데키랩(1.25만) 열기 ↗</a>
@@ -264,41 +264,41 @@
       </a>
       <a class="cafe-step-tab" href="#sec-cafe-todo">
         <div>
-          <strong style="color:#2563eb;">② 뭘 할 건지 (3:1 무링크 워밍업 큐 &amp; 원클릭 송출)</strong>
-          <small>데키랩(첫 3편 100% 무링크 순수정보 잠금) + 고급지식(100% 원문 브릿지)</small>
+          <strong style="color:#2563eb;">② 뭘 할 건지 (완결 원고 · 근거 · 검수)</strong>
+          <small>게시판 독자에게 맞는 주제와 완성된 원고만 검토합니다</small>
         </div>
         <span class="chip chip-blue" id="tab-cafe-todo">큐 10편</span>
       </a>
       <a class="cafe-step-tab" href="#sec-cafe-effect">
         <div>
           <strong style="color:#7c3aed;">③ 효과 측정 (카페별 도달·GA4 유입 전환 측정판)</strong>
-          <small>현역 14,242명 회원 노출 · 네이버 카페/검색 GA4 유입 세션 · 도메인별 전환 성과</small>
+          <small>회원수는 실제 노출이 아닙니다 · 카페 출처 유입과 글별 수익은 별도입니다</small>
         </div>
-        <span class="chip chip-purple" id="tab-cafe-effect">14,242명 현역</span>
+        <span class="chip chip-purple" id="tab-cafe-effect">글별 성과 확인 필요</span>
       </a>
     </nav>
 
     <!-- KPI Row -->
     <section class="cafe-kpi-grid" aria-label="네이버 카페 핵심 지표">
       <div class="cafe-kpi-card">
-        <div class="cafe-kpi-head"><span>☕ 현역 가동 네이버 카페 모수</span><span class="chip chip-green">5계정 전수점검</span></div>
-        <div class="cafe-kpi-val" id="kpi-cafe-members">14,242명 (2곳)</div>
-        <div class="cafe-kpi-sub">고급지식 1,739명(Tier1) + 데키랩 12,503명(Tier2)</div>
+        <div class="cafe-kpi-head"><span>☕ 관리 대상 카페</span><span class="chip chip-green">현재 상태 구분</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-members">2곳</div>
+        <div class="cafe-kpi-sub">회원수를 실제 도달수로 계산하지 않습니다</div>
       </div>
       <div class="cafe-kpi-card">
-        <div class="cafe-kpi-head"><span>✅ 발행 완료 게시글 (뭘 했는지)</span><span class="chip chip-green">영수증 검증</span></div>
+        <div class="cafe-kpi-head"><span>게시 기록과 본문 검증</span><span class="chip chip-green">독자 화면 확인</span></div>
         <div class="cafe-kpi-val" id="kpi-cafe-published">5건 발행 완료</div>
-        <div class="cafe-kpi-sub">고급지식 3건 현역 노출 중 · 금융꿀팁 2건 격리 보존</div>
+        <div class="cafe-kpi-sub">기존 기록 · 현재 접근 상태 · 본문 검증을 구분합니다</div>
       </div>
       <div class="cafe-kpi-card">
-        <div class="cafe-kpi-head"><span>🛡️ Tier 2 강퇴 방어 모드</span><span class="chip chip-blue">3:1 법칙 잠금</span></div>
-        <div class="cafe-kpi-val" id="kpi-cafe-pending">무링크 0/3단계</div>
-        <div class="cafe-kpi-sub">일반 카페 첫 3편 외부링크 0개 순수정보 강제</div>
+        <div class="cafe-kpi-head"><span>완결형 포스팅 준비</span><span class="chip chip-blue">원고별 검수</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-pending">준비 상태 확인</div>
+        <div class="cafe-kpi-sub">독자 적합성과 근거가 확인된 원고만 발행합니다</div>
       </div>
       <div class="cafe-kpi-card">
-        <div class="cafe-kpi-head"><span>📈 네이버 생태계 → CF 유입 (효과 측정)</span><span class="chip chip-purple">GA4 28일</span></div>
-        <div class="cafe-kpi-val" id="kpi-cafe-traffic">실시간 추적 중</div>
-        <div class="cafe-kpi-sub">smilenote.kr · meganote.kr · must-good.com 집중 브릿지</div>
+        <div class="cafe-kpi-head"><span>📈 카페 출처 → 사이트 유입</span><span class="chip chip-purple">GA4 30일</span></div>
+        <div class="cafe-kpi-val" id="kpi-cafe-traffic">수집 자료 확인</div>
+        <div class="cafe-kpi-sub">출처별 합계이며 개별 글의 성과·수익은 아닙니다</div>
       </div>
     </section>
 
@@ -311,7 +311,7 @@
           <span class="sec-badge sec-1">① 뭘 했는지</span>
           <span>네이버 카페 2곳 실제 발행 완료 영수증 &amp; CF 브릿지 원문 검증</span>
         </h2>
-        <span style="font-size:12px; color:#64748b; font-weight:700;">모든 게시글은 EGO `barolab-soul5373` 스페이스에서 실제 글 번호(`articleid`)까지 검증된 라이브 게시물입니다</span>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">발행 당시 기록과 현재 본문 열람 여부를 구분합니다</span>
       </div>
 
       <!-- 2 Cafe Hub Summary Cards -->
@@ -403,8 +403,8 @@
               <th>CF 도메인</th>
               <th>오늘 전체 PV (GA4)</th>
               <th>오늘 네이버 유입 세션</th>
-              <th>최근 7일 네이버 유입</th>
-              <th>최근 28일 네이버 유입</th>
+              <th>최근 7일 카페 출처 유입</th>
+              <th>최근 30일 카페 출처 유입</th>
               <th>도메인 열기</th>
             </tr>
           </thead>
@@ -422,12 +422,13 @@
       const pubs = data.publishedArticles || [];
       const queue = data.plannedQueue || [];
       const meas = data.measurement || {};
-      const naverGa4 = meas.naverEcosystemReferrals || {};
+      const naverGa4 = meas.cafeDirectReferrals || {};
+      const metric = x => x == null ? '미수집' : x.toLocaleString();
 
-      document.getElementById('kpi-cafe-members').textContent = `${(kpi.totalMembers || 30217).toLocaleString()}명 (${kpi.cafeCount || 2}곳)`;
-      document.getElementById('kpi-cafe-published').textContent = `${pubs.length}건 발행 완료`;
+      document.getElementById('kpi-cafe-members').textContent = `${kpi.cafeCount ?? 0}곳 · 회원수는 도달수와 별도`;
+      document.getElementById('kpi-cafe-published').textContent = `기록 ${pubs.length}건 · 본문 검증 ${kpi.bodyVerifiedCount ?? 0}건`;
       document.getElementById('kpi-cafe-pending').textContent = `${kpi.pendingQueueCount ?? 7}편 대기 중`;
-      document.getElementById('kpi-cafe-traffic').textContent = `28일 ${naverGa4.last28DaysSessions ?? 0}세션 · 실시간 추적`;
+      document.getElementById('kpi-cafe-traffic').textContent = `30일 ${metric(naverGa4.monthSessions)}세션 · 출처별 합계`;
 
       document.getElementById('tab-cafe-done').textContent = `발행 ${pubs.length}건`;
       document.getElementById('tab-cafe-todo').textContent = `큐 ${queue.length}편`;
@@ -437,10 +438,10 @@
       const abBox = document.getElementById('cafe-antiban-banner');
       if (abBox) {
         abBox.innerHTML = `
-          <div style="font-weight:900; color:#1e3a8a; margin-bottom:4px;">🛡️ 네이버 카페 무강퇴·장기 생존 2-Track 엔진 가동 중 (Tier 1 브릿지 특화 vs Tier 2 일반카페 3:1 위장 법칙)</div>
-          <div>• <strong>${ab.tier1Rule || 'Tier 1 (고급지식의 모든 것): 운영자 브릿지 허용 특화 카페 → 100% 원문 링크 카드 직결'}</strong></div>
-          <div>• <strong>${ab.tier2Rule || 'Tier 2 (금융꿀팁 2.8만 & 신규 가입 일반 카페): 3편 연속 무링크 순수 정보글 작성 시에만 4번째 글 소프트 브릿지 1회 해금'}</strong></div>
-          <div style="color:#047857; font-weight:800; margin-top:2px;">• ${ab.warmupRule || '신규 카페 확장 시 가입 후 첫 3회 활동은 외부링크 100% 차단 (진성 회원 위장 완료 후 3:1 루프 진입)'}</div>
+          <div style="font-weight:900; color:#1e3a8a; margin-bottom:4px;">카페 글 자체로 독자 질문을 해결하는 완결형 포스팅</div>
+          <div>• <strong>${ab.tier1Rule || '본문 완결성과 정확한 근거 확인'}</strong></div>
+          <div>• <strong>${ab.tier2Rule || '게시판 독자와 운영 규칙 확인'}</strong></div>
+          <div style="color:#047857; font-weight:800; margin-top:2px;">• ${ab.warmupRule || '원고별 검수 · 불확실한 제출 자동 재시도 금지'}</div>
         `;
       }
 
@@ -454,7 +455,7 @@
           </div>
           <div style="font-size:15px; font-weight:900; color:#0f172a;">☕ ${c.name}</div>
           <div style="font-size:12px; color:#334155;">
-            등급: <strong>${c.grade}</strong> · 회원수: <strong>${(c.members || 0).toLocaleString()}명</strong> · 누적 발행: <strong>${c.publishedCount}건</strong> (무링크 ${c.noLinkCount ?? 0}건 / 브릿지 ${c.bridgeCount ?? c.publishedCount}건)
+            등급: <strong>${c.grade}</strong> · 회원수: <strong>${c.members == null ? '미확인' : c.members.toLocaleString() + '명'}</strong> · 누적 발행: <strong>${c.publishedCount}건</strong> (무링크 ${c.noLinkCount ?? 0}건 / 브릿지 ${c.bridgeCount ?? c.publishedCount}건)
           </div>
           <div style="font-size:12px; font-weight:800; color:#1e40af; background:#eff6ff; padding:6px 10px; border-radius:8px; border:1px solid #bfdbfe;">
             📌 다음 발행 모드: <strong>${c.nextPostModeBadge || ''}</strong><br/>
@@ -482,9 +483,9 @@
             <a href="${a.articleUrl}" target="_blank" rel="noopener" style="font-size:11.5px; color:#059669; font-weight:800;">${a.articleUrl} ↗</a>
           </td>
           <td>
-            <a href="${a.bridgeUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">⚡ ${a.bridgeDomain} ↗</a>
+            <a href="${a.bridgeUrl || '#'}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">⚡ ${a.bridgeDomain || '선택 링크 없음'} ↗</a>
           </td>
-          <td><span class="chip chip-green">${a.statusLabel}</span></td>
+          <td><span class="chip ${a.publicState === 'body_verified' ? 'chip-green' : 'chip-amber'}">${a.statusLabel}</span></td>
           <td>
             <a class="cafe-btn emerald" style="padding:5px 10px; font-size:11.5px;" href="${a.articleUrl}" target="_blank" rel="noopener">카페 원문 열기 ↗</a>
           </td>
@@ -519,7 +520,7 @@
             <td><span class="chip ${badgeCls}">${q.statusLabel}</span></td>
             <td>
               <button class="cafe-btn emerald" style="padding:5px 10px; font-size:11px;" onclick="publishCafePart(${q.part})">
-                🚀 ${q.status === 'completed_both' ? '재발행 점검' : '2개 카페 동시 발행'}
+                ${q.status === 'existing_record' ? '기존 글 관측' : '검수된 원고 발행'}
               </button>
             </td>
           </tr>
@@ -531,7 +532,7 @@
       effTbody.innerHTML = (meas.cafeBreakdown || []).map(c => `
         <tr>
           <td><strong>${c.cafeName}</strong></td>
-          <td><strong>${(c.members || 0).toLocaleString()}명</strong></td>
+          <td><strong>${c.members == null ? '미확인' : c.members.toLocaleString() + '명'}</strong></td>
           <td><span class="chip chip-green">${c.publishedCount}건 완료</span></td>
           <td><strong style="color:#1d4ed8;">${c.targetDomains}</strong></td>
           <td style="font-size:12px; color:#334155;">${c.expectedEffect}</td>
@@ -546,8 +547,8 @@
           <td><strong>${d.domain}</strong></td>
           <td><strong>${d.totalPageViewsToday} PV</strong></td>
           <td>${d.todaySessions} 세션</td>
-          <td>${d.last7DaysSessions} 세션</td>
-          <td><strong>${d.last28DaysSessions} 세션</strong></td>
+          <td>${metric(d.weekSessions)} 세션</td>
+          <td><strong>${metric(d.monthSessions)} 세션</strong></td>
           <td><a href="https://www.${d.domain}/" target="_blank" rel="noopener" style="color:#2563eb; font-weight:800; text-decoration:none;">사이트 열기 ↗</a></td>
         </tr>
       `).join('');
@@ -585,7 +586,7 @@
       const btn = document.getElementById('btn-publish-next-cafe');
       if (btn) {
         btn.disabled = true;
-        btn.textContent = `⏳ Part ${partNo} 2개 카페 동시 발행 중...`;
+        btn.textContent = `Part ${partNo} 준비·검수 상태 확인 중...`;
       }
       try {
         const res = await fetch('/api/cafe/publish', {
@@ -595,10 +596,12 @@
         });
         const out = await res.json();
         if (out.status) renderCafePage(out.status);
+        else await loadCafe();
+        if (!out.ok) alert((out.receipts || []).map(r => `${r.cafe}: ${r.reason || r.status}`).join('\n') || '검수된 원고와 브라우저 작업 준비가 필요합니다.');
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.textContent = '🚀 Part 6 (희망리턴패키지) 2개 카페 동시 발행';
+          btn.textContent = '검수된 Part 6 발행';
         }
       }
     }

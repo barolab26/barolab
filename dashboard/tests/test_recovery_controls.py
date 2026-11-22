@@ -15,6 +15,52 @@ from server import agent_tools
 
 
 class RecoveryControls(unittest.TestCase):
+    def test_native_watchdog_preserves_healthy_browser_without_posting_cli(self):
+        from common import system_watchdog as watchdog, ubuntu_naver_browser as browsers, ego_taskspace as spaces
+        with patch.object(watchdog, 'CDP_PORT_CATALOG', [{'id':'stone','port':9230,'name':'stone','required':True}]), \
+             patch.object(watchdog, 'is_port_open', return_value=True), \
+             patch.object(watchdog, 'is_process_running_match', return_value=False), \
+             patch.object(watchdog, 'save_json'), \
+             patch.object(watchdog.os, 'name', 'nt'), \
+             patch.object(spaces, 'find_ego_cli', return_value='ego-browser'), \
+             patch.object(spaces, 'resolve_ego_profile', return_value='Profile 7'), \
+             patch.object(spaces, 'list_profiles_and_spaces', return_value={'ok':True,'profiles':[{'id':'Profile 7'}]}), \
+             patch.object(browsers, 'close_account') as close:
+            result=watchdog.check_and_recover_cdp_browsers()
+        close.assert_not_called()
+        self.assertTrue(result['ports']['9230'])
+
+    def test_native_watchdog_observes_exact_profile_without_opening_spaces(self):
+        from common import system_watchdog as watchdog, ego_taskspace as spaces
+        with patch.object(watchdog, 'CDP_PORT_CATALOG', [{'id':'stone','port':9230,'name':'stone','required':True}]), \
+             patch.object(watchdog, 'is_port_open', return_value=False), \
+             patch.object(watchdog, 'save_json'), \
+             patch.object(watchdog.os, 'name', 'nt'), \
+             patch.object(spaces, 'find_ego_cli', return_value='ego-browser'), \
+             patch.object(spaces, 'resolve_ego_profile', return_value='Profile 7'), \
+             patch.object(spaces, 'ensure_persistent_ego_spaces') as open_spaces, \
+             patch.object(spaces, 'list_profiles_and_spaces', return_value={'ok':True,'profiles':[{'id':'Profile 3'}]}) as observe:
+            self.assertFalse(watchdog.check_and_recover_cdp_browsers(auto_start=False)['ports']['9230'])
+            observe.return_value={'ok':True,'profiles':[{'id':'Profile 7'}]}
+            self.assertTrue(watchdog.check_and_recover_cdp_browsers(auto_start=False)['ports']['9230'])
+        open_spaces.assert_not_called()
+
+    def test_known_route_cooldown_classifies_without_another_model(self):
+        path, row = self.make_row()
+        row['discovered'].update(originalRetryEligible=True,
+            failureDiagnostic={'errorMessage': "editorial_images_held: ['RouteCoolingDown']"})
+        with patch.object(recovery, '_recovery_resume_guard') as guard, patch('common.llm_client.generate_json') as model:
+            result = recovery._classify_recovery(row, path)
+            self.assertEqual(result['kind'], 'retry_original')
+            guard.assert_called_once_with(row)
+            model.assert_not_called()
+        write(self.root/'dashboard/data/llm_usage_ledger.json',
+              {'routeHealth':{'codex:vision':{'retryAt':recovery.time.time()+100}}})
+        with patch.object(recovery, '_recovery_resume_guard') as guard, patch('common.llm_client.generate_json') as model:
+            self.assertEqual(recovery._classify_recovery(row,path)['kind'], 'hold')
+            guard.assert_not_called()
+            model.assert_not_called()
+
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

@@ -262,13 +262,19 @@ def check_and_recover_server() -> Dict[str, Any]:
 def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
     """Verify native EGO Lite profiles on Windows (single-browser TaskSpace mode) or dedicated CDP ports on Linux."""
     from common.ubuntu_naver_browser import ensure_account, account_paths, process_identity, listener_owner
-    from common.ego_taskspace import find_ego_cli, ensure_persistent_ego_spaces, resolve_ego_profile
+    from common.ego_taskspace import ensure_persistent_ego_spaces, find_ego_cli, list_profiles_and_spaces, resolve_ego_profile
     results = {}; recovered_ports = []; failed_ports = []
     ego_profiles_available = set()
     use_native_ego = os.name == "nt" and find_ego_cli() is not None
     if use_native_ego:
         try:
-            meta = ensure_persistent_ego_spaces(timeout=35)
+            # Observe without opening account pages; sequential navigations can
+            # time out even while the native CLI is healthy.
+            meta = list_profiles_and_spaces(timeout=15)
+            if auto_start and isinstance(meta.get("taskSpaces"), list):
+                existing_names = {s.get("name") for s in meta["taskSpaces"] if isinstance(s, dict)}
+                if not {"barolab-soultin", "barolab-soul5373", "barolab-yoon_master", "barolab-kin-adinfo0905", "barolab-kin-stone0747", "barolab-cf-flow"}.issubset(existing_names):
+                    meta = ensure_persistent_ego_spaces(timeout=30) or meta
             if meta.get("ok"):
                 ego_profiles_available = {
                     str(p.get("id") or p.get("path") or p.get("name") or "")
@@ -282,13 +288,10 @@ def check_and_recover_cdp_browsers(auto_start: bool = True) -> Dict[str, Any]:
         port = item['port']; was_open = is_port_open(port); verified = False
         target_profile = resolve_ego_profile(port)
         if use_native_ego and target_profile:
-            if was_open and not is_process_running_match("posting.py"):
-                try:
-                    from common.ubuntu_naver_browser import close_account
-                    close_account(port)
-                except Exception:
-                    pass
-            verified = bool(ego_profiles_available) and (target_profile in ego_profiles_available or len(ego_profiles_available) > 0)
+            # A native conference imports posting.py in its own process, so
+            # command-line text cannot establish browser idleness/ownership.
+            # Preserve healthy listeners; their actual owner controls cleanup.
+            verified = target_profile in ego_profiles_available
             if not verified and was_open:
                 verified = True
             results[item['id']] = {
@@ -414,22 +417,24 @@ def clean_zombie_locks_and_recover(stale_minutes: int = 15) -> List[Dict[str, An
             nv_active["recoveredAt"] = now_kst_iso()
             nv_active["recoveryReason"] = "PID 종료 감지" if pid_dead else f"{int((age or 0) // 60)}분 무응답 좀비 상태 복구"
             save_json(nv_active_path, nv_active)
-            try:
-                subprocess.Popen(
-                    [python_exe, "-u", "-B", "-X", "utf8", str(ROOT / 'naver_blog_posting' / 'posting.py'), "--catch-up"],
-                    cwd=str(ROOT),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                )
-            except Exception:
-                pass
-            actions.append({
-                "channel": "naver_blog",
-                "owner": "@publi",
-                "action": "네이버 블로그 좀비 워크플로 해제 및 즉시 재가동",
-                "detail": nv_active["recoveryReason"],
-            })
+            from common.naver_ownership import legacy_naver_submission_allowed
+            if legacy_naver_submission_allowed(ROOT):
+                try:
+                    subprocess.Popen(
+                        [python_exe, "-u", "-B", "-X", "utf8", str(ROOT / 'naver_blog_posting' / 'posting.py'), "--catch-up"],
+                        cwd=str(ROOT),
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                    )
+                except Exception:
+                    pass
+                actions.append({
+                    "channel": "naver_blog",
+                    "owner": "@publi",
+                    "action": "네이버 블로그 좀비 워크플로 해제 및 즉시 재가동",
+                    "detail": nv_active["recoveryReason"],
+                })
 
     # Content-maintenance uses the same kernel-lock lifecycle; retain its inode.
 
@@ -516,6 +521,8 @@ def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
 
     # 2. Check Windows Scheduled Tasks health (ensure BaroLab-Naver-Daily, BaroLab-Kin-Seven-Day-Pilot, BaroLab-Threads-Pilot, BaroLab-CF-Cleaner are Enabled)
     if os.name == "nt":
+        from common.naver_ownership import legacy_naver_submission_allowed
+        naver_legacy_allowed = legacy_naver_submission_allowed(ROOT)
         powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
         for task_name, channel, owner in [
             ("BaroLab-Naver-Daily", "naver_blog", "@publi"),
@@ -523,6 +530,8 @@ def trigger_missed_slot_catchup() -> List[Dict[str, Any]]:
             ("BaroLab-Threads-Pilot", "threads", "@publi"),
             ("BaroLab-CF-Cleaner", "cf_blog", "@publi"),
         ]:
+            if channel == "naver_blog" and not naver_legacy_allowed:
+                continue
             try:
                 res = subprocess.run(
                     [

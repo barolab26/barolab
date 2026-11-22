@@ -478,7 +478,7 @@ def inspect_capture_box(image_path, subject, heading=''):
     return receipt
 
 
-def inspect_published_visual(image_path, title='', caption=''):
+def inspect_published_visual(image_path, title='', caption='', *, source_capture=False):
     """Verify a captured or generated visual has no horizontal text clipping, AI gibberish, Western/foreign mismatch, or ad banner."""
     try:
         prepared = prepare_image_asset(image_path)
@@ -521,6 +521,13 @@ def inspect_published_visual(image_path, title='', caption=''):
             },
         },
     }
+    if source_capture:
+        questions['noAiGibberishOrAdBanner']['instructions'] = (
+            'Is this actual source screenshot free of garbled characters, intrusive third-party ad banners, '
+            'and unrelated promotional posters? Original publisher logos, author credits, copyright notices '
+            'and authentic source watermarks are attribution and must remain intact; do not reject solely for them.')
+        questions['noAiGibberishOrAdBanner']['criteria']['false'] = (
+            'Contains garbled text, intrusive unrelated advertising, or a pure promotional poster without informational content.')
     receipt = _ask(state, questions, assets={asset_id: prepared['asset']})
     receipt['passed'] = False
     if receipt['status'] == 'ok':

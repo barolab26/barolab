@@ -10,10 +10,11 @@ from pathlib import Path
 from common.collection_observability import load, write, stamp
 
 
-def hold_editorial_images(folder, reason):
+def hold_editorial_images(folder, reason, failure=None):
     """Persist an actionable hold without modifying the draft or submission receipt."""
     write(Path(folder) / 'image-preparation-status.json', {
         'status': 'held', 'reason': str(reason), 'updatedAt': stamp(),
+        'failure': failure,
         'action': 'Review real browser sources and reprepare images in an unsubmitted draft; preserve submitted receipts.',
     })
     raise ValueError('editorial_images_held: ' + str(reason))
@@ -26,12 +27,18 @@ def require_editorial_images(title, sections, folder, *, channel, existing=None,
     except ImportError:
         hold_editorial_images(folder, 'browser_capture_engine_unavailable; install the shared engine before repreparing')
     if existing is None:
+        manifest=Path(folder)/'editorial-images.json'
+        if manifest.is_file():
+            # Read the durable outcome. A failed acquisition is not permission
+            # to launch another browser/model attempt from this wrapper.
+            existing=load(manifest)
+    if existing is None:
         try:
             existing = build_editorial_assets(title, sections, folder, sources=sources, channel=channel)
         except Exception as exc:
             hold_editorial_images(folder, 'browser_capture_failed: ' + str(exc))
     if not isinstance(existing, dict) or existing.get('status') != 'ready':
-        hold_editorial_images(folder, (existing or {}).get('reasons') or 'browser_capture_missing_or_failed; reprepare required')
+        hold_editorial_images(folder, (existing or {}).get('reasons') or 'browser_capture_missing_or_failed; reprepare required', (existing or {}).get('failure'))
     try:
         valid = validate_editorial_assets(title, sections, folder, existing, channel=channel)
     except Exception:

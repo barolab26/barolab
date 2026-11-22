@@ -68,6 +68,70 @@ def public_url(url):
 def primary_url(url):
     parsed=urlparse(url)
     host=(parsed.hostname or '').lower()
+    # Observed public, first-party insurance product/service guidance. These
+    # routes explain the issuer's own terms; private contracts are not approved.
+    if host in ('kbinsure.co.kr','www.kbinsure.co.kr'):
+        return (parsed.scheme=='https' and not parsed.username and not parsed.password
+                and parsed.port in (None,443) and re.fullmatch(r'/(?:pop/)?CG\d{9}\.ec',parsed.path)
+                and not parsed.query and not parsed.fragment)
+    if host in ('idbins.com','www.idbins.com'):
+        return (parsed.scheme=='https' and not parsed.username and not parsed.password
+                and parsed.path=='/pc/bizxpress/my/ac/FWMYCV5027.shtm'
+                and not parsed.query and not parsed.fragment)
+    if host in ('directdb.co.kr','www.directdb.co.kr'):
+        return (parsed.scheme=='https' and not parsed.username and not parsed.password
+                and parsed.path=='/comm/bnf/evt/atarcDstTtyView.do'
+                and parsed.query=='pageDvn=trvDstc' and not parsed.fragment)
+    # Browser-observed HIRA public insurance-criteria notice; not private claims,
+    # community posts or all content on this .or.kr domain.
+    if host in ('hira.or.kr','www.hira.or.kr'):
+        query=parse_qs(parsed.query,keep_blank_values=True)
+        return (parsed.scheme=='https' and not parsed.username and not parsed.password
+                and not parsed.fragment and parsed.path=='/rc/insu/insuadtcrtr/InsuAdtCrtrPopup.do'
+                and set(query)=={'mtgHmeDd','mtgMtrRegSno','sno'}
+                and all(len(values)==1 and values[0].isdigit() for values in query.values())
+                and len(query['mtgHmeDd'][0])==8)
+    # HUG's own public policy answers use .or.kr. This does not approve
+    # user assertions, private enquiries or unrelated pages on that domain.
+    if host in ('khug.or.kr','www.khug.or.kr'):
+        query=parse_qs(parsed.query)
+        if parsed.scheme!='https' or parsed.username or parsed.password or parsed.fragment:return False
+        # Browser-observed HUG public business guidance and notices. Personal
+        # applications/contracts and other board modes are separate surfaces.
+        if parsed.path in ('/jeonse/web/s07/s070101.jsp','/jeonse/web/s07/s070102.jsp'):
+            return not parsed.query
+        if parsed.path=='/jeonse/web/s07/s070301.jsp':
+            if set(query)-{'mode','articleId','currentPage'}:return False
+            if any(len(query[k])!=1 or not query[k][0].isdigit() for k in ('articleId','currentPage') if k in query):return False
+            return (query.get('mode')==['S'] if 'articleId' in query else 'mode' not in query)
+        return (parsed.scheme=='https' and parsed.path=='/hug/web/cs/el/csel000182.jsp'
+                and set(query)<= {'hmpg_sno','hmpg_cvap_dcd'}
+                and len(query.get('hmpg_sno',[]))==1 and query['hmpg_sno'][0].isdigit()
+                and query.get('hmpg_cvap_dcd')==['04'] and not parsed.fragment)
+    # First-party notice about this hospital's own optional-exam service only;
+    # it does not establish coverage for other hospitals or insurance contracts.
+    if host=='hallym.hallym.or.kr':
+        return (parsed.scheme=='https' and parsed.path=='/hallymuniv_sub.asp'
+                and parsed.query=='screen=ptm681' and not parsed.fragment)
+    # SEMAS's official application portal uses .kr rather than .go.kr.
+    # Restrict this exception to public notices and their official file bundles.
+    if host in ('sbiz24.kr','www.sbiz24.kr'):
+        return (parsed.path == '/' and re.fullmatch(r'/pbanc/\d+', parsed.fragment or '') is not None
+                or re.fullmatch(r'/api/cmmn/file/zip/pbancdoc-\d+/download\.zip', parsed.path) is not None)
+    # KEPCO identifies EN:TER as its own platform. Public support instructions
+    # and FAQ are first-party evidence for this program, not all pages on the host.
+    if host == 'en-ter.co.kr':
+        return (parsed.scheme == 'https' and parsed.path in (
+            '/support/info/info02/info.do', '/support/bbs/faq/info.do',
+            '/support/bbs/notice/list.do') and not parsed.query and not parsed.fragment)
+    # NPS's public service catalog is an official .or.kr source, not a blog.
+    if host in ('nps.or.kr','www.nps.or.kr'):
+        query=parse_qs(parsed.query)
+        return (parsed.scheme=='https' and parsed.path in (
+            '/elctcvlcpt/comm/getOHAC0000M3.do','/elctcvlcpt/comm/getOHAC0000M5.do')
+            and not parsed.username and not parsed.password and parsed.port in (None,443)
+            and set(query)=={'menuId'} and len(query['menuId'])==1
+            and re.fullmatch(r'MN\d{8}',query['menuId'][0]) is not None and not parsed.fragment)
     if re.search(r'/(?:answers|community|forums?|discussions?|comments?)(?:/|$)',parsed.path,re.I) or host.startswith(('answers.','community.','forum.','forums.')):
         return False
     if host in ('airport.kr','www.airport.kr'):
@@ -76,6 +140,12 @@ def primary_url(url):
         return url == 'https://m.samsungfire.com/download/product/P_P02_03_01_033_2.pdf'
     if host == 'd.samsungfire.com':
         return url == 'https://d.samsungfire.com/claim/healthreward/health_doc.html'
+    # First-party service scope/advertised application figures, not clinical proof.
+    if host in ('3o3.co.kr','www.3o3.co.kr'):
+        return (parsed.scheme == 'https' and parsed.path.rstrip('/') == '/hospital_refund_v2_1'
+                and not parsed.query and not parsed.fragment)
+    if host == 'hospital-refund.3o3.co.kr':
+        return parsed.scheme == 'https' and parsed.path == '/landing' and not parsed.query and not parsed.fragment
     return any(host==suffix or host.endswith('.'+suffix) for suffix in PRIMARY_HOSTS)
 
 
@@ -431,14 +501,69 @@ def fact_valid(fact,sources):
     source=sources.get(fact.get('sourceId'))
     quote=fact.get('quote')
     claim=fact.get('claim')
+    normalize_space=lambda text:' '.join(text.split())
     if not (source and source.get('status')==200 and isinstance(quote,str) and len(quote.strip())>=12 and
-            quote.strip() in source.get('text','') and isinstance(claim,str) and claim.strip()):
+            normalize_space(quote) in normalize_space(source.get('text','')) and isinstance(claim,str) and claim.strip()):
         return False
-    return number_tokens(claim)<=number_tokens(quote)
+    numeric_claim, numeric_quote = claim, quote
+    if re.search(r'전화|대표번호|연락처', claim) and re.search(r'TEL|전화|대표번호|연락처', quote, re.I):
+        phone = r'(?<!\d)(?:0\d{1,2}[-. ]\d{3,4}[-. ]\d{4}|1\d{3}[-. ]\d{4})(?!\d)'
+        claim_phones = re.findall(phone, claim)
+        source_phones = {re.sub(r'\D', '', p) for p in re.findall(phone, quote)}
+        if claim_phones:
+            if any(re.sub(r'\D', '', p) not in source_phones for p in claim_phones):return False
+            numeric_claim, numeric_quote = re.sub(phone, '', claim), re.sub(phone, '', quote)
+    if re.search(r'상담|오전|오후|시간|시각',claim) and re.search(r'상담|오전|오후|시간|시각',quote):
+        clock=re.compile(r'(?<!\d)(?:(오전|오후)\s*)?(\d{1,2})(?:시(?:\s*(\d{1,2})분)?|:(\d{2}))(?!\d)')
+        def times(text):
+            result=[]
+            for m in clock.finditer(text):
+                period,hour,minute1,minute2=m.groups();hour=int(hour);minute=int(minute1 or minute2 or 0)
+                if minute>59 or hour>23 or period and not 1<=hour<=12:continue
+                if period:hour=hour%12+(12 if period=='오후' else 0)
+                result.append((m.span(),(hour,minute)))
+            return result
+        claim_times, quote_times=times(numeric_claim),times(numeric_quote)
+        if claim_times:
+            if not {value for _,value in claim_times}<={value for _,value in quote_times}:return False
+            for (start,end),_ in reversed(claim_times):numeric_claim=numeric_claim[:start]+numeric_claim[end:]
+            for (start,end),_ in reversed(quote_times):numeric_quote=numeric_quote[:start]+numeric_quote[end:]
+    supported = number_tokens(numeric_quote)
+    # Official notices abbreviate nearby years as ‘25년 / ‘27년. Resolve
+    # only explicit year notation, using a dated source's own century/context.
+    dated = re.search(r'((?:19|20)\d{2})(?=[./-]\d{1,2}[./-]\d{1,2}|년)', source.get('text',''))
+    if dated:
+        reference = int(dated.group(1))
+        for short in re.findall(r"['‘’](\d{2})년", quote):
+            full = reference // 100 * 100 + int(short)
+            if abs(full-reference) <= 10:
+                supported.add(str(full))
+    return number_tokens(numeric_claim)<=supported
 
 
 def number_tokens(text):
-    return {value.replace(',','') for value in re.findall(r'\d+(?:[.,]\d+)*',text)}
+    # These are service names, not numerical assertions requiring a quoted quantity.
+    text=re.sub(r'(?:고용|정부|실손)\s*24', '', text)
+    text=re.sub(r'1350(?=\s*상담)', '', text)
+    values = {value.replace(',','') for value in re.findall(r'\d+(?:[.,]\d+)*',text)}
+    # A real calendar date such as 2026.10.06 also states the year 2026,
+    # month 10 and day 6. Do not treat it as one decimal financial quantity.
+    from datetime import date
+    for match in re.finditer(r'(?<!\d)((?:19|20)\d{2})[./-](0?[1-9]|1[0-2])[./-](0?[1-9]|[12]\d|3[01])(?!\d)', text):
+        try:
+            parts = tuple(int(v) for v in match.groups())
+            date(*parts)
+        except ValueError:
+            continue
+        values.update(str(v) for v in parts)
+    # Korean official schedules use 7.24(금) ~ 8.7(금). The weekday
+    # annotation disambiguates this from decimal money, rates and measurements.
+    for match in re.finditer(r'(?<![\d.])(0?[1-9]|1[0-2])[./](0?[1-9]|[12]\d|3[01])\s*\([월화수목금토일](?:요일)?\)',text):
+        month,day=map(int,match.groups())
+        try:date(2000,month,day)
+        except ValueError:continue
+        values.update((str(month),str(day)))
+    return values
 
 
 def draft_rules(article,draft,sources,issues):

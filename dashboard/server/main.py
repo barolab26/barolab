@@ -203,6 +203,11 @@ def _snapshot_metric_summary(data):
 
 
 def refresh_live_snapshot():
+    # The Windows worker owns collection. Container HTTP reads must not create
+    # another collector or rewrite the shared host evidence with a new clock.
+    if Path('/.dockerenv').exists():
+        snapshot=load_json(DATA_DIR/'live_snapshot.json',{})
+        return {**snapshot,'cached':True,'sourceStatus':'host_snapshot_stale_or_missing'}
     from server.mission_control import Collector, shared_snapshot
     from common.dashboard_jobs import write
     with LIVE_SNAPSHOT_LOCK:
@@ -226,10 +231,12 @@ def get_live_snapshot():
 
 @app.on_event('startup')
 async def _start_live_snapshot():
+    if Path('/.dockerenv').exists():
+        app.state.mission_collector=None
+        return
     from server.mission_control import Collector
     collector=Collector();app.state.mission_collector=collector
     await asyncio.to_thread(refresh_live_snapshot)
-    collector.start()
 
 
 @app.on_event('shutdown')
@@ -492,7 +499,7 @@ def api_watchdog_run_now():
 
 
 def _start_periodic_project_health_auditor():
-    if os.environ.get("BAROLAB_DISABLE_BACKGROUND") == "1":
+    if os.environ.get("BAROLAB_DISABLE_BACKGROUND") == "1" or Path('/.dockerenv').exists():
         return
     import threading
     import time

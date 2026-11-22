@@ -468,7 +468,22 @@ class HermesMemory:
     def initialize(self):
         if self._initialized:
             return
+        # Completed schemas need no writer lock or full historical FTS scan on
+        # every short-lived publisher/reviewer process. Ordinary episode writes
+        # already maintain this index in the same transaction.
+        migration = 'sessions-fts-backfill-v1'
+        if self.db_path.is_file():
+            try:
+                with closing(sqlite3.connect(self.db_path.resolve().as_uri()+'?mode=ro',uri=True,timeout=15)) as db:
+                    ready=db.execute('SELECT 1 FROM memory_migrations WHERE name=?',(migration,)).fetchone()
+                if ready:
+                    self._initialized=True
+                    return
+            except sqlite3.OperationalError:
+                pass  # Existing pre-migration database follows the serialized upgrade.
         with file_lock(self.lock_path):
+            if self._initialized:
+                return
             self.root.mkdir(parents=True, exist_ok=True)
             self.skills_root.mkdir(parents=True, exist_ok=True)
             for name in ("MEMORY.md", "USER.md"):
@@ -511,12 +526,18 @@ class HermesMemory:
                     CREATE TABLE IF NOT EXISTS review_queue (
                         event_id TEXT PRIMARY KEY, state TEXT NOT NULL, lease_until REAL NOT NULL DEFAULT 0,
                         attempts INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL);
+                    CREATE TABLE IF NOT EXISTS memory_migrations (
+                        name TEXT PRIMARY KEY, completed_at TEXT NOT NULL);
                 """)
                 if 'attempts' not in {row[1] for row in db.execute('PRAGMA table_info(learning_candidates)')}:
                     db.execute('ALTER TABLE learning_candidates ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0')
                 # Migrate by copying source episodes. Existing episode_fts is retained,
                 # never dropped, so upgrades preserve both source data and old indexes.
-                db.execute("INSERT INTO sessions_fts(event_id,session_id,summary,messages) SELECT e.event_id,e.session_id,e.summary,e.messages FROM episodes e WHERE NOT EXISTS(SELECT 1 FROM sessions_fts f WHERE f.event_id=e.event_id)")
+                if not db.execute('SELECT 1 FROM memory_migrations WHERE name=?',(migration,)).fetchone():
+                    # Materialize the indexed-ID set once; the former correlated
+                    # lookup rescanned an unindexed FTS column for every episode.
+                    db.execute("INSERT INTO sessions_fts(event_id,session_id,summary,messages) SELECT e.event_id,e.session_id,e.summary,e.messages FROM episodes e WHERE e.event_id NOT IN (SELECT event_id FROM sessions_fts WHERE event_id IS NOT NULL)")
+                    db.execute('INSERT INTO memory_migrations VALUES(?,?)',(migration,utc_now()))
                 db.commit()
             self._initialized = True
 
@@ -683,21 +704,23 @@ class HermesMemory:
         key = session_id
         if key in self._snapshots:
             return self._snapshots[key]
-        with self.db() as db:
-            row = db.execute("SELECT snapshot FROM sessions WHERE session_id=?", (key,)).fetchone()
-            if row:
-                value = row[0]
-            else:
-                # The serialized snapshot remains immutable for this session even after writes.
-                with file_lock(self.lock_path):
+        self.initialize()
+        # Match all memory writers: file lock first, SQLite transaction second.
+        with file_lock(self.lock_path):
+            with self.db() as db:
+                row = db.execute("SELECT snapshot FROM sessions WHERE session_id=?", (key,)).fetchone()
+                if row:
+                    value = row[0]
+                else:
+                    # The serialized snapshot remains immutable for this session even after writes.
                     catalog = self.skill_list()
                     index = "\n".join(f"{s['name']}: {' '.join(s['description'].split())}" for s in catalog)
                     value = "<project-memory>\n" + self.bounded("memory")["content"] + "\n</project-memory>\n<user-profile>\n" + self.bounded("user")["content"] + "\n</user-profile>\n<available-skills>\n" + index + "\n</available-skills>"
                     db.execute("INSERT OR IGNORE INTO session_catalog VALUES(?,?)", (key,json.dumps(catalog,ensure_ascii=False)))
                     for skill in catalog:
                         db.execute("INSERT OR IGNORE INTO skill_snapshots VALUES(?,?,?)", (key,skill["name"],self.skill_view(skill["name"])["content"]))
-                db.execute("INSERT OR IGNORE INTO sessions VALUES(?,?,?)", (key, value, utc_now()))
-                value = db.execute("SELECT snapshot FROM sessions WHERE session_id=?", (key,)).fetchone()[0]
+                    db.execute("INSERT OR IGNORE INTO sessions VALUES(?,?,?)", (key, value, utc_now()))
+                    value = db.execute("SELECT snapshot FROM sessions WHERE session_id=?", (key,)).fetchone()[0]
         if len(self._snapshots) >= 512:
             self._snapshots.pop(next(iter(self._snapshots)))
         self._snapshots[key] = value

@@ -825,6 +825,24 @@ def _classify_recovery(row,path):
     from common import llm_settings
     from common.llm_client import generate_json
     from common.hermes_memory import learning_text
+    discovered = row.get('discovered', {})
+    # A deterministic admission failure needs no second model just to classify it.
+    # Actual retry still passes the immutable target/receipt/ownership guards.
+    diagnostic = json.dumps(discovered.get('failureDiagnostic') or
+                            row.get('plan', {}).get('sourceSnapshot', {}).get('failureDiagnostic', {}))
+    if 'RouteCoolingDown' in diagnostic or 'model_route_cooling_down' in diagnostic:
+        from common.collection_observability import load
+        from common import llm_usage
+        health = load(llm_usage.ROOT/'dashboard/data/llm_usage_ledger.json').get('routeHealth', {})
+        cooling = any(max(v.get('retryAt', 0), v.get('probeUntil', 0)) > time.time() for v in health.values())
+        if not cooling and discovered.get('originalRetryEligible') is True:
+            _recovery_resume_guard(row)
+            return {'kind':'retry_original','inspectRole':'publi','selectedFiles':[],
+                    'objective':'Resume only the original unsubmitted work through the native finite retry gates',
+                    'reason':'Host route cooldown has expired and exact original retry eligibility was observed'}
+        return {'kind':'hold','inspectRole':'patch','selectedFiles':[],
+                'objective':'Retain the exact original work until its host route and retry evidence are ready',
+                'reason':'Model route remains cooling or original pre-submission eligibility is unverified'}
     if row.get('hostRepairReceipt'):
         verified_applied_repair(row)
         _recovery_resume_guard(row)

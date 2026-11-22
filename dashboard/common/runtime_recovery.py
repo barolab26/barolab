@@ -2,7 +2,51 @@
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
+
+def host_resource_snapshot():
+    """Observe Windows pressure without spawning processes or changing workload limits."""
+    if os.name!='nt':return {'status':'unknown','reason':'windows_host_observation_required'}
+    try:
+        import ctypes,shutil
+        class Memory(ctypes.Structure):
+            _fields_=[('length',ctypes.c_uint32),('load',ctypes.c_uint32),
+                      *[(name,ctypes.c_uint64) for name in ('totalPhysical','availablePhysical','totalCommit','availableCommit','totalVirtual','availableVirtual','extendedVirtual')]]
+        memory=Memory();memory.length=ctypes.sizeof(memory)
+        if not ctypes.WinDLL('kernel32',use_last_error=True).GlobalMemoryStatusEx(ctypes.byref(memory)):
+            raise OSError(ctypes.get_last_error())
+        disk=shutil.disk_usage(Path(__file__).resolve().anchor)
+        return resource_observation(memory.totalPhysical,memory.availablePhysical,
+                                    memory.totalCommit,memory.availableCommit,disk.total,disk.free)
+    except (OSError,ValueError,AttributeError) as exc:
+        return {'status':'unknown','checkedAt':time.time(),'errorType':type(exc).__name__}
+
+
+def resource_observation(total,available,commit,commit_available,disk_total,disk_free):
+    if not (0<=available<=total and total>0 and 0<=commit_available<=commit and commit>0):
+        raise ValueError('Invalid host memory counters')
+    physical=100*(total-available)/total;committed=100*(commit-commit_available)/commit
+    return {'status':'critical' if max(physical,committed)>=95 else 'attention' if max(physical,committed)>=85 else 'normal',
+            'checkedAt':time.time(),'source':'windows-host-GlobalMemoryStatusEx',
+            'physicalTotalBytes':total,'physicalAvailableBytes':available,'physicalUsedPercent':round(physical,2),
+            'commitLimitBytes':commit,'commitAvailableBytes':commit_available,'commitUsedPercent':round(committed,2),
+            'systemDiskTotalBytes':disk_total,'systemDiskFreeBytes':disk_free,
+            'publicationVerified':False,'automaticProcessTermination':False}
+
+
+def host_resource_evidence(now=None):
+    """Use shared host evidence; container memory is never the Windows PC's memory."""
+    import json
+    now=time.time() if now is None else now
+    shared=Path(__file__).resolve().parents[2]/'dashboard/data/host-resources.json'
+    try:
+        row=json.loads(shared.read_bytes());age=now-float(row['checkedAt'])
+        if not 0<=age<=120:return {'status':'unknown','reason':'host_resource_observation_stale','ageSeconds':round(age,1)}
+        return {**row,'ageSeconds':round(age,1),'evidencePath':'dashboard/data/host-resources.json'}
+    except (OSError,ValueError,KeyError,TypeError):
+        return {'status':'unknown','reason':'host_resource_observation_missing'}
+
 
 UNITS = {
     'cf_blog': ('barolab-parameters-prepare.timer', 'barolab-parameters-dispatch.timer'),

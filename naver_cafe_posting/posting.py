@@ -1,19 +1,12 @@
-"""Dedicated Naver Cafe 30,217-Member Bridge & Anti-Ban Engine (`cafe.html` / `/api/cafe`).
-
-Manages:
-1. Tier 1 (`direct_bridge` · 100% Link Allowed):
-   - `boutiqueinfo` (고급지식의 모든 것 · 1,722명 · clubid 31608088 · menuId 4)
-2. Tier 2 (`safe_community_3to1` · 3:1 No-Link Camouflage + Soft Bridge Guardrail):
-   - `loveshake1` ([금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리 · 28,495명 · clubid 19858249 · menuId 164)
-   - Future general cafes (자동 워밍업 및 3:1 무링크 순수 정보글 강제 비율 적용)
-3. Native EGO Lite `Profile 4` (`barolab-soul5373`) FEEditor publishing & GA4 referral tracking.
-"""
+"""Source-reviewed, complete Naver Cafe posting and evidence-scoped status."""
 from __future__ import annotations
 
 import datetime as dt
 import json
 from pathlib import Path
 from typing import Any
+import re
+from urllib.parse import unquote, urlsplit
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 CAFE_STATUS_PATH = ROOT_DIR / "dashboard" / "data" / "cafe" / "status.json"
@@ -28,110 +21,31 @@ def now_kst_str() -> str:
 
 
 CAFE_POLICIES: dict[str, dict[str, Any]] = {
-    "boutiqueinfo": {
-        "cafeId": "boutiqueinfo",
-        "clubId": "31608088",
-        "menuId": "4",
-        "account": "soul5373",
-        "tier": "Tier 1 · 브릿지 특화 카페",
-        "policyMode": "direct_bridge",
-        "requiredNoLinkStreak": 0,
-        "cooldownHours": 4,
-        "ratioLabel": "다이렉트 원문 브릿지 100% 허용",
-        "defenseRule": "운영자 브릿지 허용 특화 카페 · 모든 글에 4문단 핵심 요약 + CF 고단가 원문 링크 카드 직접 삽입 (네이버 카페탭 통합검색 기지)",
-    },
-    "dekilab": {
-        "cafeId": "dekilab",
-        "clubId": "31529204",
-        "menuId": "18",
-        "account": "yoon_master",
-        "tier": "Tier 2 · 일반 AI/테크 커뮤니티 (12,503명)",
-        "policyMode": "safe_community_3to1",
-        "requiredNoLinkStreak": 3,
-        "cooldownHours": 48,
-        "ratioLabel": "무링크 순수정보 75% (3편) : 소프트 브릿지 25% (1편)",
-        "defenseRule": "금융꿀팁 초기 광고글 강퇴 교훈 반영 · 첫 3편은 외부링크 0개 순수 정보글로만 작성해 [작성글 보기] 진성 회원 위장 완료 후 4번째 글에만 소프트 브릿지 허용",
-    },
-    "loveshake1": {
-        "cafeId": "loveshake1",
-        "clubId": "19858249",
-        "menuId": "164",
-        "account": "soul5373",
-        "tier": "Tier 2 · 일반 커뮤니티 (송출 제외 · 초기 링크글 강퇴)",
-        "policyMode": "suspended_banned",
-        "requiredNoLinkStreak": 3,
-        "cooldownHours": 9999,
-        "ratioLabel": "송출 중단 (초기 연속 링크글로 인한 활동 제한)",
-        "defenseRule": "가입 직후 연속 브릿지 글 작성으로 강퇴됨 · 송출 파이프라인에서 즉시 격리하고 신규 일반 카페는 무조건 '무링크 3편 선행 워밍업' 강제 적용",
-    },
+    "boutiqueinfo": {"cafeId":"boutiqueinfo", "clubId":"31608088", "menuId":"4", "account":"soul5373",
+        "tier":"완결형 정보 포스팅", "policyMode":"reader_complete", "requiredNoLinkStreak":0,
+        "topicTags":["finance","tax","welfare","health"], "externalLinksAllowed":True,
+        "boardMenus":{"4":"[경제정보]","5":"[금융/대출정보실]","7":"[정부지원혜택]","9":"[기타정보]"},
+        "ratioLabel":"링크는 추가 가치가 검증된 경우에만 선택", "defenseRule":"본문만으로 질문 해결 · 정확한 근거 · 문단/표 · 게시판 규칙 준수"},
+    "dekilab": {"cafeId":"dekilab", "clubId":"31529204", "menuId":"18", "account":"yoon_master",
+        "tier":"AI/테크 독자용 완결형 포스팅", "policyMode":"suspended_banned", "restrictionUntil":"2026-11-24", "restrictionEvidence":"dashboard/data/repair-workflows/company-20261106/dekilab-restriction.json", "requiredNoLinkStreak":0,
+        "topicTags":["ai","automation","coding"], "externalLinksAllowed":False, "boardMenus":{"18":"AI 정보 & 팁 공유"},
+        "ratioLabel":"횟수로 링크를 해금하지 않음", "defenseRule":"AI/테크 주제 적합성 필수 · 링크 규칙 확인 전 외부 링크 제외"},
+    "loveshake1": {"cafeId":"loveshake1", "clubId":"19858249", "menuId":"164", "account":"soul5373",
+        "tier":"활동 제한 기록 보존", "policyMode":"suspended_banned", "requiredNoLinkStreak":0,
+        "topicTags":[], "externalLinksAllowed":False, "ratioLabel":"송출 중단", "defenseRule":"우회 발행·계정 교체·삭제 글 재발행 금지"},
 }
 
 
 def evaluate_cafe_safety_quota(cafe_id: str, published_articles: list[dict[str, Any]]) -> dict[str, Any]:
-    """Evaluate whether the next post on `cafe_id` must be a No-Link pure value post or can include a bridge link."""
     policy = CAFE_POLICIES.get(cafe_id, CAFE_POLICIES["loveshake1"])
-    cafe_pubs = [a for a in published_articles if a.get("cafeId") == cafe_id]
-    total_count = len(cafe_pubs)
-    no_link_count = len([a for a in cafe_pubs if a.get("postType") == "no_link_value" or not a.get("hasExternalLink", True)])
-    bridge_count = total_count - no_link_count
-
-    if policy["policyMode"] == "direct_bridge":
-        return {
-            "cafeId": cafe_id,
-            "tier": policy["tier"],
-            "policyMode": "direct_bridge",
-            "nextPostMode": "direct_bridge",
-            "nextPostModeBadge": "🔗 100% 원문 링크 카드 송출",
-            "noLinkStreak": no_link_count,
-            "requiredNoLinkStreak": 0,
-            "remainingNoLinkNeeded": 0,
-            "bridgeUnlocked": True,
-            "totalCount": total_count,
-            "noLinkCount": no_link_count,
-            "bridgeCount": bridge_count,
-            "safetyStatus": "🟢 브릿지 특화 카페 (상시 링크 허용)",
-            "ratioLabel": policy["ratioLabel"],
-            "defenseRule": policy["defenseRule"],
-        }
-
-    # For Tier 2 (`safe_community_3to1`), count consecutive `no_link_value` posts from newest to oldest
-    streak = 0
-    for art in cafe_pubs:
-        is_no_link = art.get("postType") == "no_link_value" or not art.get("hasExternalLink", True)
-        if is_no_link:
-            streak += 1
-        else:
-            break
-
-    req_streak = int(policy.get("requiredNoLinkStreak", 3))
-    remaining = max(0, req_streak - streak)
-    unlocked = remaining == 0
-
-    return {
-        "cafeId": cafe_id,
-        "tier": policy["tier"],
-        "policyMode": "safe_community_3to1",
-        "nextPostMode": "soft_bridge" if unlocked else "no_link_value",
-        "nextPostModeBadge": (
-            "💡 소프트 브릿지 해금 (3:1 충족)"
-            if unlocked
-            else f"🛡️ 무링크 순수정보 강제 (위장 {streak}/{req_streak}단계 · 링크 자동 차단)"
-        ),
-        "noLinkStreak": streak,
-        "requiredNoLinkStreak": req_streak,
-        "remainingNoLinkNeeded": remaining,
-        "bridgeUnlocked": unlocked,
-        "totalCount": total_count,
-        "noLinkCount": no_link_count,
-        "bridgeCount": bridge_count,
-        "safetyStatus": (
-            "🟢 3:1 위장 조건 충족 (다음 1회 소프트 브릿지 가능)"
-            if unlocked
-            else f"🛡️ 강퇴 방어 위장 가동 중 (앞으로 {remaining}편 연속 무링크 순수정보글 자동 작성)"
-        ),
-        "ratioLabel": policy["ratioLabel"],
-        "defenseRule": policy["defenseRule"],
-    }
+    pubs = [a for a in published_articles if a.get("cafeId") == cafe_id]
+    no_link = sum(a.get("hasExternalLink") is False for a in pubs)
+    suspended = policy["policyMode"] == "suspended_banned"
+    return {**policy, "nextPostMode":"held" if suspended else "reader_complete",
+        "nextPostModeBadge":"송출 중단" if suspended else "근거 검수된 완결형 포스팅",
+        "noLinkStreak":0, "remainingNoLinkNeeded":0, "bridgeUnlocked":False,
+        "totalCount":len(pubs), "noLinkCount":no_link, "bridgeCount":len(pubs)-no_link,
+        "safetyStatus":"활동 제한 · 재발행 금지" if suspended else "원고별 품질·주제·링크 검수 필요"}
 
 
 def _extract_ga4_channel_referrals(channel_keywords: list[str]) -> dict[str, Any]:
@@ -320,438 +234,260 @@ def load_cafe_status() -> dict[str, Any]:
 
 
 def save_cafe_status(data: dict[str, Any]) -> dict[str, Any]:
-    CAFE_STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CAFE_PUBLIC_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    txt = json.dumps(data, ensure_ascii=False, indent=2)
-    CAFE_STATUS_PATH.write_text(txt, encoding="utf-8")
-    CAFE_PUBLIC_JSON_PATH.write_text(txt, encoding="utf-8")
+    from naver_cafe_posting.editorial import write
+    write(CAFE_STATUS_PATH, data)
+    write(CAFE_PUBLIC_JSON_PATH, data)
     return data
 
 
+def normalize_articles(articles):
+    """Count canonical posts once; preserve encoded/legacy receipts as aliases."""
+    records = {}
+    for index, original in enumerate(articles):
+        row = dict(original)
+        url = str(row.get('articleUrl') or '')
+        for _ in range(4):
+            url = unquote(url)
+        club = (CAFE_POLICIES.get(row.get('cafeId')) or {}).get('clubId')
+        match = re.search(r'/cafes/(\d+)/articles/(\d+)', url)
+        short = re.fullmatch(r'/([^/]+)/(\d+)', urlsplit(url).path)
+        query_id = re.search(r'(?:[?&])articleid=(\d+)', url)
+        actual_club = match[1] if match else club
+        article_id = match[2] if match else (short[2] if short and short[1] == row.get('cafeId') else query_id[1] if query_id else None)
+        valid = urlsplit(url).hostname == 'cafe.naver.com' and club and actual_club == club and article_id
+        key = (club, article_id) if valid else ('unresolved', index)
+        if valid:
+            row['articleUrl'] = f'https://cafe.naver.com/ca-fe/cafes/{club}/articles/{article_id}'
+        if key not in records:
+            records[key] = row
+            continue
+        previous = records[key]
+        rank = lambda a: ({'body_verified':3,'body_observed':2,'unavailable':1}.get(a.get('publicState'),0),a.get('publicCheckedAt',''))
+        preferred, other = (row, previous) if rank(row) > rank(previous) else (previous, row)
+        aliases = list(preferred.get('legacyRecordAliases') or []) + list(other.get('legacyRecordAliases') or [])
+        alias = {k:v for k,v in other.items() if k != 'legacyRecordAliases'}
+        if alias not in aliases:
+            aliases.append(alias)
+        preferred['legacyRecordAliases'] = aliases
+        records[key] = preferred
+    return list(records.values())
+
+
 def sync_cafe_live_state() -> dict[str, Any]:
-    """Build and sync the dedicated Naver Cafe 30,217-member control room state with Tier 1 / Tier 2 Anti-Ban Guardrails."""
-    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, load_brunch_status
-
+    """Refresh metadata only; never claim that cached receipts prove current public state."""
+    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM
     prev = load_cafe_status()
-    published_articles: list[dict[str, Any]] = list(prev.get("publishedArticles") or DEFAULT_CAFE_PUBLISHED_ARTICLES)
-    # Ensure default postType fields exist on legacy entries
-    for a in published_articles:
-        if "postType" not in a:
-            a["postType"] = "direct_bridge"
-            a["hasExternalLink"] = True
-            a["postTypeBadge"] = (
-                "🔗 Tier 1 다이렉트 브릿지"
-                if a.get("cafeId") == "boutiqueinfo"
-                else "🔗 브릿지 발행 (이후 3편 무링크 잠금)"
-            )
-
-    seen_urls = {a.get("articleUrl") for a in published_articles if a.get("articleUrl")}
-
-    br_st = load_brunch_status()
-    for h in reversed((br_st.get("automation") or {}).get("history") or []):
-        for cb in (h.get("cafeBridges") or []):
-            u = cb.get("url")
-            if u and u not in seen_urls:
-                seen_urls.add(u)
-                c_slug = cb.get("cafe", "loveshake1")
-                published_articles.insert(0, {
-                    "id": f"{c_slug}-{len(published_articles) + 1}",
-                    "part": h.get("part", 6),
-                    "cafeId": c_slug,
-                    "cafeName": "[금융꿀팁] 직장인/주부/서민/아파트론/대환/저금리" if c_slug == "loveshake1" else "고급지식의 모든 것",
-                    "boardName": "자유게시판·금융꿀팁 (menuId 164)" if c_slug == "loveshake1" else "지식 아카이브 (menuId 4)",
-                    "members": 28495 if c_slug == "loveshake1" else 1722,
-                    "account": "soul5373",
-                    "postType": cb.get("postType", "direct_bridge"),
-                    "postTypeBadge": "🛡️ 무링크 순수정보 (위장)" if cb.get("postType") == "no_link_value" else "🔗 다이렉트 브릿지",
-                    "hasExternalLink": cb.get("postType") != "no_link_value",
-                    "title": f"[핵심정리] {h.get('title', '')}",
-                    "articleUrl": u,
-                    "bridgeDomain": (h.get("bridgeUrl") or "https://www.meganote.kr").split("/")[2].replace("www.", ""),
-                    "bridgeUrl": h.get("bridgeUrl") or "https://www.meganote.kr/",
-                    "publishedAt": str(h.get("at") or now_kst_str())[:16].replace("T", " ") + " KST",
-                    "status": "published_verified",
-                    "statusLabel": "🟢 실측 발행 영수증 검증 완료",
-                })
-
-    dekilab_quota = evaluate_cafe_safety_quota("dekilab", published_articles)
-    loveshake_quota = evaluate_cafe_safety_quota("loveshake1", published_articles)
-    boutique_quota = evaluate_cafe_safety_quota("boutiqueinfo", published_articles)
-
-    cafes = [
-        {
-            "cafeId": "boutiqueinfo",
-            "clubId": "31608088",
-            "menuId": "4",
-            "name": "고급지식의 모든 것 (Tier 1 브릿지 본진)",
-            "shortName": "고급지식의 모든 것",
-            "tier": boutique_quota["tier"],
-            "policyMode": boutique_quota["policyMode"],
-            "ratioLabel": boutique_quota["ratioLabel"],
-            "defenseRule": boutique_quota["defenseRule"],
-            "nextPostMode": boutique_quota["nextPostMode"],
-            "nextPostModeBadge": boutique_quota["nextPostModeBadge"],
-            "safetyStatus": boutique_quota["safetyStatus"],
-            "noLinkStreak": boutique_quota["noLinkStreak"],
-            "requiredNoLinkStreak": boutique_quota["requiredNoLinkStreak"],
-            "grade": "가지3단계 (운영자 브릿지 허용 특화 카페)",
-            "members": 1739,
-            "account": "soul5373 · yoon_master · soultin (3계정 모두 글쓰기 활성)",
-            "cafeUrl": "https://cafe.naver.com/boutiqueinfo",
-            "writeMode": "🔗 Tier 1 브릿지 특화 (FEEditor + 클립보드 원문 링크카드 100% 직결)",
-            "targetTopics": "주택연금 · 대환대출 · 건보료 · 소상공인 지원금 · 절세 · 복지할인 전 분야",
-            "publishedCount": boutique_quota["totalCount"],
-            "noLinkCount": boutique_quota["noLinkCount"],
-            "bridgeCount": boutique_quota["bridgeCount"],
-            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), "https://cafe.naver.com/boutiqueinfo/2305"),
-            "status": "live",
-            "statusBadge": "🔗 Tier 1 · 100% 브릿지 특화 가동 중",
-        },
-        {
-            "cafeId": "dekilab",
-            "clubId": "31529204",
-            "menuId": "18",
-            "name": "AI 커뮤니티 - 데키랩 (Tier 2 · 12,503명 활성 카페)",
-            "shortName": "데키랩 (AI 커뮤니티)",
-            "tier": dekilab_quota["tier"],
-            "policyMode": dekilab_quota["policyMode"],
-            "ratioLabel": dekilab_quota["ratioLabel"],
-            "defenseRule": dekilab_quota["defenseRule"],
-            "nextPostMode": dekilab_quota["nextPostMode"],
-            "nextPostModeBadge": dekilab_quota["nextPostModeBadge"],
-            "safetyStatus": dekilab_quota["safetyStatus"],
-            "noLinkStreak": dekilab_quota["noLinkStreak"],
-            "requiredNoLinkStreak": dekilab_quota["requiredNoLinkStreak"],
-            "grade": "열매단계 (12,503명 · yoon_master 글쓰기 권한 확인 완료)",
-            "members": 12503,
-            "account": "yoon_master (Profile 5 · barolab-yoon_master)",
-            "cafeUrl": "https://cafe.naver.com/dekilab",
-            "writeMode": "🛡️ 3:1 강퇴방어 엔진 (첫 3편 무링크 순수 AI/정보글 워밍업 후 4번째 글 소프트 브릿지)",
-            "targetTopics": "AI 에이전트 자동화 · 바이브코딩 · 프롬프트 & 실전 워크플로우 · IT 생산성",
-            "publishedCount": dekilab_quota["totalCount"],
-            "noLinkCount": dekilab_quota["noLinkCount"],
-            "bridgeCount": dekilab_quota["bridgeCount"],
-            "latestArticleUrl": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "dekilab"), "https://cafe.naver.com/dekilab"),
-            "status": "live",
-            "statusBadge": "🛡️ Tier 2 · 무링크 3편 선행 워밍업 잠금 중",
-        },
-    ]
-
-    # Build 10-part Planned Queue with simulated 3:1 progression on `dekilab` (Tier 2) + `boutiqueinfo` (Tier 1)
-    planned_queue: list[dict[str, Any]] = []
-    sim_streak = dekilab_quota["noLinkStreak"]
-    req_streak = dekilab_quota["requiredNoLinkStreak"]
-
-    for cur in BRUNCHBOOK_CURRICULUM:
-        part_no = int(cur["part"])
-        matching_pubs = [a for a in published_articles if int(a.get("part") or 0) == part_no or cur["title"][:8] in str(a.get("title") or "")]
-        dekilab_pub = next((a for a in matching_pubs if a.get("cafeId") == "dekilab"), None)
-        loveshake_pub = next((a for a in matching_pubs if a.get("cafeId") == "loveshake1"), None)
-        boutique_pub = next((a for a in matching_pubs if a.get("cafeId") == "boutiqueinfo"), None)
-
-        if dekilab_pub:
-            tier2_plan_mode = dekilab_pub.get("postType", "no_link_value")
-            tier2_plan_label = (
-                "🟢 데키랩 무링크 순수정보 완료"
-                if tier2_plan_mode == "no_link_value"
-                else "🟢 데키랩 소프트 브릿지 완료"
-            )
-            tier2_url = dekilab_pub["articleUrl"]
-        elif loveshake_pub:
-            tier2_plan_mode = "archived_loveshake"
-            tier2_plan_label = "📦 구 금융꿀팁 발행분 (데키랩 3:1 대기)"
-            tier2_url = loveshake_pub["articleUrl"]
-        else:
-            if sim_streak < req_streak:
-                sim_streak += 1
-                tier2_plan_mode = "no_link_value"
-                tier2_plan_label = f"🛡️ 데키랩 무링크 워밍업 ({sim_streak}/{req_streak})"
-            else:
-                sim_streak = 0
-                tier2_plan_mode = "soft_bridge"
-                tier2_plan_label = "💡 데키랩 소프트 브릿지 해금 (3:1)"
-            tier2_url = ""
-
-        if dekilab_pub and boutique_pub:
-            q_status = "completed_both"
-            q_label = "🟢 2개 카페 모두 발행 완료"
-        elif boutique_pub:
-            q_status = "completed_partial"
-            q_label = "🟡 고급지식 완료 · 데키랩 무링크 워밍업 대기"
-        else:
-            q_status = "queued"
-            q_label = (
-                "🛡️ 데키랩(무링크 워밍업) + 🔗 고급지식(브릿지)"
-                if tier2_plan_mode == "no_link_value"
-                else "💡 데키랩(3:1 브릿지 해금) + 🔗 고급지식(브릿지)"
-            )
-
-        planned_queue.append({
-            "part": part_no,
-            "title": (
-                f"[정보공유] {cur['title']}"
-                if tier2_plan_mode == "no_link_value" and not dekilab_pub
-                else f"[핵심정리] {cur['title']}"
-            ),
-            "subtitle": cur["subtitle"],
-            "category": cur["category"],
-            "targetCafes": "데키랩(Tier 2 · 3:1 무링크 워밍업) + 고급지식(Tier 1 · 100% 브릿지)",
-            "bridgeDomain": cur["targetDomain"],
-            "bridgeUrl": cur.get("bridgeUrl") or f"https://www.{cur['targetDomain']}/",
-            "loveshakeUrl": tier2_url,
-            "loveshakePlanMode": tier2_plan_mode,
-            "loveshakePlanLabel": tier2_plan_label,
-            "boutiqueUrl": boutique_pub["articleUrl"] if boutique_pub else "",
-            "boutiquePlanLabel": "🟢 브릿지 발행 완료" if boutique_pub else "🔗 100% 원문 브릿지 예정",
-            "status": q_status,
-            "statusLabel": q_label,
-        })
-
-    cafe_ga4 = _extract_ga4_channel_referrals(["cafe.naver", "m.cafe.naver", "naver_cafe"])
-    naver_all_ga4 = _extract_ga4_channel_referrals(["naver"])
-
-    measurement = {
-        "totalMembersReach": 14242,
-        "publishedTotalCount": len(published_articles),
-        "completedQueueCount": len([q for q in planned_queue if q["status"] != "queued"]),
-        "pendingQueueCount": len([q for q in planned_queue if q["status"] == "queued"]),
-        "cafeDirectReferrals": cafe_ga4,
-        "naverEcosystemReferrals": naver_all_ga4,
-        "cafeBreakdown": [
-            {
-                "cafeName": "고급지식의 모든 것 (boutiqueinfo · Tier 1 브릿지 특화카페)",
-                "members": 1739,
-                "publishedCount": boutique_quota["totalCount"],
-                "targetDomains": "100% 다이렉트 브릿지 (meganote.kr · smilenote.kr · healthcox.com)",
-                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "boutiqueinfo"), ""),
-                "expectedEffect": "운영자 공인 브릿지 기지 · 3계정(soul5373·yoon_master·soultin) 동시 가동으로 카페탭 상위노출 및 원문 직결",
-            },
-            {
-                "cafeName": "AI 커뮤니티 - 데키랩 (dekilab · Tier 2 일반 커뮤니티)",
-                "members": 12503,
-                "publishedCount": dekilab_quota["totalCount"],
-                "targetDomains": "3:1 법칙 (무링크 순수정보 3편 선행 워밍업 → 4번째 글 소프트 브릿지 1회)",
-                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "dekilab"), "https://cafe.naver.com/dekilab"),
-                "expectedEffect": "금융꿀팁 초기 링크 강퇴 교훈 반영 · 첫 3편 100% 무링크 정보글로 진성 활동 이력 확보 후 안전 유입",
-            },
-            {
-                "cafeName": "[금융꿀팁] 러브쉐이크 (loveshake1 · 🔴 강퇴 격리/송출 중단)",
-                "members": 28495,
-                "publishedCount": loveshake_quota["totalCount"],
-                "targetDomains": "⛔ 송출 영구 차단 (가입 직후 첫 글부터 외부링크 삽입으로 인한 탈퇴 조치)",
-                "latestReceipt": next((a["articleUrl"] for a in published_articles if a.get("cafeId") == "loveshake1"), ""),
-                "expectedEffect": "교훈 아카이브: 일반 커뮤니티 카페는 가입 직후 외부링크 작성 시 즉시 강퇴됨 → 전 일반 카페 3편 무링크 선행 워밍업 의무화",
-            },
-        ],
-    }
-
-    payload = {
-        "ok": True,
-        "updatedAt": now_kst_str(),
-        "account": {
-            "naverId": "soul5373 + yoon_master",
-            "egoProfile": "Profile 4 (soul5373) & Profile 5 (yoon_master)",
-            "cdpPort": 9440,
-            "autoReclaimEnabled": True,
-            "operatingRule": "금융꿀팁 초기 링크 강퇴 교훈 반영: Tier 1(고급지식 1,739명)은 100% 브릿지 송출 · Tier 2(데키랩 12,503명 및 신규 카페)는 『무링크 순수정보 3편 선행 워밍업 + 3:1 법칙』을 코드 레벨에서 강제 잠금",
-        },
-        "antiBanStrategy": {
-            "tier1Rule": "Tier 1 (브릿지 특화 카페 · 고급지식의 모든 것 1,739명): 운영자 브릿지 허용 카페 → soul5373·yoon_master·soultin 3계정 100% 원문 링크 직결",
-            "tier2Rule": "Tier 2 (일반 커뮤니티 카페 · 데키랩 12,503명 & 신규 카페): 첫 3편 연속 '외부링크 0개 순수 정보글' 달성 전에는 코드에서 URL 삽입 원천 차단 (4번째 글에만 소프트 브릿지 1회 해금)",
-            "warmupRule": "🔴 금융꿀팁(loveshake1) 강퇴 사후조치 완료: loveshake1 송출 루프 즉시 격리 차단 + 모든 일반 카페는 가입 직후 첫 3편 무링크 워밍업 100% 강제",
-            "dekilabQuota": dekilab_quota,
-            "boutiqueQuota": boutique_quota,
-            "loveshakeQuota": loveshake_quota,
-        },
-        "kpi": {
-            "cafeCount": 2,
-            "totalMembers": 14242,
-            "publishedArticleCount": len(published_articles),
-            "pendingQueueCount": measurement["pendingQueueCount"],
-            "cafeGa4Sessions7d": cafe_ga4["weekSessions"],
-            "cafeGa4Sessions30d": cafe_ga4["monthSessions"],
-            "cafeGa4Sessions28d": cafe_ga4["last28DaysSessions"],
-            "naverTotalSessions7d": naver_all_ga4["weekSessions"],
-            "naverTotalSessions30d": naver_all_ga4["monthSessions"],
-            "naverTotalSessions28d": naver_all_ga4["last28DaysSessions"],
-            "ga4WindowNote": "GA4 month period covers 30 days (week=7d, month=30d)",
-            "dekilabNextMode": dekilab_quota["nextPostModeBadge"],
-        },
-        "cafes": cafes,
-        "publishedArticles": published_articles,
-        "plannedQueue": planned_queue,
-        "measurement": measurement,
-    }
+    articles = normalize_articles(list(prev.get("publishedArticles") or DEFAULT_CAFE_PUBLISHED_ARTICLES))
+    for article in articles:
+        article.setdefault("legacyPublicationStatus", article.get("status"))
+        state = article.get("publicState", "not_rechecked")
+        article["status"] = "body_verified" if state == "body_verified" else state
+        article["statusLabel"] = {"body_verified":"본문·문단·표·링크 검증 완료",
+            "body_observed":"현재 본문 열람 확인 · 기존 글 유지", "unavailable":"현재 접근 불가 · 삭제 원인 미확인"}.get(state,"기존 발행 기록 · 현재 본문 미검증")
+        article["postTypeBadge"] = "완결형 정보 포스팅" if state == "body_verified" else "기존 기록 보존"
+    quotas = {c:evaluate_cafe_safety_quota(c,articles) for c in CAFE_POLICIES}
+    names = {"boutiqueinfo":"고급지식의 모든 것", "dekilab":"AI 커뮤니티 - 데키랩", "loveshake1":"금융꿀팁 (활동 제한 기록)"}
+    cafes = []
+    for cafe_id in ("boutiqueinfo","dekilab"):
+        q = quotas[cafe_id]
+        cafes.append({**q,"name":names[cafe_id],"shortName":names[cafe_id],"members":None,
+            "account":CAFE_POLICIES[cafe_id]["account"],"cafeUrl":f"https://cafe.naver.com/{cafe_id}",
+            "grade":"회원수·등급은 발행 품질/노출 증거가 아님", "writeMode":"검수된 완결형 포스팅",
+            "targetTopics":"금융·세금·복지·건강" if cafe_id=="boutiqueinfo" else "AI·자동화·코딩",
+            "publishedCount":q["totalCount"],"status":"review_required","statusBadge":q["safetyStatus"],
+            "latestArticleUrl":next((a["articleUrl"] for a in articles if a.get("cafeId")==cafe_id),"")})
+    queue = []
+    for item in BRUNCHBOOK_CURRICULUM:
+        found = [a for a in articles if a.get("cafeId")=="boutiqueinfo" and a.get("part")==item["part"]]
+        queue.append({"part":item["part"],"title":item["title"],"subtitle":item["subtitle"],
+            "category":item["category"],"targetCafes":"고급지식 · 주제 적합성 확인 후 검수",
+            "bridgeDomain":"원고별 선택","bridgeUrl":"", "loveshakeUrl":"",
+            "loveshakePlanMode":"out_of_scope","loveshakePlanLabel":"데키랩: 이 금융/복지 커리큘럼 배포 제외",
+            "boutiqueUrl":found[0]["articleUrl"] if found else "",
+            "boutiquePlanLabel":"기존 기록 보존" if found else "완결 원고·근거·검수 필요",
+            "status":"existing_record" if found else "queued",
+            "statusLabel":"기존 글 관측 · 중복 발행 제외" if found else "완결형 포스팅 준비 대기"})
+    cafe_ga4 = _extract_ga4_channel_referrals(["cafe.naver","m.cafe.naver","naver_cafe"])
+    naver_ga4 = _extract_ga4_channel_referrals(["naver"])
+    payload = {**prev,"ok":True,"updatedAt":now_kst_str(),
+        "account":{"naverId":"soul5373 + yoon_master","autoReclaimEnabled":False,
+            "operatingRule":"완결된 정보 포스팅 · 현재 근거 · 독자 적합성 · 선택 링크 · 발행 후 독립 확인"},
+        "antiBanStrategy":{"tier1Rule":"카페 글 자체에서 독자 질문을 해결 · 관련 링크만 선택",
+            "tier2Rule":"활동 횟수로 링크를 허용하지 않음 · AI 카페에 금융/건강 글 배포 제외",
+            "warmupRule":"활동 제한 보존 · 사용자 공간 자동 회수/불확실한 제출 재시도 금지",
+            "boutiqueQuota":quotas["boutiqueinfo"],"dekilabQuota":quotas["dekilab"],"loveshakeQuota":quotas["loveshake1"]},
+        "kpi":{"cafeCount":2,"totalMembers":None,"publishedArticleCount":len(articles),
+            "bodyVerifiedCount":sum(a.get("publicState")=="body_verified" for a in articles),
+            "unavailableCount":sum(a.get("publicState")=="unavailable" for a in articles),
+            "pendingQueueCount":sum(q["status"]=="queued" for q in queue),
+            "cafeGa4Sessions7d":cafe_ga4["weekSessions"],"cafeGa4Sessions30d":cafe_ga4["monthSessions"],
+            "naverTotalSessions7d":naver_ga4["weekSessions"],"naverTotalSessions30d":naver_ga4["monthSessions"],
+            "ga4WindowNote":"출처별 합계 · 개별 카페 글 성과/수익 귀속 아님", "dekilabNextMode":"AI/테크 원고만 검토"},
+        "cafes":cafes,"publishedArticles":articles,"plannedQueue":queue,
+        "measurement":{"totalMembersReach":None,"publishedTotalCount":len(articles),
+            "completedQueueCount":0,"pendingQueueCount":sum(q["status"]=="queued" for q in queue),
+            "cafeDirectReferrals":cafe_ga4,"naverEcosystemReferrals":naver_ga4,
+            "cafeBreakdown":[],"attributedRevenue":None,"causalClaim":False}}
     return save_cafe_status(payload)
 
 
-def _build_cafe_post_payload(
-    cafe_slug: str,
-    target_item: dict[str, Any],
-    bridge_url: str,
-    quota: dict[str, Any],
-) -> dict[str, Any]:
-    """Construct the exact title & paragraphs according to the cafe's Tier and current 3:1 safety quota."""
-    post_mode = quota["nextPostMode"]
-    raw_paras = [str(p).strip() for p in (target_item.get("paragraphs") or []) if str(p).strip()]
+def _build_cafe_post_payload(cafe_slug, target_item, bridge_url=None, quota=None):
+    """Legacy callers cannot silently turn truncated curriculum prose into a post."""
+    from naver_cafe_posting.editorial import validate_document, render
+    document = target_item.get("document")
+    research = target_item.get("research")
+    if not document or not research:
+        raise ValueError("Complete source-reviewed Cafe document required; curriculum snippets are not publishable")
+    validate_document(document, research, cafe_slug)
+    return {"title":document["title"], "document":document, "contentHtml":render(document),
+            "postType":"reader_complete", "hasExternalLink":bool(document.get("lineLinks"))}
 
-    if post_mode == "no_link_value":
-        # Tier 2 Anti-Ban Camouflage Mode: ZERO external links, 100% pure community value post
-        clean_title = f"[정보공유] {target_item['title']} 핵심 기준 정리해 봤습니다"
-        paras = [
-            f"안녕하세요, 요즘 {target_item['title']} 관련해서 헷갈리는 기준들이 많길래 제가 직접 확인하면서 정리해 둔 핵심 체크포인트를 회원님들과 공유해 봅니다.",
-            *raw_paras[:5],
-            f"✔ 핵심 요약: {target_item['subtitle']}",
-            "신청 시기나 세부 요건을 놓치면 불이익이 생길 수 있으니 해당되시는 분들은 미리 조건을 대조해 보시는 걸 추천드립니다. 혹시 올해 직접 신청해 보셨거나 궁금한 점 있으신 분들은 댓글로 함께 이야기 나눠요!",
-        ]
-        return {
-            "postType": "no_link_value",
-            "postTypeBadge": f"🛡️ 무링크 순수정보 (위장 {quota['noLinkStreak'] + 1}/{quota['requiredNoLinkStreak']})",
-            "hasExternalLink": False,
-            "title": clean_title,
-            "paragraphs": paras,
-            "recordedBridgeDomain": "무링크 순수기여 (강퇴방어 위장)",
-            "recordedBridgeUrl": f"https://cafe.naver.com/{cafe_slug}",
-        }
 
-    if post_mode == "soft_bridge":
-        # Tier 2 Unlocked Soft Bridge Mode (only 1 out of 4 posts)
-        soft_title = f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})"
-        paras = [
-            *raw_paras[:4],
-            f"▶ 구간별 상세 비교표 및 계산 기준 참고 출처:",
-            bridge_url,
-        ]
-        return {
-            "postType": "soft_bridge",
-            "postTypeBadge": "💡 Tier 2 소프트 브릿지 (3:1 해금)",
-            "hasExternalLink": True,
-            "title": soft_title,
-            "paragraphs": paras,
-            "recordedBridgeDomain": target_item["targetDomain"],
-            "recordedBridgeUrl": bridge_url,
-        }
-
-    # Tier 1 Direct Bridge Mode (`boutiqueinfo`)
-    direct_title = f"[핵심정리] {target_item['title']} ({target_item['subtitle'][:22]})"
-    paras = [
-        *raw_paras[:4],
-        f"▶ {target_item['title']} 상세 비교표 및 자가진단 원문 보기:",
-        bridge_url,
-    ]
-    return {
-        "postType": "direct_bridge",
-        "postTypeBadge": "🔗 Tier 1 다이렉트 브릿지",
-        "hasExternalLink": True,
-        "title": direct_title,
-        "paragraphs": paras,
-        "recordedBridgeDomain": target_item["targetDomain"],
-        "recordedBridgeUrl": bridge_url,
-    }
+def acquire_cafe_browser_lease(cafe_id: str) -> dict[str, Any]:
+    """Use only the registered, agent-owned account space and visibly verify its login."""
+    policy = CAFE_POLICIES[cafe_id]
+    if policy.get('policyMode') == 'suspended_banned' or policy.get('restrictionUntil'):
+        raise ValueError('Existing Cafe restriction requires its original resolution')
+    status = load_cafe_status()
+    if any(status.get(k) for k in ('manualStop','userTakeover','reviewBudgetHold','pendingEffect')):
+        raise ValueError('Protected Cafe work requires its original resume condition')
+    from dashboard.common.ego_taskspace import run_ego_mjs, resolve_ego_profile
+    account = policy['account']
+    script = '''
+const spaces=await listTaskSpaces();
+const found=spaces.find(s=>s.name===SPACE);
+if(found && found.ownership!=="agent")throw Error("account_space_unavailable_or_user_takeover");
+const task=found?await taskSpace(found.id):await taskSpace(SPACE,{profileId:PROFILE});
+if(task.ownership!=="agent")throw Error("user_takeover");
+const prior=LEASE;
+if(found && (prior.space!==task.spaceId || !prior.page))throw Error("account_page_lease_requires_reconciliation");
+const page=task.page(found?prior.page:"p1");
+const path=new URL(await page.url()).pathname;
+if(path.endsWith('/write') || path.endsWith('/modify'))throw Error("existing_editor_requires_reconciliation");
+let verified=false;
+try {
+ await page.goto("https://www.naver.com");
+ const emails=await page.evaluate(()=>document.body.innerText.match(/[a-zA-Z0-9_.+-]+@naver\\.com/g)||[]);
+ if(!emails.includes(ACCOUNT+"@naver.com"))throw Error("visible_logged_in_account_mismatch");
+ verified=true;
+ console.log("BAROLAB_EGO_JSON:"+JSON.stringify({space:task.spaceId,page:page.label,account:ACCOUNT,cafeId:CAFE,accountVerified:true}));
+} finally {/* Preserve the exact page for inspection on authentication or navigation failure. */}
+'''.replace('SPACE',json.dumps('barolab-'+account)).replace('PROFILE',json.dumps(resolve_ego_profile(account))).replace('LEASE',json.dumps(status.get('browserLease') or {})).replace('ACCOUNT',json.dumps(account)).replace('CAFE',json.dumps(cafe_id))
+    lease = run_ego_mjs(script, timeout=60)
+    if not isinstance(lease,dict) or lease.get('accountVerified') is not True:
+        raise ValueError('Visible account verification failed; no browser lease granted')
+    lease['expiresAt'] = (dt.datetime.now(dt.timezone.utc)+dt.timedelta(minutes=20)).isoformat()
+    current = load_cafe_status()
+    if any(current.get(k) for k in ('manualStop','userTakeover','reviewBudgetHold','pendingEffect')):
+        raise ValueError('Cafe control changed during account verification')
+    current['browserLease']=lease
+    save_cafe_status(current)
+    return lease
 
 
 def publish_cafe_bridge_part(part_no: int = 6) -> dict[str, Any]:
-    """Publish a specific curriculum part (1~10) to both Naver Cafes enforcing Tier 1 (Direct Bridge) & Tier 2 (3:1 No-Link Anti-Ban)."""
-    from brunch_posting.posting import BRUNCHBOOK_CURRICULUM, get_today_cf_bridge_targets
-    from dashboard.common.ego_taskspace import native_publish_naver_cafe_article
+    from common import runtime_locks
+    output=Path(__file__).resolve().parent/'output';output.mkdir(parents=True,exist_ok=True)
+    with (output/'publisher.lock').open('a+b') as handle:
+        try:runtime_locks.flock(handle,runtime_locks.LOCK_EX|runtime_locks.LOCK_NB)
+        except BlockingIOError:return {'ok':False,'status':'busy','reason':'existing_cafe_publisher_preserved','publicationVerified':False}
+        try:return _publish_cafe_bridge_part(part_no)
+        finally:runtime_locks.flock(handle,runtime_locks.LOCK_UN)
 
-    target_item = next((c for c in BRUNCHBOOK_CURRICULUM if int(c["part"]) == int(part_no)), BRUNCHBOOK_CURRICULUM[0])
-    bridge_targets = get_today_cf_bridge_targets(target_item["title"], allowed_domains=[target_item["targetDomain"]])
-    bridge_url = target_item.get("bridgeUrl") or (bridge_targets[0]["url"] if bridge_targets else f"https://www.{target_item['targetDomain']}/")
 
-    st = sync_cafe_live_state()
-    published_articles = list(st.get("publishedArticles") or [])
-    receipts = []
+def settle_cafe_preparation(cafe_id, part_no, folder):
+    """Settle only an exact verified write receipt, without another browser write."""
+    from naver_cafe_posting.editorial import read,digest
+    from common.collection_observability import locked,write
+    folder=Path(folder)
+    try:
+        doc=read(folder/'document.json');prepared=read(folder/'prepared.json')
+        intent=read(folder/'intent.json');evidence=read(folder/'public-evidence.json')
+    except (OSError,ValueError):return None
+    sha=digest(doc);url=intent.get('url')
+    if (intent.get('status')!='verified_published' or evidence.get('status')!='verified_published'
+            or not url or evidence.get('url')!=url or prepared.get('cafeId')!=cafe_id
+            or any(x.get('documentSha256')!=sha for x in (prepared,intent,evidence))
+            or any(intent.get(k) for k in ('manualStop','userTakeover','reviewBudgetHold','pendingEffect'))):return None
+    receipt={'ok':True,'status':'verified_published','publicationVerified':True,
+             'url':url,'documentSha256':sha,'verifiedAt':evidence.get('checkedAt'),
+             'reusedExistingReceipt':True,'submissionDispatched':False}
+    index=ROOT_DIR/'dashboard/data/cafe/preparation-jobs.json'
+    with locked(index.with_suffix('.lock')):
+        jobs=read(index) if index.exists() else {};job=jobs.get('jobs',{}).get(f'{cafe_id}:{part_no}')
+        if job and (job.get('prepared') or {}).get('documentSha256')==sha:
+            job.update(status='published_verified',publicationVerified=True,receipt=receipt,
+                       nextAction='Observe public content and measure traffic and revenue separately')
+            write(index,jobs)
+    st=load_cafe_status()
+    if st.get('approvedPreparedPart')==part_no:
+        st.pop('approvedPreparedPart');st['updatedAt']=now_kst_str();save_cafe_status(st)
+    return receipt
 
-    for cafe_cfg in [
-        {"slug": "boutiqueinfo", "account": "soul5373", "clubid": "31608088", "menuid": "4", "name": "고급지식의 모든 것", "board": "지식 아카이브 (menuId 4)", "members": 1739},
-        {"slug": "dekilab", "account": "yoon_master", "clubid": "31529204", "menuid": "18", "name": "AI 커뮤니티 - 데키랩", "board": "AI 정보 & 팁 공유 (menuId 18)", "members": 12503},
-    ]:
-        already = next((a for a in published_articles if a.get("cafeId") == cafe_cfg["slug"] and int(a.get("part") or 0) == int(target_item["part"])), None)
-        if already:
-            receipts.append({
-                "cafe": cafe_cfg["slug"],
-                "url": already["articleUrl"],
-                "postType": already.get("postType", "direct_bridge"),
-                "reused": True,
-            })
+
+def _publish_cafe_bridge_part(part_no: int = 6) -> dict[str, Any]:
+    """Only an explicitly prepared article and active browser lease may be submitted.
+
+    Old records/parts are never reused as proof of public content or retried.
+    Creating source/reviewed drafts is an explicit bounded preparation step.
+    """
+    from naver_cafe_posting.editorial import OUTPUT, read, browser_operation, write
+    st = load_cafe_status()
+    results = []
+    if any(st.get(k) for k in ('manualStop','userTakeover','reviewBudgetHold','pendingEffect')):
+        return {'ok':False,'status':'held','reason':'original_resume_condition_required'}
+    lease = st.get("browserLease") or {}
+    try:
+        active = dt.datetime.fromisoformat(lease["expiresAt"]) > dt.datetime.now(dt.timezone.utc)
+    except (KeyError, ValueError, TypeError):
+        active = False
+    for cafe_id in ("boutiqueinfo", "dekilab"):
+        existing = [a for a in st.get("publishedArticles", []) if a.get("cafeId")==cafe_id and int(a.get("part") or 0)==int(part_no)]
+        if existing:
+            receipt=settle_cafe_preparation(cafe_id,int(part_no),OUTPUT/'prepared'/f'part-{int(part_no)}'/cafe_id)
+            if receipt:
+                results.append({'cafe':cafe_id,**receipt});continue
+            results.append({"cafe":cafe_id,"status":"existing_record_preserved","publicState":existing[0].get("publicState","not_rechecked")})
             continue
-
-        quota = evaluate_cafe_safety_quota(cafe_cfg["slug"], published_articles)
-        post_spec = _build_cafe_post_payload(cafe_cfg["slug"], target_item, bridge_url, quota)
-
-        c_res = native_publish_naver_cafe_article(
-            account=cafe_cfg["account"],
-            clubid=cafe_cfg["clubid"],
-            menuid=cafe_cfg["menuid"],
-            title=post_spec["title"],
-            paragraphs=post_spec["paragraphs"],
-            cafe_slug=cafe_cfg["slug"],
-        )
-        if isinstance(c_res, dict) and c_res.get("ok") and c_res.get("url"):
-            art_url = str(c_res["url"])
-            receipts.append({
-                "ok": True,
-                "cafe": cafe_cfg["slug"],
-                "cafeSlug": cafe_cfg["slug"],
-                "url": art_url,
-                "postType": post_spec["postType"],
-                "postTypeBadge": post_spec["postTypeBadge"],
-            })
-            published_articles.insert(0, {
-                "id": f"{cafe_cfg['slug']}-{art_url.rstrip('/').split('/')[-1]}",
-                "part": int(target_item["part"]),
-                "cafeId": cafe_cfg["slug"],
-                "cafeName": cafe_cfg["name"],
-                "boardName": cafe_cfg["board"],
-                "members": cafe_cfg["members"],
-                "account": cafe_cfg["account"],
-                "postType": post_spec["postType"],
-                "postTypeBadge": post_spec["postTypeBadge"],
-                "hasExternalLink": post_spec["hasExternalLink"],
-                "title": post_spec["title"],
-                "articleUrl": art_url,
-                "bridgeDomain": post_spec["recordedBridgeDomain"],
-                "bridgeUrl": post_spec["recordedBridgeUrl"],
-                "publishedAt": now_kst_str()[:16] + " KST",
-                "status": "published_verified",
-                "statusLabel": f"🟢 실측 발행 영수증 검증 완료 (#{art_url.rstrip('/').split('/')[-1]})",
-            })
-
-    st["publishedArticles"] = published_articles
-    save_cafe_status(st)
-    final_st = sync_cafe_live_state()
-    return {
-        "ok": len(receipts) > 0,
-        "part": int(target_item["part"]),
-        "title": target_item["title"],
-        "receipts": receipts,
-        "status": final_st,
-    }
+        folder = OUTPUT / "prepared" / f"part-{int(part_no)}" / cafe_id
+        if not (folder / "prepared.json").is_file():
+            results.append({"cafe":cafe_id,"status":"held","reason":"reviewed_article_and_explicit_browser_lease_required","autoRetry":False})
+            continue
+        intent = read(folder / "intent.json") if (folder / "intent.json").is_file() else {}
+        if intent.get("status") in ("submitting","submission_unknown","verified_published","verified_updated") or any(intent.get(k) for k in ('manualStop','userTakeover','reviewBudgetHold','pendingEffect')):
+            results.append({"cafe":cafe_id,"status":"held","reason":"reconcile_existing_write","autoRetry":False})
+            continue
+        if not active or lease.get('cafeId')!=cafe_id or lease.get('accountVerified') is not True:
+            lease=acquire_cafe_browser_lease(cafe_id)
+            active=True
+        write(folder / "intent.json", {"status":"prepared","revisionAuthorized":False})
+        browser_operation(lease["space"],lease["page"],folder,mode="stage")
+        result = browser_operation(lease["space"],lease["page"],folder,mode="submit")
+        document = read(folder / "document.json")
+        row = {"id":f"{cafe_id}-{part_no}","cafeId":cafe_id,"part":int(part_no),
+               "account":CAFE_POLICIES[cafe_id]["account"],"title":document["title"],"articleUrl":result["url"],
+               "postType":"reader_complete","hasExternalLink":bool(document.get("lineLinks")),
+               "publishedAt":now_kst_str(),"status":"published_verified","publicState":"body_verified",
+               "statusLabel":"본문·문단·표·링크 확인 완료","evidencePath":str(folder / "public-evidence.json")}
+        st=load_cafe_status()
+        st.setdefault("publishedArticles",[]).insert(0,row)
+        save_cafe_status(st)
+        settle_cafe_preparation(cafe_id,int(part_no),folder)
+        results.append({"cafe":cafe_id,**result})
+    verified=any(r.get("status")=="verified_published" for r in results)
+    return {"ok":verified,"publicationVerified":verified,"part":part_no,"receipts":results}
 
 
 def process_cafe_autonomy_once() -> dict[str, Any]:
-    """24/7 Autonomous Naver Cafe Bridge Scheduler (09:40 & 16:40 KST, up to 2 parts/day across boutiqueinfo + dekilab)."""
-    now_dt = datetime.now(KST)
-    today_prefix = now_dt.date().isoformat()
+    """Consume only reviewed, explicitly leased work; no daily post-count target."""
+    now = dt.datetime.now(KST)
+    if now.hour < 9:
+        return {"ok":True,"action":"waiting_for_slot"}
     st = load_cafe_status()
-    published_articles = list(st.get("publishedArticles") or [])
-    today_articles = [a for a in published_articles if str(a.get("publishedAt") or "").startswith(today_prefix)]
-    if len(today_articles) >= 4:
-        return {"ok": True, "action": "daily_quota_complete", "todayCount": len(today_articles)}
-
-    target_minutes = 9 * 60 + 40 if len(today_articles) == 0 else 16 * 60 + 40
-    cur_minutes = now_dt.hour * 60 + now_dt.minute
-    if cur_minutes < target_minutes:
-        return {"ok": True, "action": "waiting_for_slot", "nextSlot": "09:40" if len(today_articles) == 0 else "16:40"}
-
-    # Find next part not yet published on both boutiqueinfo and dekilab
-    for part_no in range(1, 11):
-        has_b = any(a.get("cafeId") == "boutiqueinfo" and int(a.get("part") or 0) == part_no for a in published_articles)
-        has_d = any(a.get("cafeId") == "dekilab" and int(a.get("part") or 0) == part_no for a in published_articles)
-        if not (has_b and has_d):
-            return publish_cafe_bridge_part(part_no)
-    return {"ok": True, "action": "all_parts_published"}
+    part = st.get("approvedPreparedPart")
+    if part is None:
+        return {"ok":True,"action":"held","reason":"no_reviewed_prepared_article","autoRetry":False}
+    return publish_cafe_bridge_part(int(part))
 
 
 if __name__ == "__main__":

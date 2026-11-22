@@ -31,9 +31,37 @@ def date(value):
 
 def load(path, default=None):
     try:
-        return json.loads(Path(path).read_text(encoding='utf-8'))
+        path = Path(path)
+        value = json.loads(path.read_text(encoding='utf-8'))
+        if path.parent.name == 'reasoning-goals':
+            from common.observation_archive import hydrate
+            return hydrate(value, path.parent / 'observation-results')
+        return value
     except (OSError, ValueError):
         return {} if default is None else default
+
+
+def failure_details(error):
+    """Preserve actionable, bounded diagnostics without copying credentials into prompts."""
+    import hashlib
+    import traceback
+    message=str(error)
+    message=re.sub(r'(?i)(bearer\s+)[^\s,;]+',r'\1[redacted]',message)
+    message=re.sub(r'(?i)((?:[\w-]*(?:token|secret|password|api[_-]?key|authorization)[\w-]*)[\s\"\x27]*[:=][\s\"\x27]*)[^\s,;\"\x27&]+',
+                   r'\1[redacted]',message)
+    message=re.sub(r'https?://[^\s<>\"\x27]+',lambda m:re.sub(r'[?#].*','?[redacted]',
+        re.sub(r'(?<=//)[^/@]+@','[redacted]@',m[0])),message)
+    frames=traceback.extract_tb(error.__traceback__)
+    frame=frames[-1] if frames else None
+    location=None
+    if frame:
+        path=Path(frame.filename)
+        root=Path(__file__).resolve().parents[2]
+        location=f'{path.relative_to(root) if path.is_relative_to(root) else path.name}:{frame.lineno}'
+    return {'errorType':type(error).__name__,'errorMessage':message[:1000],
+            'sourceLocation':location,'failureFingerprint':hashlib.sha256(
+                json.dumps([type(error).__name__,message[:1000],location]).encode()).hexdigest(),
+            'nextAction':'inspect_exact_source_and_inputs; preserve original effect state; no blind retry'}
 
 
 def write(path, value):

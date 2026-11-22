@@ -1,5 +1,13 @@
 """Shared staff ownership and capability contracts; host validators keep write gates."""
 ACTION_OWNERS = {
+    'prepare_brunch_content':'publi',
+    'verify_cf_corrected_publication':'trace',
+    'verify_youtube_content':'trace',
+    'inspect_url_acquisition':'trace',
+    'prepare_youtube_content':'publi',
+    'repair_cf_normalization':'publi',
+    'prepare_cafe_content':'publi',
+    'browser_ego_action':'patch',
     'publish_strategy_link':'publi',
     'recover_project_runtime':'patch', 'recover_project_work':'publi',
     'repair_kin_submission':'patch', 'run_cf_domain':'publi',
@@ -32,11 +40,18 @@ def capability_catalog():
     from common.project_autonomy import COMMANDS
     from common.runtime_recovery import UNITS
     return [
+        {'tool':'prepare_brunch_content','owner':'publi','args':['project=brunch','part_no','source_queries?'],'permission':'execute','verification':'exact unpublished local draft and independent source review; no browser or submission; preserve original intents and holds'},
+        {'tool':'verify_cf_corrected_publication','owner':'trace','args':['project=cf_blog','url','artifact_folder'],'permission':'repair','verification':'exact independently reviewed correction and current API body; compares public paragraphs, clears only owned stale canonical/versioned cache keys if required, then rechecks; never sends content POST/PUT'},
+        {'tool':'verify_youtube_content','owner':'trace','args':['project=youtube','key'],'permission':'repair','verification':'read-only external observation settles the exact original intent; never resubmits'},
+        {'tool':'prepare_youtube_content','owner':'publi','args':['project=youtube','channel_handle','topic','source_queries?'],'permission':'execute','verification':'source-bound community text draft, independent reader/fact review, native publisher and exact public body; not a video upload'},
+        {'tool':'repair_cf_normalization','owner':'publi','args':['project=cf_blog','domain','day','source_queries?'],'permission':'repair','verification':'same original held revision, observed sources, unchanged independent content and image checks, native cleaner handoff; never submits'},
+        {'tool':'prepare_cafe_content','owner':'publi','args':['project=naver_cafe','cafe_id','part_no','topic','source_queries?'],'permission':'execute','verification':'source-bound complete draft and independent reviews; preparation is not publication; preserve existing articles and restrictions'},
+        {'tool':'inspect_url_acquisition','owner':'trace','args':['project=cf_blog','url','start','end'],'permission':'read','verification':'read-only GA4 exact article URL session/pageView breakdown (attributed, excluded operational/internal, unattributed); complete=False keeps qualified metrics None; never allocates domain revenue to an article'},
         {'tool':'read_agent_status','owner':'trace','args':['project'],'permission':'read','verification':'source observation; no publication or revenue success inferred'},
         {'tool':'publish_strategy_link','owner':'publi','args':['project=threads','target_url'],'permission':'execute','verification':'exact selected source, registered slot, native quality/quota/submission guards and public receipt'},
         {'tool':'browser_ego_action','owner':'patch','args':['port','url','goal'],'permission':'repair','verification':'EGO screenshot/action receipt and fresh screen observation; submission uses existing verification'},
         {'tool':'read_source','owner':'current actor','args':['path','line?','lines?'],'limits':{'linesMaximum':240},'pagination':['sha256','totalLines','truncated','nextLine'],'verification':'follow nextLine for complete evidence'},
-        {'tool':'run_project_cycle','owner':'publi (legacy_remodel: doctor)','args':['project'],'projects':list(COMMANDS),'permission':'execute','verification':'actual publication/reservation receipt; queued is not completed'},
+        {'tool':'run_project_cycle','owner':'publi (legacy_remodel: doctor)','args':['project','allocation_id?'],'projects':list(COMMANDS),'permission':'execute','verification':'actual publication/reservation receipt; queued is not completed'},
         {'tool':'recover_project_runtime','owner':ACTION_OWNERS['recover_project_runtime'],'args':['project'],'projects':list(UNITS),'permission':'repair','whenToUse':'Registered scheduler or worker runtime is unavailable; prefer this bounded recovery before source-code investigation. A content hold is not a runtime error.','verification':'fresh source and symptom recheck; timer start alone is not recovery'},
         {'tool':'recover_project_work','owner':ACTION_OWNERS['recover_project_work'],'args':['project','work_id'],'projects':['cf_blog','naver_blog'],'permission':'repair','whenToUse':'Existing supported recovery of the same pre-submission failed work; preserve the approved document and verification. If held or submission is uncertain, reconcile first and use another independent eligible task.','verification':'same approved work, existing submission fences and actual completion receipt'},
         {'tool':'repair_kin_submission','owner':ACTION_OWNERS['repair_kin_submission'],'args':['account','question_id'],'permission':'repair','verification':'existing task-owned editor and submission evidence; never bypass quota/captcha'},

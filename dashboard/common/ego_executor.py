@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import logging
 
 
-def benchmark_blog_screen(query, folder, *, resume=False):
+def benchmark_blog_screen(query, folder, *, resume=False, surface='naver_blog'):
     from pathlib import Path
     from urllib.parse import quote
     from datetime import datetime
@@ -17,14 +17,18 @@ def benchmark_blog_screen(query, folder, *, resume=False):
     folder.mkdir(parents=True, exist_ok=True)
     receipt = folder / 'screen-benchmark.json'
     previous = load(receipt)
-    if previous.get('query') == query and previous.get('status') == 'observed':
-        return previous
     try:
-        from common.ego_taskspace import find_ego_cli, native_benchmark_blog_screen
-        if find_ego_cli() is not None:
-            return native_benchmark_blog_screen(query, folder)
-    except Exception as exc:
-        logging.getLogger(__name__).warning('Native EGO TaskSpace benchmark fallback to CDP: %s', exc)
+        age = (datetime.now(ZoneInfo('Asia/Seoul'))-datetime.fromisoformat(previous['checkedAt'])).total_seconds()
+        if (previous.get('query') == query and previous.get('status') == 'observed' and previous.get('surface', 'naver_blog') == surface and 0 <= age <= 24*3600
+                and any(len(a.get('bodyText', '')) >= 200 for a in previous.get('articles', []))):
+            return previous
+    except (KeyError, TypeError, ValueError):
+        pass
+    from common.ego_taskspace import find_ego_cli, native_benchmark_blog_screen
+    if find_ego_cli() is not None:
+        return native_benchmark_blog_screen(query, folder, surface=surface)
+    if surface != 'naver_blog':
+        raise ValueError('Native browser required for this search surface')
     binary, profile, _ = account_paths(9440)
     search_url = 'https://search.naver.com/search.naver?where=blog&query=' + quote(query)
     with sync_playwright() as playwright:
@@ -284,7 +288,8 @@ def execute_staff_action(action, *, task_id, request_id, observer=None, requeste
         if not isinstance(result, dict):
             raise ValueError('Registered tool returned no structured receipt')
     except Exception as exc:
-        result = {'ok': False, 'status': 'failed', 'errorType': type(exc).__name__}
+        from common.collection_observability import failure_details
+        result = {'ok': False, 'status': 'failed', **failure_details(exc)}
     status = result.get('status') or ('returned' if result.get('ok') is True else 'unknown')
     pending = status in ('running', 'started', 'queued', 'awaiting_completion', 'unknown')
     returned = datetime.now(timezone.utc).isoformat()

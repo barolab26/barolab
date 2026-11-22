@@ -5,12 +5,21 @@ const marker = "BAROLAB_ADPOST_RESULT=";
 let task;
 try {
   const existing = await listTaskSpaces();
-  const found = Array.isArray(existing) ? existing.find(s => s && s.name === "barolab-soul5373") : null;
-  task = request.spaceId
-    ? await taskSpace(request.spaceId)
-    : (found ? await taskSpace("barolab-soul5373") : await taskSpace("barolab-soul5373", { profileId: "Profile 4" }));
+  const matches = Array.isArray(existing) ? existing.filter(s => s &&
+    (request.spaceId ? s.id === request.spaceId : s.name === "barolab-soul5373")) : [];
+  if (matches.length === 0 && !request.spaceId && request.authorizedProfileId) {
+    task = await taskSpace(request.taskName, { profileId: request.authorizedProfileId });
+  } else if (matches.length === 1 && matches[0].ownership === "agent") {
+    task = await taskSpace(matches[0].id);
+  } else {
+    throw {status: "browser_unavailable", reasonCode: "owned_reporting_space_unavailable"};
+  }
+  if (task.ownership !== "agent")
+    throw {status: "browser_unavailable", reasonCode: "user_takeover"};
   console.log("BAROLAB_ADPOST_SPACE=" + task.spaceId);
-  const page = task.page("p1");
+  const tabs = await task.tabs();
+  const reporting = tabs.find(t => /^https:\/\/adpost\.naver\.com\//.test(t.url || ""));
+  const page = reporting ? task.page(reporting.label) : await task.newPage();
   await page.goto("https://adpost.naver.com/main", { waitUntil: "domcontentloaded", timeout: 15000 });
   const read = async (path) => {
     const response = await page.fetch(path, { method: "GET", credentials: "include", timeout: 15000 });
@@ -38,6 +47,8 @@ try {
   const rows = await read(`/api/report/revenue?startDate=${request.start}&endDate=${request.end}&publisherId=${publisher}&clipRequired=true`);
   if (!Array.isArray(rows)) throw { status: "error", reasonCode: "report_rows_invalid" };
   const result = { ok: true, account: request.expectedAccount, publisher, blogs, medias, rows, spaceId: task.spaceId };
+  await task.finish({ keep: [] });
+  result.taskFinished = true;
   console.log(marker + JSON.stringify(result));
 } catch (error) {
   // A stopped or unexpected session stays available for explicit reconciliation.

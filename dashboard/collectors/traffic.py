@@ -49,6 +49,8 @@ def classify_source(channel, source, medium):
 
 
 SOURCE_ALIASES = {
+    'brunch': {'brunch', 'brunch.co.kr'},
+    'youtube': {'youtube', 'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'},
     'naver_blog': {'naver_blog', 'naver-blog', 'blog.naver.com', 'm.blog.naver.com'},
     'naver_kin': {'naver_kin', 'naver-kin', 'naver_jisikin', 'naver-jisikin', 'kin.naver.com', 'm.kin.naver.com'},
     'naver_cafe': {'naver_cafe', 'naver-cafe', 'cafe.naver.com', 'm.cafe.naver.com'},
@@ -95,7 +97,7 @@ def aggregate_source_attribution(report, site_host, derived_at=None):
     This excludes known operational sources, not every bot or operator visit.
     It is attribution grouping, never verified human traffic or causal lift.
     """
-    channels = ('naver_blog', 'naver_kin', 'naver_cafe', 'threads', 'other')
+    channels = (*SOURCE_ALIASES, 'other')
     result = {'schema': 'source-attribution-v1', 'status': 'unknown',
               'canonicalExternalSessions': {key: None for key in channels},
               'qualifiedExternalSessions': None, 'excludedExternalSessions': None,

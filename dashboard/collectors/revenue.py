@@ -679,10 +679,12 @@ def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None
         if space_id is None and previous.get('status') in ('running', 'held'):
             raise RevenueSourceError(previous.get('sourceStatus', 'browser_unavailable'),
                                      'EGO 세션 확인 필요 · 이전 작업 공간 보존 · 자동 재시도 보류')
+        authorization = {key: previous[key] for key in ('authorizedProfileId', 'profileAuthorization') if key in previous}
         request = {'expectedAccount': expected_account, 'start': start.strftime('%Y%m%d'),
                    'end': end.strftime('%Y%m%d'), 'spaceId': space_id,
+                   'authorizedProfileId': authorization.get('authorizedProfileId'),
                    'taskName': 'adpost-soul5373-' + datetime.now(KST).strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:8]}
-        state = {'status': 'running', 'spaceId': space_id, 'taskName': request['taskName'], 'startedAt': stamp()}
+        state = {**authorization, 'status': 'running', 'spaceId': space_id, 'taskName': request['taskName'], 'startedAt': stamp()}
         atomic_write(control_path, state)
         token = base64.urlsafe_b64encode(json.dumps(request).encode('utf-8')).decode('ascii').rstrip('=')
         module = (ROOT / 'dashboard/collectors/adpost_ego.mjs').as_uri()
@@ -709,6 +711,8 @@ def _adpost_ego_report(start, end, expected_account='soul5373', *, space_id=None
                     raise ValueError('Invalid report rows')
             if any(str(row.get('publisherId')) != publisher for row in payload['blogs'] + payload['medias']):
                 raise RevenueSourceError('auth_required', 'EGO 애드포스트 미디어 소유자 식별 불일치')
+            if payload.get('taskFinished') is not True:
+                raise ValueError('Reporting task cleanup was not verified')
             state.update(status='completed', finishedAt=stamp(), taskFinished=True)
             atomic_write(control_path, state)
             return payload['rows'], publisher, payload['blogs'], payload['medias']

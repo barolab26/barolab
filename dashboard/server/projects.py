@@ -420,15 +420,15 @@ def compute_closed_test_schedule(
         }
 
     closed_dt = datetime.fromisoformat(str(closed_start_iso)).astimezone(KST)
-    elapsed_days = max(1, (now.date() - closed_dt.date()).days)
+    elapsed_days = max(0, int((now - closed_dt).total_seconds() // 86400))
     remaining_days = max(0, req_days - elapsed_days)
     target_release_date = (closed_dt.date() + timedelta(days=req_days)).isoformat()
     day_progress_pct = min(100, round((elapsed_days / req_days) * 100))
     current_track_label = f"비공개 테스트 가동 중 (테스터 {opt_ins}/{req_testers}명)"
     closed_status_label = (
-        f"비공개 테스트 D+{elapsed_days}일째 · 14일 요건 D-{remaining_days}일 ({target_release_date} 충족)"
+        f"비공개 테스트 {elapsed_days}일 경과 · 14일 요건까지 {remaining_days}일 ({target_release_date} 예상 · 연속 참여 유지 필요)"
         if remaining_days > 0
-        else f"비공개 테스트 14일 요건 충족 완료 (D+{elapsed_days}일)"
+        else f"비공개 테스트 {elapsed_days}일 경과 · 콘솔에서 14일 요건 충족 여부 확인 필요"
     )
 
     return {
@@ -455,7 +455,7 @@ def compute_closed_test_schedule(
         "dDayBadge": closed_status_label,
         "testerGroupEmail": truth.get("testerGroupEmail", "barolab-testers@googlegroups.com"),
         "testerLandingUrl": truth.get("testerLandingUrl", "https://barolab-daily-apps.pages.dev/testers/"),
-        "readyForProductionTrack": remaining_days == 0,
+        "readyForProductionTrack": remaining_days == 0 and review_approved,
     }
 
 

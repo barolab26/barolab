@@ -20,7 +20,7 @@ STATE = DATA / 'active-agenda.json'
 ROWS = DATA / 'publication-conferences' / 'operations'
 _CONTEXT = ContextVar('business_agenda', default=None)
 _EXECUTING = ContextVar('agenda_execution', default=False)
-READ_ONLY = frozenset(('read_agent_status', 'read_coding_job_status', 'read_patch_code_status'))
+READ_ONLY = frozenset(('read_agent_status', 'read_coding_job_status', 'read_patch_code_status', 'inspect_url_acquisition'))
 LABELS = {'queued':'대기', 'meeting':'방향·전략 협의', 'executing':'실행 중',
           'recovering':'같은 안건 복구 중', 'verifying':'실제 결과 검증',
           'report_pending':'마무리 보고 전달 중', 'blocked':'미해결 · 재개 조건 대기',
@@ -399,7 +399,7 @@ def _pending_owned_work(goal):
     pending = goal.get('pendingAction') or {}
     if pending:
         request_id = pending.get('requestId')
-        receipt = load(DATA/'staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json')) if request_id else {}
+        receipt = load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json')) if request_id else {}
         # Missing/stale receipts are uncertainty, never proof that a submitted action stopped.
         if receipt.get('status') not in ('completed', 'cancelled', 'denied') or receipt.get('pendingEffect'):
             return True
@@ -411,9 +411,273 @@ def _pending_owned_work(goal):
     return False
 
 
+def _unstarted_budget_hold(row):
+    """A held, never-dispatched staff request must not block unrelated work."""
+    request_id = (row.get('source') or {}).get('requestId') if row.get('kind') == 'staff' else None
+    if not request_id:
+        return False
+    receipt = load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+    return (receipt.get('requestId') == request_id and receipt.get('status') == 'held'
+            and receipt.get('reasonCode') == 'budget_exhausted'
+            and receipt.get('results') == [] and receipt.get('requests') == []
+            and not receipt.get('pendingEffect') and not running(row))
+
+
+def _reconciled_scheduler_execution(item, request_id):
+    if not isinstance(item, dict) or item.get('tool') != 'run_project_cycle':
+        return {}, None
+    result = item.get('result') or {}
+    initial = item.get('initialResult') or {}
+    snapshot = item.get('controllerSnapshot') or {}
+    requested_at = result.get('conferenceRequestedAt')
+    if requested_at is None:
+        requested_at = initial.get('conferenceRequestedAt')
+    execution = result.get('executorReceipt')
+    if isinstance(execution, dict) and execution.get('requestId') == request_id:
+        return execution, requested_at
+    init_exec = initial.get('executorReceipt') if isinstance(initial.get('executorReceipt'), dict) else {}
+    identity = result.get('conferenceAgendaId')
+    if (init_exec.get('requestId') == request_id
+            and init_exec.get('tool') == 'run_project_cycle'
+            and initial.get('status') in ('running', 'started', 'awaiting_completion')
+            and initial.get('conferenceAgendaId') == identity
+            and result.get('status') in ('completed', 'failed', 'held', 'no_work', 'partial')
+            and not result.get('pendingEffect') and not snapshot.get('pendingEffect')
+            and isinstance(identity, str) and re.fullmatch(r'[a-f0-9]{64}', identity)
+            and snapshot.get('agendaId') == identity
+            and snapshot.get('requestedAt') is not None
+            and snapshot.get('requestedAt') == requested_at
+            and snapshot.get('completedAt')
+            and result.get('controllerEvidenceSha256')):
+        return {**init_exec, 'status': result.get('status'), 'completed': True,
+                'finishedAt': snapshot.get('completedAt')}, requested_at
+    return {}, requested_at
+
+
+def _verified_pre_submission_child_failure(project, child, owner):
+    if child.get('status') != 'failed' or not child.get('completedAt'):
+        return False
+    if (child.get('submissionStarted') is True or child.get('pendingEffect')
+            or any(child.get(k) for k in ('submittedAt', 'submissionStartedAt', 'preCommitIntent'))
+            or child.get('outcomes')):
+        return False
+    if any(d.get(k) for d in (child, owner) for k in ('manualStop', 'userTakeover', 'cancelRequested')):
+        return False
+    diag_text = json.dumps({k: child.get(k) for k in ('failureReason', 'errorType', 'failureDiagnostic')}, ensure_ascii=False)
+    if (child.get('failureReason') in ('screen_action_reconciliation_required', 'worker_interrupted_verify_before_retry',
+            'threads_uncertain_submission_tab_preserved')
+            or re.search(r'manual.stop|user.takeover|auth.required|login.required', diag_text, re.I)):
+        return False
+    args = child.get('arguments') or {}
+    root = DATA.parent.parent
+    if project == 'naver_blog':
+        if args.get('action') != 'naver' or not all(isinstance(args.get(k), str) and args[k] for k in ('account', 'date', 'slot')):
+            return False
+        slot_dir = root / 'naver_blog_posting/output/scheduled' / args['date'] / (args['account'] + '-' + args['slot'].replace(':', ''))
+        if (slot_dir / 'reservation-evidence.json').exists() or (slot_dir.is_dir() and any(slot_dir.glob('*publication*receipt*'))):
+            return False
+        for ev in (load(DATA / 'naver/public-verification.json').get('evidence') or []):
+            if (isinstance(ev, dict) and ev.get('account') == args['account']
+                    and (ev.get('publicationDate') or str(ev.get('reserveTime') or '')[:10]) == args['date']
+                    and (ev.get('scheduledSlot') or str(ev.get('reserveTime') or '')[-5:]) == args['slot']):
+                return False
+        attempts = [
+            r for r in (load(DATA / 'naver/automation-journal.json').get('attempts') or [])
+            if isinstance(r, dict) and r.get('account') == args['account']
+            and (r.get('publicationDate') or str(r.get('reserveTime') or '')[:10]) == args['date']
+            and (r.get('scheduledSlot') or str(r.get('reserveTime') or '')[-5:]) == args['slot']
+        ]
+        if any(r.get('submissionStarted') is not False or r.get('preCommitIntent') is not False
+               or any(r.get(k) for k in ('submittedAt', 'submissionStartedAt', 'pendingEffect'))
+               or (r.get('phase') or r.get('status')) not in ('failed', 'material_required', 'superseded')
+               for r in attempts):
+            return False
+        return bool(attempts) or child.get('submissionStarted') is False
+    if project == 'cf_blog':
+        if args.get('action') not in ('cf', 'cf-prepare') or not all(isinstance(args.get(k), str) and args[k] for k in ('account', 'date', 'slot')):
+            return False
+        if child.get('submissionStarted') is not False:
+            return False
+        slot_dir = root / 'cf_posting/output/scheduled' / args['date'] / args['account']
+        if slot_dir.is_dir() and any(slot_dir.glob('*publication*receipt*')):
+            return False
+        schedule = load(DATA / 'cf/daily_schedule.json')
+        if schedule.get('date') == args['date']:
+            for item in (schedule.get('items') or []):
+                if not isinstance(item, dict) or item.get('domain') != args['account']:
+                    continue
+                if (item.get('status') in ('published', 'published_verified', 'verified', 'accepted', 'submitted',
+                        'submitting', 'submission_unknown', 'unknown', 'pending_effect', 'verification_pending')
+                        or any(item.get(k) for k in ('submissionStarted', 'submittedAt', 'submissionStartedAt', 'preCommitIntent', 'pendingEffect'))):
+                    return False
+        return True
+    return child.get('submissionStarted') is False
+
+
+def scheduler_child_handoff_settled(row):
+    """Release scheduler wrapper capacity only when its exact child conference terminated pre-submission (or completed/cancelled) and is owned by its conference agenda."""
+    if running(row) or not isinstance(row, dict) or row.get('kind') != 'staff' or execution_lane(row) != 'scheduler':
+        return None
+    if (row.get('status') in ('submitting', 'unknown', 'manual_stop')
+            or any(row.get(k) for k in ('pendingEffect', 'manualStop', 'userTakeover', 'cancelRequested'))
+            or _pending_owned_work(row)):
+        return None
+    request_id = (row.get('source') or {}).get('requestId')
+    if not request_id:
+        return None
+    receipt_path = DATA / 'chats/staff-requests' / (hashlib.sha256(str(request_id).encode()).hexdigest() + '.json')
+    receipt = load(receipt_path)
+    actions = (row.get('source') or {}).get('actions') or []
+    results = receipt.get('results') or []
+    if (receipt.get('requestId') != request_id or receipt.get('status') not in ('completed', 'failed', 'held')
+            or receipt.get('pendingEffect') or not results or len(results) != len(actions)):
+        return None
+    identities, owners = [], []
+    for item in results:
+        execution, requested_at = _reconciled_scheduler_execution(item, request_id)
+        result = (item or {}).get('result') or {}
+        identity = result.get('conferenceAgendaId')
+        if (execution.get('requestId') != request_id or execution.get('completed') is not True
+                or not execution.get('finishedAt') or result.get('pendingEffect')
+                or result.get('status') not in ('completed', 'failed', 'held', 'no_work')
+                or not isinstance(identity, str) or not re.fullmatch(r'[a-f0-9]{64}', identity)):
+            return None
+        child = load(ROWS.parent / (identity + '.json'))
+        args = child.get('arguments') or {}
+        binding = hashlib.sha256(json.dumps([child.get('kind'), args], sort_keys=True).encode()).hexdigest()
+        owner_id = child.get('businessAgendaId')
+        owner = get(owner_id) if isinstance(owner_id, str) and re.fullmatch(r'[a-f0-9]{64}', owner_id) else {}
+        if (child.get('agendaId') != identity or binding != identity
+                or not child.get('requestedAt') or requested_at != child.get('requestedAt')
+                or owner.get('id') != owner_id or owner.get('kind') != 'conference'
+                or owner.get('project') not in (None, row.get('project'))
+                or (owner.get('source') or {}).get('conferenceId') != identity
+                or owner.get('status') in ('submitting', 'unknown', 'manual_stop')):
+            return None
+        if (child.get('status') not in ('completed', 'cancelled', 'failed') or not child.get('completedAt')
+                or child.get('pendingEffect') or owner.get('pendingEffect')
+                or any(d.get(k) for d in (child, owner) for k in ('manualStop', 'userTakeover', 'cancelRequested'))
+                or running(owner)
+                or (child.get('pid') and process_identity(child.get('pid')) == child.get('startTicks'))):
+            return None
+        if any(not isinstance(o, dict) or o.get('pendingEffect') or o.get('outcome') == '게시 확인 중'
+               or o.get('submissionState') in ('submitting', 'submitted_unknown', 'api_submitted', 'unknown')
+               for o in (child.get('outcomes') or [])):
+            return None
+        if child.get('status') == 'failed':
+            if (owner.get('status') not in ('blocked', 'recovering', 'executing', 'meeting', 'queued')
+                    or not _verified_pre_submission_child_failure(row.get('project'), child, owner)):
+                return None
+        identities.append(identity)
+        owners.append(owner_id)
+    goal_id = row.get('controllerGoalId') or row.get('recoveryGoalId')
+    if isinstance(goal_id, str) and re.fullmatch(r'[a-f0-9]{64}', goal_id):
+        goal_file = DATA / 'chats/reasoning-goals' / (goal_id + '.json')
+        if goal_file.is_file():
+            goal = load(goal_file)
+            if not goal or goal.get('status') == 'running' or _pending_owned_work(goal):
+                return None
+    return {'owner': 'conference:' + str(owners[-1]), 'conferenceAgendaId': str(identities[-1]),
+            'businessAgendaId': str(owners[-1]), 'reason': 'child_conference_owns_terminal_pre_submission_state',
+            'nextAction': 'inspect_or_recover_on_child_conference_agenda_no_scheduler_replay',
+            'publicationVerified': False, 'sourceRef': str(receipt_path)}
+
+
+def scheduler_clock_wait(row):
+    """Only exact completed, pre-submission clock waits release scheduler capacity."""
+    if running(row):return None
+    if row.get('kind')=='staff' and execution_lane(row)=='scheduler':
+        request_id=(row.get('source') or {}).get('requestId')
+        receipt=load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        actions=(row.get('source') or {}).get('actions') or []
+        results=receipt.get('results') or []
+        if (receipt.get('requestId')==request_id and receipt.get('status') in ('completed','failed','held')
+                and not receipt.get('pendingEffect') and len(results)==len(actions)):
+            def clock_wait(item):
+                result=item.get('result') or {};execution=result.get('executorReceipt') or {}
+                return (item.get('tool')=='run_project_cycle' and execution.get('requestId')==request_id
+                    and execution.get('completed') is True and execution.get('finishedAt')
+                    and result.get('publicationVerified') is False and not result.get('pendingEffect')
+                    and not result.get('conferenceAgendaId') and not result.get('submissionDispatched')
+                    and ((result.get('status')=='held' and result.get('reason')=='allocation_slot_not_currently_eligible')
+                         or (result.get('status')=='waiting_schedule' and result.get('submissionDispatched') is False)
+                         or (result.get('status')=='no_work' and result.get('reason')=='no_eligible_concrete_work' and not result.get('protectedWork'))))
+            if results and all(clock_wait(item) for item in results):
+                goal_id=row.get('controllerGoalId') or row.get('recoveryGoalId')
+                if goal_id:
+                    try:
+                        goal=json.loads((DATA/'chats/reasoning-goals'/(goal_id+'.json')).read_text(encoding='utf-8'))
+                    except (OSError,ValueError):return None
+                    if _pending_owned_work(goal):return None
+                return {'owner':'normal-cf-scheduler','reason':'prepared_publication_not_due',
+                        'nextAction':'wait_for_original_allocation_due; no repair or replay',
+                        'publicationVerified':False,'sourceRef':str(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))}
+    return None
+
+
 def occupies_lane(row):
     if running(row):
         return True
+    if _unstarted_budget_hold(row):
+        return False
+    if row.get('kind')=='staff':
+        request_id=(row.get('source') or {}).get('requestId')
+        receipt=load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        if receipt.get('requestId')==request_id and (receipt.get('pendingEffect') or receipt.get('status') in ('unknown','submitting','awaiting_completion','acknowledged')):
+            return True
+    if scheduler_clock_wait(row) or scheduler_child_handoff_settled(row):return False
+    if row.get('kind')=='staff':
+        request_id=(row.get('source') or {}).get('requestId')
+        receipt=load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        if receipt.get('requestId')==request_id:
+            for item in receipt.get('results') or []:
+                result=item.get('result') or {}
+                if result.get('pendingEffect'):return True
+                if result.get('conferenceAgendaId'):
+                    child=load(ROWS.parent/(str(result['conferenceAgendaId'])+'.json')) if re.fullmatch(r'[a-f0-9]{64}',str(result['conferenceAgendaId'])) else {}
+                    if child.get('status') not in ('completed','cancelled') or child.get('pendingEffect'):return True
+    if row.get('kind')=='staff':
+        actions=(row.get('source') or {}).get('actions') or []
+        request_id=(row.get('source') or {}).get('requestId')
+        receipt=load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        results=receipt.get('results') or []
+        if receipt.get('pendingEffect'):return True
+        if receipt.get('requestId')==request_id and receipt.get('status') in ('completed','failed','held') and not receipt.get('pendingEffect') and len(results)==len(actions):
+            if actions and all(a.get('tool') in ('prepare_cafe_content','prepare_youtube_content','prepare_brunch_content','repair_cf_normalization') for a in actions):
+                if all(not (r.get('result') or {}).get('pendingEffect') and (r.get('result') or {}).get('publicationVerified') is not True
+                       and ((r.get('result') or {}).get('status') in ('prepared','needs_attention')
+                            or ((r.get('result') or {}).get('status') in ('failed','held')
+                                and ((r.get('result') or {}).get('executorReceipt') or {}).get('completed') is True
+                                and ((r.get('result') or {}).get('executorReceipt') or {}).get('finishedAt'))) for r in results):
+                    return False  # Finished preparation/feedback is not ownership of the next preparation lane.
+            if actions and all(a.get('tool') in ('verify_cf_corrected_publication','verify_youtube_content','verify_cf_source_fact_fix') for a in actions):
+                if all(not (r.get('result') or {}).get('pendingEffect')
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('completed') is True
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('finishedAt') for r in results):
+                    return False
+            if actions and all(a.get('tool')=='recover_project_work' for a in actions):
+                if all(not (r.get('result') or {}).get('pendingEffect') and not (r.get('result') or {}).get('conferenceAgendaId')
+                       and not (r.get('result') or {}).get('conference')
+                       and (r.get('result') or {}).get('status')=='held'
+                       and (r.get('result') or {}).get('reason') in ('same_work_not_eligible_or_requires_reconciliation','execution_disabled')
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('completed') is True
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('finishedAt') for r in results):
+                    return False
+            if actions and all(a.get('tool')=='recover_project_runtime' for a in actions):
+                if all(not (r.get('result') or {}).get('pendingEffect')
+                       and (r.get('result') or {}).get('status') in ('observed','held','failed')
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('completed') is True
+                       and ((r.get('result') or {}).get('executorReceipt') or {}).get('finishedAt') for r in results):
+                    return False
+    if row.get('kind')=='conference' and row.get('status') in ('meeting','executing'):
+        conf_id=(row.get('source') or {}).get('conferenceId')
+        if isinstance(conf_id,str) and re.fullmatch(r'[a-f0-9]{64}',conf_id):
+            conf=load(ROWS.parent/(conf_id+'.json'))
+            if conf and _verified_pre_submission_child_failure(row.get('project'),conf,row):
+                identity=row.get('controllerGoalId') or row.get('recoveryGoalId') or (row.get('source') or {}).get('goalId')
+                goal=load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}',identity) else {}
+                if goal.get('status') not in ('ready','running') and not _pending_owned_work(goal) and not _pending_owned_work(row):
+                    return False
     if row.get('status') in ('blocked', 'recovering'):
         identity = row.get('controllerGoalId') or row.get('recoveryGoalId') or row.get('source', {}).get('goalId')
         goal = load(DATA/'chats/reasoning-goals'/(identity+'.json')) if identity and re.fullmatch(r'[a-f0-9]{64}', identity) else {}
@@ -516,7 +780,7 @@ def staff_agenda(request_id, actions):
             from common.repair_workflow import _recovery_row
             _,recovery=_recovery_row(args['task_id'],args['plan_sha256'])
             project=recovery['plan']['project']
-        project=project or ('naver_kin' if action['tool']=='repair_kin_submission' else 'cf_blog' if 'cf_' in action['tool'] else 'all')
+        project=project or ('naver_kin' if action['tool']=='repair_kin_submission' else 'cf_blog' if ('cf_' in action['tool'] or action['tool']=='inspect_url_acquisition') else 'all')
         projects.add(project)
     if len(projects)>1:raise ValueError('Different projects require separate business agendas')
     project=next(iter(projects))
@@ -533,7 +797,10 @@ def staff_result(row, receipt_path):
     results=[r.get('result',{}) for r in row.get('results',[])]
     if agenda['kind']=='conference':
         actions=row.get('actions',[])
-        if len(actions)!=1 or actions[0]['tool']!='repair_kin_submission' or agenda['project']!='naver_kin':return
+        if len(actions)!=1 or actions[0]['tool']!='repair_kin_submission' or agenda['project']!='naver_kin':
+            if agenda.get('status')=='executing' and not running(agenda):
+                hold(agenda['id'],agenda.get('blocker') or '복구 단계 실행 결과를 확인했습니다.',recovery=True)
+            return
         source=agenda.get('workTarget') or agenda['source']
         original=load(ROWS.parent/(agenda['source']['conferenceId']+'.json'))
         target=original.get('retryTarget') or next(iter(original.get('executionFailures',[])),{})
@@ -545,9 +812,17 @@ def staff_result(row, receipt_path):
             hold(agenda['id'],result.get('reason') or '같은 답변의 실제 공개·계정 검증이 아직 완료되지 않았습니다.',recovery=True)
             return
     elif agenda['kind']!='staff':return
+    clock=scheduler_clock_wait(agenda)
+    if clock:
+        with locked(ROWS):
+            fresh=get(agenda['id'])
+            fresh.update(status='blocked',waitingFor=clock,blocker=clock['reason'])
+            _save(fresh)
+        return  # Waiting is not a repair task or evidence of publication.
     inspection=all(a['tool'] in READ_ONLY for a in row['actions'])
     proof=bool(results) and row['status']=='completed' and all(r.get('ok') is True and
-        (inspection or r.get('publicationVerified') is True or r.get('recoveryVerified') is True or r.get('reservationVerified') is True) for r in results)
+        (inspection or r.get('publicationVerified') is True or r.get('recoveryVerified') is True or r.get('reservationVerified') is True
+         or (a.get('tool')=='run_project_cycle' and r.get('preparationVerified') is True)) for a,r in zip(row['actions'],results)) and len(results)==len(row['actions'])
     if proof:
         replies=[r for r in row.get('results',[]) if r.get('staffResponse')]
         last=replies[-1] if replies else None
@@ -556,9 +831,15 @@ def staff_result(row, receipt_path):
         staff={'actor':last['agent'],'text':response['reply'],'route':{'provider':observed.get('provider'),
                'model':observed.get('actualModel'),'reasoningEffort':observed.get('reasoningEffort')}} if response else None
         verified(agenda['id'],{'verified':True,'source':str(receipt_path),'scope':'원천 상태 조회' if inspection else '실제 업무 결과',
-            'results':[{k:r.get(k) for k in ('ok','status','project','publicationVerified','recoveryVerified','reservationVerified','publicUrl','account','questionId')} for r in results]},staff=staff)
+            'results':[{k:r.get(k) for k in ('ok','status','project','publicationVerified','recoveryVerified','reservationVerified','preparationVerified','publicUrl','account','questionId')} for r in results]},staff=staff)
     else:
-        hold(agenda['id'],'직원 실행 결과에서 원래 업무의 해결 증거가 확인되지 않았습니다. 같은 안건에서 원인을 조사합니다.',recovery=True)
+        handoff=scheduler_child_handoff_settled(agenda)
+        hold(agenda['id'],'직원 실행 결과에서 원래 업무의 해결 증거가 확인되지 않았습니다. 같은 안건에서 원인을 조사합니다.',recovery=not bool(handoff))
+        if handoff:
+            with locked(ROWS):
+                fresh=get(agenda['id'])
+                fresh['waitingFor']=handoff
+                _save(fresh)
 
 
 @contextmanager
@@ -669,6 +950,163 @@ def read_only_agenda(row):
     return row.get('kind')=='staff' and bool(actions) and all(a.get('tool') in READ_ONLY for a in actions)
 
 
+def execution_lane(row):
+    """Scheduler requests must not wait behind the work they are meant to wake."""
+    actions=(row.get('source') or {}).get('actions') or []
+    if row.get('kind')=='staff' and actions and all(a.get('tool') in (
+            'prepare_cafe_content','prepare_youtube_content','prepare_brunch_content','repair_cf_normalization') for a in actions):
+        return 'preparation'
+    if row.get('kind')=='staff' and actions and all(a.get('tool')=='run_project_cycle' for a in actions):
+        return 'scheduler'
+    return 'inspection' if read_only_agenda(row) else 'work'
+
+
+def _verified_account(row):
+    """Resolve a single verified account/domain from host records; never guess or release uncertain submissions."""
+    if not isinstance(row, dict) or row.get('status') in ('submitting', 'unknown') or row.get('pendingEffect'):
+        return None
+    target = row.get('workTarget') or row.get('source') or {}
+    source = row.get('source') or {}
+    request_id = source.get('requestId')
+    if request_id:
+        receipt = load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        if receipt.get('requestId') == request_id and (receipt.get('pendingEffect') or receipt.get('status') in ('submitting', 'unknown')):
+            return None
+    conf_id = target.get('conferenceId') or source.get('conferenceId')
+    if isinstance(conf_id, str) and re.fullmatch(r'[a-f0-9]{64}', conf_id):
+        conf = load(ROWS.parent/(conf_id+'.json'))
+        if conf:
+            if conf.get('agendaId') != conf_id or (conf.get('businessAgendaId') and row.get('id') and conf.get('businessAgendaId') != row.get('id')):
+                return None
+            if conf.get('status') in ('submitting', 'unknown') or conf.get('pendingEffect') or conf.get('submissionStarted'):
+                return None
+            c_args = conf.get('arguments') or {}
+            c_id = c_args.get('account') or c_args.get('domain')
+            if isinstance(c_id, str) and c_id:
+                return c_id
+    args = target.get('arguments') or source.get('arguments') or {}
+    identity = args.get('account') or args.get('domain')
+    if isinstance(identity, str) and identity:
+        return identity
+    actions = target.get('actions') or source.get('actions') or []
+    if not actions:
+        return None
+    def resolve_action(action):
+        a_args = (action or {}).get('args') or {}
+        direct = a_args.get('account') or a_args.get('domain')
+        if isinstance(direct, str) and direct:
+            return direct
+        if isinstance(a_args.get('url'), str):
+            ukey = _url_key(a_args.get('url'))
+            if ukey:
+                return ukey[0]
+        if (action or {}).get('tool') != 'recover_project_work':
+            return None
+        wid = a_args.get('work_id')
+        proj = a_args.get('project') or row.get('project')
+        if not isinstance(wid, str) or not re.fullmatch(r'[0-9a-f]{64}', wid) or proj not in ('cf_blog', 'naver_blog'):
+            return None
+        rec = load(DATA/'project-work-recovery'/(wid+'.json'))
+        if rec.get('workId') == wid and rec.get('project') == proj:
+            if rec.get('status') in ('submitting', 'unknown') or rec.get('pendingEffect') or rec.get('submissionStarted'):
+                return None
+            acc = rec.get('account') or rec.get('identity') or rec.get('domain')
+            if isinstance(acc, str) and acc and rec.get('date'):
+                binding = {'project': proj, 'date': rec.get('date'), 'identity': acc, 'slot': rec.get('slot')}
+                if hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest() == wid:
+                    return acc
+        from common.recovery_evidence import failure_targets
+        matches = [t for t in failure_targets(DATA.parent.parent, proj) if t.get('workId') == wid]
+        if len(matches) == 1:
+            t = matches[0]
+            if t.get('submissionStarted') or t.get('status') in ('submitting', 'unknown'):
+                return None
+            acc = t.get('identity')
+            if isinstance(acc, str) and acc:
+                return acc
+        if proj == 'naver_blog':
+            journal = load(DATA/'naver/automation-journal.json')
+            found = set()
+            for att in journal.get('attempts', []):
+                if not isinstance(att, dict): continue
+                acc = att.get('account')
+                day = att.get('publicationDate') or str(att.get('reserveTime', ''))[:10]
+                slot = att.get('scheduledSlot') or str(att.get('reserveTime', ''))[-5:]
+                if not isinstance(acc, str) or not acc or not day: continue
+                binding = {'project': 'naver_blog', 'date': day, 'identity': acc, 'slot': slot}
+                if hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest() == wid:
+                    if any(att.get(k) for k in ('submissionStarted', 'submittedAt', 'submissionStartedAt')) or (att.get('phase') or att.get('status')) in ('submitting', 'unknown'):
+                        return None
+                    found.add(acc)
+            if len(found) == 1:
+                return next(iter(found))
+        return None
+    identities = [resolve_action(a) for a in actions]
+    return identities[0] if identities and all(i and i == identities[0] for i in identities) else None
+
+
+def shares_execution_lane(existing, chosen):
+    if execution_lane(existing)!=execution_lane(chosen):return False
+    if execution_lane(chosen) not in ('work','preparation') or running(existing):return True
+    left,right=_verified_account(existing),_verified_account(chosen)
+    # A parked failure for one identity is not ownership of every account/domain.
+    # Unknown/global ownership and live processes still retain the project lane.
+    return not left or not right or left==right
+
+
+def admission_state(chosen, state=None):
+    """Read-only admission explanation, shared by dispatcher and manager; never clears ownership."""
+    now=time.time();state=load(STATE) if state is None else state
+    base={'owner':'jarvis','lane':execution_lane(chosen),'publicationVerified':False}
+    if not chosen:return {**base,'eligible':False,'reason':'agenda_missing','nextAction':'inspect_original_agenda'}
+    if chosen.get('id') in active_ids(state):return {**base,'eligible':True,'reason':'already_active'}
+    if chosen.get('status')!='queued':return {**base,'eligible':False,'reason':'original_state_requires_review','nextAction':'inspect_original_agenda_no_replay'}
+    if chosen.get('notBefore',0)>now:
+        return {**base,'eligible':False,'reason':'not_due','notBefore':chosen['notBefore'],'nextAction':'wait_until_notBefore'}
+    source=chosen.get('source') or {}
+    if source.get('autonomousExperiment') and not chosen.get('activatedAt'):
+        experiment=state.get('activeExperiment') or {}
+        if (source.get('experimentId')!=experiment.get('id') or not autonomous_experiment_allows(
+                source.get('gateProject') or chosen.get('project'),target_url=source.get('targetUrl',''),
+                domain=source.get('domain',''),state=state,reserved_agenda_id=chosen['id'])):
+            return {**base,'eligible':False,'reason':'experiment_gate_held','nextAction':'inspect_original_budget_and_scope_no_override'}
+    proj=chosen.get('project') or 'other';limit=LANE_LIMITS.get(proj,1)
+    blockers=[r for r in active_rows(state) if (r.get('project') or 'other')==proj
+              and occupies_lane(r) and shares_execution_lane(r,chosen)]
+    def resource(row):
+        # Multiple finished scheduler envelopes may observe ONE native child.
+        # Count its ownership once; never erase either envelope or the child hold.
+        fallback='agenda:'+row['id']
+        if execution_lane(row)!='scheduler' or running(row):return fallback
+        request_id=(row.get('source') or {}).get('requestId')
+        receipt=load(DATA/'chats/staff-requests'/(hashlib.sha256(str(request_id).encode()).hexdigest()+'.json'))
+        items=receipt.get('results') or []
+        if (receipt.get('requestId')!=request_id or receipt.get('status') not in ('completed','failed','held')
+                or receipt.get('pendingEffect') or len(items)!=1):return fallback
+        result=items[0].get('result') or {}
+        execution,requested_at=_reconciled_scheduler_execution(items[0],request_id)
+        identity=result.get('conferenceAgendaId')
+        if (items[0].get('tool')!='run_project_cycle' or execution.get('requestId')!=request_id
+                or execution.get('completed') is not True or not execution.get('finishedAt')
+                or result.get('pendingEffect') or not re.fullmatch(r'[a-f0-9]{64}',str(identity))):return fallback
+        child=load(ROWS.parent/(identity+'.json'));args=child.get('arguments') or {}
+        binding=hashlib.sha256(json.dumps([child.get('kind'),args],sort_keys=True).encode()).hexdigest()
+        owner=get(child['businessAgendaId']) if child.get('businessAgendaId') else {}
+        if (child.get('agendaId')!=identity or binding!=identity or not child.get('requestedAt')
+                or requested_at!=child['requestedAt']
+                or owner.get('kind')!='conference' or (owner.get('source') or {}).get('conferenceId')!=identity):return fallback
+        return 'native:'+identity
+    resources={r['id']:resource(r) for r in blockers}
+    occupied=len(set(resources.values()));available=occupied<limit
+    return {**base,'eligible':available,'reason':'capacity_available' if available else 'lane_capacity',
+        'limit':limit,'occupiedResources':occupied,'verifiedAccount':_verified_account(chosen),
+        'blockers':[{'agendaId':r['id'],'resourceIdentity':resources[r['id']],'kind':r.get('kind'),'status':r.get('status'),
+            'verifiedAccount':_verified_account(r),
+            'sourceRef':str(path(r['id'])),'owner':r.get('responsibleCrew') or 'jarvis',
+            'resumeCondition':'original execution/receipt reconciliation or completed owned work; never force release'} for r in blockers],
+        'nextAction':'native_admission_then_opening_ack' if available else 'inspect_named_blockers; continue_independent_lanes'}
+
+
 def admit(identity):
     if not enabled():
         return None
@@ -685,19 +1123,12 @@ def admit(identity):
         chosen = next((r for r in sorted(eligible, key=lambda r:(0 if r.get('kind') == 'conference' else 1, r['priority'], r['createdAt'])) if r['id'] == identity), None)
         if not chosen:
             return None
-        source = chosen.get('source') or {}
-        if source.get('autonomousExperiment') and not chosen.get('activatedAt'):
-            experiment = state.get('activeExperiment') or {}
-            if (source.get('experimentId') != experiment.get('id') or
-                    not autonomous_experiment_allows(source.get('gateProject') or chosen.get('project'),
-                        target_url=source.get('targetUrl', ''), domain=source.get('domain', ''), state=state, reserved_agenda_id=identity)):
-                return None
-        proj = chosen.get('project') or 'other'
-        limit = LANE_LIMITS.get(proj, 1)
-        lane_active = [r for r in cur_rows if (r.get('project') or 'other') == proj and occupies_lane(r)
-                       and read_only_agenda(r)==read_only_agenda(chosen)]
-        if len(lane_active) >= limit:
+        assessment=admission_state(chosen,state)
+        if not assessment['eligible']:
+            if chosen.get('admissionWait')!=assessment:
+                chosen['admissionWait']=assessment;_save(chosen)
             return None
+        chosen.pop('admissionWait',None)
         chosen.update(status='report_pending' if chosen.get('verification',{}).get('verified') else 'meeting', activatedAt=time.time())
         _save(chosen)
         new_ids = [r['id'] for r in cur_rows] + [identity]
@@ -878,7 +1309,8 @@ def task_outcome(row, evidence=None, now=None):
         results = evidence.get('results') or []
         if actions and len(results) == len(actions) and all(r.get('ok') is True and
                 (a.get('tool') in READ_ONLY or any(r.get(k) is True for k in
-                 ('publicationVerified', 'recoveryVerified', 'reservationVerified'))) for a, r in zip(actions, results)):
+                 ('publicationVerified', 'recoveryVerified', 'reservationVerified'))
+                 or (a.get('tool')=='run_project_cycle' and r.get('preparationVerified') is True)) for a, r in zip(actions, results)):
             satisfied.add('requested_actions')
         for key, proof in (evidence.get('acceptanceResults') or {}).items():
             if not isinstance(proof, dict) or not proof.get('source') or not proof.get('sha256'):
@@ -1195,7 +1627,8 @@ def finish_reports(identity):
         state = load(STATE)
         row = get(identity)
         cur_ids = active_ids(state)
-        if (identity not in cur_ids or running(row)
+        native_reconciled=row.get('verification',{}).get('resolvedBy')=='native-publication-receipt-reconciler'
+        if ((identity not in cur_ids and not native_reconciled) or running(row)
                 or not all(row['events'][s].get('receivedAt') for s in ('opening','staff_result','closing'))):
             return False
         outcome = task_outcome(row)
@@ -1211,6 +1644,7 @@ def finish_reports(identity):
         new_ids = [i for i in cur_ids if i != identity]
         state['activeIds'] = new_ids
         state['activeId'] = new_ids[0] if new_ids else None
+        state['pending'] = [i for i in state.get('pending',[]) if i!=identity]
         state['recent'] = ([identity] + [i for i in state.get('recent',[]) if i!=identity])[:30]
         write(STATE, state)
     return True
@@ -1502,6 +1936,73 @@ def recovery_watch(row):
             'fingerprint':fingerprint,'environment':evidence['environment']})
         progress(row['id'],'recovering','새 증거·도구 변경을 자동 감지해 같은 안건의 진단을 재개합니다.')
     return True
+
+
+def reconcile_publication_agenda(row):
+    """Resolve an exact publication incident from a later trusted native receipt.
+
+    This does not rewrite the failed conference or discharge broader directives.
+    Reservation, public availability and business performance remain separate.
+    """
+    if (row.get('kind')!='conference' or row.get('status') in ('closed','suspended','report_pending','cancelled','manual_stop')
+            or row.get('manualStop') or row.get('cancelRequested')
+            or running(row) or acceptance_requirements(row)!=['conference_receipt']):return False
+    target=row.get('workTarget') or row.get('source') or {}
+    args=target.get('arguments') or {}
+    if target.get('kind')!='parameters' or args.get('action') not in ('naver','cf'):return False
+    root=DATA.parent.parent
+    proof=None
+    if args['action']=='naver':
+        from common.naver_ab import journal_row
+        candidates=[]
+        for original in load(DATA/'naver/automation-journal.json').get('attempts',[]):
+            attempt=journal_row(original)
+            if (attempt.get('phase')!='verified' or attempt.get('account')!=args.get('account')
+                    or attempt.get('scheduledSlot')!=args.get('slot')
+                    or str(attempt.get('reserveTime',''))[:10]!=args.get('date')):continue
+            folder=Path(attempt.get('artifactFolder') or '')
+            if not folder.is_absolute() or not folder.resolve().is_relative_to((root/'naver_blog_posting/output').resolve()):continue
+            path=folder/'reservation-evidence.json';receipt=load(path)
+            if (receipt.get('submissionStatus')!='verified_reserved' or receipt.get('account')!=args['account']
+                    or receipt.get('reserveTime')!=attempt.get('reserveTime')
+                    or receipt.get('title')!=(attempt.get('title') or attempt.get('topic'))
+                    or not receipt.get('documentSha256') or not (folder/'reserved-server-document.json').is_file()):continue
+            from naver_blog_posting.posting import editor_review_hash
+            if editor_review_hash(load(folder/'reserved-server-document.json'))!=receipt['documentSha256']:continue
+            candidates.append((str(path),receipt))
+        unique={path:receipt for path,receipt in candidates}
+        if len(unique)==1:
+            path,receipt=next(iter(unique.items()))
+            proof=(Path(path),receipt,{'reservationVerified':True,'publicationVerified':False,
+                   'reserveTime':receipt['reserveTime'],'account':receipt['account'],'slot':args['slot']})
+    else:
+        from common.cf_recovery import original_folder
+        schedule=load(DATA/'cf/daily_schedule.json')
+        candidates=[r for current in schedule.get('items',[]) for r in [*current.get('publicationHistory',[]),current]]
+        slots=[r for r in candidates if schedule.get('date')==args.get('date')
+               and r.get('domain')==args.get('account') and r.get('scheduledTime')==args.get('slot')]
+        if len(slots)==1 and slots[0].get('status')=='published':
+            path=original_folder(slots[0],args['date'],root)/'publication-receipt.json';receipt=load(path)
+            if (receipt.get('state')=='published' and receipt.get('publicPublicationVerified') is True
+                    and receipt.get('httpStatus')==200 and receipt.get('domain')==args['account']
+                    and receipt.get('publicUrl')==slots[0].get('publicUrl')):
+                proof=(path,receipt,{'publicationVerified':True,'publicUrl':receipt['publicUrl'],
+                       'account':args['account'],'slot':args['slot']})
+    if not proof:return False
+    path,receipt,outcome=proof
+    observed=_stamp(receipt.get('verifiedAt'))
+    if observed is None or not row.get('createdAt',0)<=observed<=time.time():return False
+    evidence={'verified':True,'source':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+              'outcomes':[outcome],'scope':args,'resolvedBy':'native-publication-receipt-reconciler',
+              'businessOutcome':'not_evaluated'}
+    if not row.get('events',{}).get('opening'):
+        with locked(ROWS):
+            saved=get(row['id'])
+            saved.setdefault('events',{}).setdefault('opening',event(saved,'opening','jarvis',
+                '예약·발행의 실제 결과 기록을 대조해 기존 운영 원장을 정리합니다.',
+                {'provider':'host','model':'native-publication-receipt-reconciler'}))
+            _save(saved)
+    return verified(row['id'],evidence)
 
 
 def reconcile_monitor_goal(row):
@@ -2310,6 +2811,17 @@ def executive_health_check(company, now=None):
 
 def company_executive_check_once(force=False):
     """Reverse-Funnel Strategy Brain (@jarvis): calculates gap to $100/day, audits all 6 channels live, pivots lanes, and proactively calls ask_ceo."""
+    from common.operating_plan import enabled as adaptive_enabled, check_once as operating_check, activate_cf
+    if adaptive_enabled():
+        now=time.time()
+        activate_cf()
+        from agents.crew_reasoning import overview
+        company=overview()
+        state=load(STATE)
+        if force or now-state.get('lastExecutiveHealthAt',0)>=300:
+            executive_health_check(company,now)
+        _top_up_channel_lanes()
+        return operating_check(company,now)
     now = time.time()
     state = load(STATE)
     if not force and now - state.get('lastExecutiveHealthAt', 0) < 300:
@@ -2363,6 +2875,10 @@ def company_executive_check_once(force=False):
                 'quota': p.get('quota'),
                 'counts': p.get('counts'),
                 'blocker': p.get('blocker'),
+                'failures': p.get('failures'),
+                'runtimeOutcome': p.get('runtimeOutcome'),
+                'source': p.get('source'),
+                'nextAction': p.get('nextAction'),
                 'recoverableCount': len(p.get('recoverableWork') or []),
             }
             for p in company.get('projects', [])
@@ -2603,6 +3119,7 @@ def company_executive_check_once(force=False):
 def _step_single_agenda(row):
     if not row:
         return False
+    if scheduler_clock_wait(row) or (scheduler_child_handoff_settled(row) and all(row.get('events', {}).get(s, {}).get('receivedAt') for s in row.get('events', {}))):return False
     if (row.get('source') or {}).get('executionContract') and (row.get('source') or {}).get('directive'):
         return False  # Typed work cannot execute while additional requested scope is unsupported.
     if row.get('switchRequest'):
@@ -2611,6 +3128,13 @@ def _step_single_agenda(row):
         from common.repair_workflow import agenda_recovery_blocker
         if agenda_recovery_blocker(row):
             return False
+    if row.get('kind')=='conference' and row.get('status') in ('meeting','executing') and not running(row):
+        from common.conference_dispatch import QUEUE, record_conference_result
+        receipt=load(QUEUE/(str((row.get('source') or {}).get('conferenceId',''))+'.json'))
+        if receipt.get('status') in ('completed','failed','unknown'):
+            with context(token(row)):
+                record_conference_result(receipt,receipt.get('preparation'))
+            return True
     if row.get('controllerFailures',0)>=3 and row['status'] in ('blocked','recovering'):
         with context(token(row)):
             return recovery_watch(row)
@@ -2736,6 +3260,27 @@ def _step_single_agenda(row):
         return False
     return False
 
+def admit_ready_once():
+    """Keep typed execution admission independent of long recovery/model discussions."""
+    if not enabled():return False
+    ROWS.mkdir(parents=True,exist_ok=True)
+    with (ROWS/'admission.lock').open('a+b') as handle:
+        try:fcntl.flock(handle,fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:return False
+        changed=False
+        pending=[get(key) for key in load(STATE).get('pending',[])]
+        for row in sorted(pending,key=lambda r:(r.get('priority',10),r.get('createdAt',0))):
+            if (row.get('kind') not in ('conference','staff') or row.get('status')!='queued'
+                    or row.get('notBefore',0)>time.time()):continue
+            if admit(row['id']):changed=True
+        for row in active_rows():
+            if (row.get('kind') in ('conference','staff') and row.get('status')=='meeting'
+                    and not (row.get('source') or {}).get('executionContract')
+                    and not row.get('events',{}).get('opening',{}).get('receivedAt')):
+                changed=prepare_open(row['id']) or changed
+        return changed
+
+
 def process_once():
     """Reverse-Funnel Multi-lane dispatcher: Jarvis evaluates the $100/day gap first, then advances prioritized channel lanes."""
     if not enabled():
@@ -2746,6 +3291,15 @@ def process_once():
         except BlockingIOError:
             return False
         for r in list(active_rows()):
+            if r.get('kind')=='conference' and r.get('status') in ('meeting','executing') and not running(r):
+                from common.conference_dispatch import QUEUE, record_conference_result
+                receipt=load(QUEUE/(str((r.get('source') or {}).get('conferenceId',''))+'.json'))
+                if receipt.get('status') in ('completed','failed','unknown'):
+                    with context(token(r)):
+                        record_conference_result(receipt,receipt.get('preparation'))
+                    r = get(r['id']) or r
+            if reconcile_publication_agenda(r):
+                continue
             if reconcile_monitor_goal(r):
                 continue
             if _should_auto_advance(r):
@@ -2759,6 +3313,13 @@ def process_once():
             slot = str(args.get('slot') or '00:00')
             return (0 if r.get('kind') == 'conference' else 1, 0 if act == 'cf' else 1, r.get('priority', 10), slot, r.get('createdAt', 0))
         for identity in sorted(list(load(STATE).get('pending', [])), key=_pending_sort_key):
+            pending=get(identity)
+            if pending and pending.get('verification',{}).get('resolvedBy')=='native-publication-receipt-reconciler':
+                if pending.get('status')=='report_pending':finish_reports(identity)
+                continue
+            if pending and reconcile_publication_agenda(pending):
+                finish_reports(identity)
+                continue
             admit(identity)
         rows = active_rows()
         if not rows:

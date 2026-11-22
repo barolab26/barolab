@@ -498,8 +498,11 @@ class Collector:
             self.stop.wait(5)
 
     def start(self):
-        self.remote.start()
-        self.thread=threading.Thread(target=self.run,name='cockpit-read-only',daemon=True);self.thread.start()
+        with self.lock:
+            if self.thread is not None and self.thread.is_alive():
+                return
+            self.remote.start()
+            self.thread=threading.Thread(target=self.run,name='cockpit-read-only',daemon=True);self.thread.start()
 
     def get(self):
         with self.lock:return self.snapshot
